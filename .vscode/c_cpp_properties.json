@@ -1,0 +1,138 @@
+{
+    "env": {
+        "defaultIncludePath": [
+            "${workspaceFolder}/include/**"
+        ],
+        "defaultDefines": [],
+        "ctrIncludePaths": [
+            "C:/devkitpro//libctru/include/**",
+            "C:/devkitpro//portlibs/3ds/include/**"
+        ],
+        "ctrDefines": [
+            "__3DS__"
+        ],
+        "ctrCompilerPath": "C:/devkitpro//devkitARM/bin/arm-none-eabi-gcc",
+        "hacIncludePaths": [
+            "C:/devkitpro//libnx/include/**",
+            "C:/devkitpro//portlibs/switch/include/**"
+        ],
+        "hacDefines": [
+            "__SWITCH__",
+            "__BSD_VISIBLE"
+        ],
+        "hacCompilerPath": "C:/devkitpro//devkitA64/bin/aarch64-none-elf-g++",
+        "rvlIncludePaths": [
+            "C:/devkitpro//portlibs/ppc/include/**",
+            "C:/devkitpro//portlibs/wii/include/**",
+            "C:/devkitpro//libogc/include/**"
+        ],
+        "rvlDefines": [
+            "HW_RVL"
+        ],
+        "dolIncludePaths": [
+            "C:/devkitpro//portlibs/ppc/include/**",
+            "C:/devkitpro//portlibs/gamecube/include/**",
+            "C:/devkitpro//libogc/include/**"
+        ],
+        "dolDefines": [
+            "HW_DOL"
+        ],
+        "cafeIncludePaths": [
+            "C:/devkitpro//portlibs/ppc/include/**",
+            "C:/devkitpro//portlibs/wiiu/include/**",
+            "C:/devkitpro//wut/include/**",
+            "C:/devkitpro//wut/usr/include/**"
+        ],
+        "cafeDefines": [
+            "__WIIU__"
+        ],
+        "ppcCompilerPath": "C:/devkitpro//devkitPPC/bin/powerpc-eabi-g++"
+    },
+    "configurations": [
+        {
+            "name": "3DS",
+            "includePath": [
+                "${env:defaultIncludePath}",
+                "${env:ctrIncludePaths}"
+            ],
+            "defines": [
+                "${env:defaultDefines}",
+                "${env:ctrDefines}"
+            ],
+            "compilerPath": "${env:ctrCompilerPath}",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-arm"
+        },
+        {
+            "name": "Switch",
+            "includePath": [
+                "C:/devkitpro/libnx/include/**",
+                "C:/devkitpro/portlibs/switch/include/**",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/source/**",
+                "${workspaceFolder}/game/objects/**",
+                "${workspaceFolder}/source/external/obj_loader/**",
+                "${workspaceFolder}/source/debug/**",
+                "${workspaceFolder}/game/objects",
+                "${workspaceFolder}/source/external/bullet",
+                "${workspaceFolder}/include/components",
+                "Z:\\SwitchProjects\\raylib-nx-master\\src"
+            ],
+            "defines": [
+                "\"__SWITCH__\"",
+                "\"__BSD_VISIBLE\""
+            ],
+            "compilerPath": "C:/devkitpro/devkitA64/bin/aarch64-none-elf-g++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-arm64"
+        },
+        {
+            "name": "Gamecube",
+            "includePath": [
+                "${env:defaultIncludePath}",
+                "${env:dolIncludePaths}"
+            ],
+            "defines": [
+                "${env:defaultDefines}",
+                "${env:dolDefines}"
+            ],
+            "compilerPath": "${env:ppcCompilerPath}",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-arm"
+        },
+        {
+            "name": "Wii",
+            "includePath": [
+                "${env:defaultIncludePath}",
+                "${env:rvlIncludePaths}"
+            ],
+            "defines": [
+                "${env:defaultDefines}",
+                "${env:rvlDefines}"
+            ],
+            "compilerPath": "${env:ppcCompilerPath}",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-arm"
+        },
+        {
+            "name": "Wii U",
+            "includePath": [
+                "${env:defaultIncludePath}",
+                "${env:cafeIncludePaths}"
+            ],
+            "defines": [
+                "${env:defaultDefines}",
+                "${env:cafeDefines}"
+            ],
+            "compilerPath": "${env:ppcCompilerPath}",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-arm"
+        }
+    ],
+    "version": 4
+}
