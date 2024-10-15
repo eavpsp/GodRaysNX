@@ -141,14 +141,13 @@ void EngineMain()
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
         {
-            BeginDrawing();
-            ClearBackground(BLACK);
+          
           //Video Playback Here
             if(!Player::playbackLoop())
             {
                 ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
             }
-            EndDrawing();
+        
         }
         
     }

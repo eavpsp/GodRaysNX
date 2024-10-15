@@ -32,7 +32,6 @@ void Player::playbackInit(string VideoPath)
         av_register_all();
         avcodec_register_all();
         av_log_set_level(AV_LOG_QUIET);
-        frameTexture = {0};
         ret = avformat_open_input(&ctx_format, VideoPath.c_str(), NULL, NULL);
         if (ret != 0) {
             char error_message[1024];
@@ -69,12 +68,14 @@ void Player::playbackThrowError(string Error)
     debugLog("Player was closed due to an error: %s" , Error.c_str());
 
 }
+bool loadedTexture = false;
 bool Player::playbackLoop()//reads data just no video
 {
     if(ffinit)
     {
-        
-        if(stop) return false;
+        while(true)
+        {
+        if(stop) break;
 
 
         if(ispause)
@@ -84,10 +85,10 @@ bool Player::playbackLoop()//reads data just no video
         }
         else if(av_read_frame(ctx_format, pkt) >= 0)
         {
-            debugLog("Frame was read");
+       
             if(pkt->stream_index == stream_idx)
             {
-                debugLog("Packet was sent");
+
                 ret = avcodec_send_packet(ctx_codec, pkt);
                 if(ret < 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return false;
                 if(ret >= 0)
@@ -113,7 +114,7 @@ bool Player::playbackLoop()//reads data just no video
                     }
                     counter++;
                     if(counter >= iffw) counter = 0;
-
+                        else continue;
                     ctx_sws = sws_getContext(frame->width, frame->height, AV_PIX_FMT_YUV420P, frame->width, frame->height, AV_PIX_FMT_RGB24, SWS_BILINEAR, 0, 0, 0);
                     rgbframe->width = frame->width;
                     rgbframe->height = frame->height;
@@ -134,26 +135,31 @@ bool Player::playbackLoop()//reads data just no video
                     img.width = rgbframe->width;
                     img.height = rgbframe->height;
                     img.mipmaps = 1;
-                    img.format = PIXEL_FORMAT_RGB_888;
-                    UpdateTexture(frameTexture,img.data);
-                    debugLog("Texture ID: %d", frameTexture.id);
-                    DrawTexture(frameTexture, 0, 0, WHITE);
+                    img.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+                    if(!loadedTexture)
+                    {
+                        loadedTexture = true;
+                        frameTexture = LoadTextureFromImage(img);
+                    }
+                    BeginDrawing();
+                     ClearBackground(BLACK);
+                        UpdateTexture(frameTexture,img.data);
+                        DrawTexture(frameTexture, 0, 0, WHITE);
+                    EndDrawing();
                     av_freep(rgbframe->data);
                 }
             }
-            else{
-                debugLog("Packet was not sent");
-            }
+            
         }
         else 
             {
-                debugLog("Frame was not read");
+              
                 stop = true;
                 if(stop) Player::playbackExit();
                 return false;
             }
-        
-       return true;
+        }
+       return false;
     }
       
     
