@@ -20,7 +20,8 @@ AVPacket* pkt;
 int ret;
 int iffw = 1;
 int counter = 0;
-
+Texture2D frameTexture;
+Image img;
 void Player::playbackInit(string VideoPath)
 {
     if(!ffinit)
@@ -31,14 +32,20 @@ void Player::playbackInit(string VideoPath)
         av_register_all();
         avcodec_register_all();
         av_log_set_level(AV_LOG_QUIET);
+        frameTexture = {0};
         ret = avformat_open_input(&ctx_format, VideoPath.c_str(), NULL, NULL);
         if (ret != 0) {
             char error_message[1024];
             av_strerror(ret, error_message, sizeof(error_message));
             Player::playbackThrowError(std::string("Error opening file: ") + error_message);
         }
+        else
+        {
+            debugLog("File was opened");
+        }
         if(avformat_find_stream_info(ctx_format, NULL) < 0) Player::playbackThrowError("Error finding stream info.");
         av_dump_format(ctx_format, 0, VideoPath.c_str(), false);
+        debugLog("Number of streams: %d", ctx_format->nb_streams);
         for(int i = 0; i < ctx_format->nb_streams; i++) if(ctx_format->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         {
             stream_idx = i;
@@ -49,9 +56,11 @@ void Player::playbackInit(string VideoPath)
         codec = avcodec_find_decoder(vid_stream->codecpar->codec_id);
         if(!codec) Player::playbackThrowError("Error finding a decoder (strange)");
         ctx_codec = avcodec_alloc_context3(codec);
+        debugLog("Codec: %s", codec->long_name);
         if(avcodec_parameters_to_context(ctx_codec, vid_stream->codecpar) < 0) Player::playbackThrowError("Error sending parameters to codec context.");
         if(avcodec_open2(ctx_codec, codec, NULL) < 0) Player::playbackThrowError("Error opening codec with context.");
         ffinit = true;
+        debugLog("Player was initialized");
     }
 }
 void Player::playbackThrowError(string Error)
@@ -60,60 +69,93 @@ void Player::playbackThrowError(string Error)
     debugLog("Player was closed due to an error: %s" , Error.c_str());
 
 }
-bool Player::playbackLoop()
+bool Player::playbackLoop()//reads data just no video
 {
     if(ffinit)
     {
-       
-            if(stop) return false;
-            if(pause)
+        
+        if(stop) return false;
+
+
+        if(ispause)
+        {
+                if(GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT) Player::playbackPauseResume();
+                else if(GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_RIGHT) Player::playbackStop();
+        }
+        else if(av_read_frame(ctx_format, pkt) >= 0)
+        {
+            debugLog("Frame was read");
+            if(pkt->stream_index == stream_idx)
             {
-                 if(GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT) Player::playbackPauseResume();
-                 else if(GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_RIGHT) Player::playbackStop();
-            }
-            else if(av_read_frame(ctx_format, pkt) >= 0)
-            {
-                 if(pkt->stream_index == stream_idx)
+                debugLog("Packet was sent");
+                ret = avcodec_send_packet(ctx_codec, pkt);
+                if(ret < 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return false;
+                if(ret >= 0)
                 {
-                    ret = avcodec_send_packet(ctx_codec, pkt);
-                    if(ret < 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return false;
-                    if(ret >= 0)
-                    {
-                        ret = avcodec_receive_frame(ctx_codec, frame);
-                        if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return false;
-                        if(GAMEPAD_BUTTON_RIGHT_FACE_RIGHT == GetGamepadButtonPressed()) Player::playbackPauseResume();
-                        else if((GAMEPAD_BUTTON_MIDDLE_RIGHT == GetGamepadButtonPressed()) || (GAMEPAD_BUTTON_MIDDLE_LEFT == GetGamepadButtonPressed())) Player::playbackStop();
-                        else if(GAMEPAD_BUTTON_RIGHT_FACE_UP == GetGamepadButtonPressed())
-                        {
-                            int newffd = 1;
-                            if(iffw == 1) newffd = 2;
-                            else if(iffw == 2) newffd = 4;
-                            else if(iffw == 4) newffd = 8;
-                            else if(iffw == 8) newffd = 1;
-                            Player::playbackSetFastForward(newffd);
-                        }
-                        counter++;
-                        if(counter >= iffw) counter = 0;
-    
-                         ctx_sws = sws_getContext(frame->width, frame->height, AV_PIX_FMT_YUV420P, frame->width, frame->height, AV_PIX_FMT_RGB24, SWS_BILINEAR, 0, 0, 0);
-                        rgbframe->width = frame->width;
-                        rgbframe->height = frame->height;
-                        rgbframe->format = AV_PIX_FMT_RGB24;
-                        av_image_alloc(rgbframe->data, rgbframe->linesize, rgbframe->width, rgbframe->height, (AVPixelFormat)rgbframe->format, 32);
-                        sws_scale(ctx_sws, frame->data, frame->linesize, 0, frame->height, rgbframe->data, rgbframe->linesize);
-                        Image img;
-                        img.data = (unsigned char*)rgbframe->data[0];
-                        img.width = rgbframe->width; img.height = rgbframe->height; img.format = rgbframe->format; img.mipmaps = 1; 
-                        Texture2D texture = LoadTextureFromImage(img);
-                        DrawTexture(texture, 0, 0, WHITE);
-                        av_freep(rgbframe->data);
+                    ret = avcodec_receive_frame(ctx_codec, frame);
+                    if(ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                    { 
+                        debugLog("EAGAIN or EOF");
+                        return false;
+
                     }
+
+                    if(GAMEPAD_BUTTON_RIGHT_FACE_RIGHT == GetGamepadButtonPressed()) Player::playbackPauseResume();
+                    else if((GAMEPAD_BUTTON_MIDDLE_RIGHT == GetGamepadButtonPressed()) || (GAMEPAD_BUTTON_MIDDLE_LEFT == GetGamepadButtonPressed())) Player::playbackStop();
+                    else if(GAMEPAD_BUTTON_RIGHT_FACE_UP == GetGamepadButtonPressed())
+                    {
+                        int newffd = 1;
+                        if(iffw == 1) newffd = 2;
+                        else if(iffw == 2) newffd = 4;
+                        else if(iffw == 4) newffd = 8;
+                        else if(iffw == 8) newffd = 1;
+                        Player::playbackSetFastForward(newffd);
+                    }
+                    counter++;
+                    if(counter >= iffw) counter = 0;
+
+                    ctx_sws = sws_getContext(frame->width, frame->height, AV_PIX_FMT_YUV420P, frame->width, frame->height, AV_PIX_FMT_RGB24, SWS_BILINEAR, 0, 0, 0);
+                    rgbframe->width = frame->width;
+                    rgbframe->height = frame->height;
+                    rgbframe->format = AV_PIX_FMT_RGB24;
+                    if (av_image_alloc(rgbframe->data, rgbframe->linesize, rgbframe->width, rgbframe->height, (AVPixelFormat)rgbframe->format, 32) < 0) 
+                    {
+                        debugLog("Error allocating RGB frame data");
+                        return false;
+                    }
+
+                    if (sws_scale(ctx_sws, frame->data, frame->linesize, 0, frame->height, rgbframe->data, rgbframe->linesize) < 0) 
+                    {
+                        debugLog("Error scaling frame to RGB");
+                        return false;
+                    }  
+
+                    img.data = rgbframe->data[0];
+                    img.width = rgbframe->width;
+                    img.height = rgbframe->height;
+                    img.mipmaps = 1;
+                    img.format = PIXEL_FORMAT_RGB_888;
+                    UpdateTexture(frameTexture,img.data);
+                    debugLog("Texture ID: %d", frameTexture.id);
+                    DrawTexture(frameTexture, 0, 0, WHITE);
+                    av_freep(rgbframe->data);
                 }
             }
-              else stop = true;
+            else{
+                debugLog("Packet was not sent");
+            }
         }
-        if(stop) Player::playbackExit();
-        return false;
+        else 
+            {
+                debugLog("Frame was not read");
+                stop = true;
+                if(stop) Player::playbackExit();
+                return false;
+            }
+        
+       return true;
+    }
+      
     
 }
 
@@ -156,6 +198,7 @@ void Player::playbackExit()
         if(ispause) ispause = false;
         iffw = 1;
         ffinit = false;
+        UnloadTexture(frameTexture);
     }
      debugLog("Player was closed.");
 }

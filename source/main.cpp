@@ -103,7 +103,7 @@ void Idle()
       BeginDrawing();
             ClearBackground(RAYWHITE);
 
-            DrawText("IDLE MODE - Cutscene Test", 190, 200, 20, BLACK);
+            DrawText("IDLE MODE", 640, 360, 20, BLACK);
     EndDrawing();
     
     timer += GetFrameTime();
@@ -118,7 +118,7 @@ void EngineMain()
     debugLog("Engine Starting...");
       //init GM
     gameManager = &GameManager::getGameManager();
-    TestVideo();
+   TestVideo();
     debugLog("Living Objects Count: %d", GameObjects->size());
     while (!WindowShouldClose() && gameManager->Running())    // Detect window close button or ESC key
     {
@@ -142,7 +142,7 @@ void EngineMain()
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
         {
             BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(BLACK);
           //Video Playback Here
             if(!Player::playbackLoop())
             {
