@@ -8,6 +8,7 @@
 #include <GameObject.h>
 #include <GameOverlays.h>
 #include "ScriptCallbacks.h"
+
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::vector<GameObject *> *GameObjects;
@@ -75,6 +76,7 @@ void GameManager::renderLoop()
  
          BeginDrawing();
             ClearBackground(RAYWHITE);
+          
 
             BeginMode3D(camera);
 
@@ -83,7 +85,7 @@ void GameManager::renderLoop()
             {
                 /* code */
                 if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
-                GameObjects->at(i)->Draw();
+                    GameObjects->at(i)->Draw();
             }   
             DrawGrid(10, 1.0f);
             
@@ -94,7 +96,6 @@ void GameManager::renderLoop()
           //  DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
          
            // DrawTextEx(guiFont, "this IS a texture!", Vector2{360, 650}, 40, 40/2,GRAY);
-
         EndDrawing();
     
 }

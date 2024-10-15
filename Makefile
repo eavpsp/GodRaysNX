@@ -40,9 +40,9 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/debug source/core source/math source/gx source/game
+SOURCES		:=	source source/debug source/core source/math source/gx source/game source/ext
 DATA		:=	data
-INCLUDES	:=	include source/debug source/core source/math source/gx source/game
+INCLUDES	:=	include source/debug source/core source/math source/gx source/game source/ext
 ROMFS		:=	romfs
 APP_TITLEID := 329
 APP_VERSION := 1.0
@@ -62,7 +62,7 @@ CXXFLAGS	:= $(CFLAGS) -frtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lraylib -lEGL -lGLESv2 -lglapi -ldrm_nouveau -lnx -lm
+LIBS	:= -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lass -ltheora -lvorbis -logg -lraylib -lglfw3 -lEGL -lGLESv2 -lglapi -ldrm_nouveau -lnx -lm -lz
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

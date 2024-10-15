@@ -77,7 +77,8 @@
                 "${workspaceFolder}/game/objects",
                 "${workspaceFolder}/source/external/bullet",
                 "${workspaceFolder}/include/components",
-                "Z:\\SwitchProjects\\raylib-nx-master\\src"
+                "Z:\\SwitchProjects\\raylib-nx-master\\src",
+                "${workspaceFolder}\\source\\ext\\**"
             ],
             "defines": [
                 "\"__SWITCH__\"",

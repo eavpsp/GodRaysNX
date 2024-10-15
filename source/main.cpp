@@ -32,8 +32,10 @@ Implement Game States - Done
 ___________________________
 **Current
 Loading Scene System - WIP
-Particle system (Dynamic Batched Software Particles)- Breaks RenderText, May need its own Camera(Text/UI)
-Video system (MP4 Playback)- MPV -
+Animation System - WIP
+Particle system (Dynamic Batched Software Particles)- WIP
+Video system (MP4 Playback)- MPV - WIP
+Physics system - WIP
 ---------------------------
 *NOT STARTED
 __________________________
@@ -46,10 +48,6 @@ IK -
 Procedural Animation -
 
 */
-
-
-
-
 
 #include <switch.h>
 #include <raylib.h>
@@ -64,7 +62,7 @@ Procedural Animation -
 #include <ScriptCallbacks.h>
 #include <GameStates.h>
 #include <map>
-
+#include <VideoPlayer.h>
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Models;
@@ -74,6 +72,7 @@ std::vector<GameObject *> *GameObjects;
 std::vector<EngineObject *> *GraphicsObjects;
 GameManager *gameManager;
 
+static float timer = 0;
 void initSystem()
 {   
     romfsInit();
@@ -85,25 +84,45 @@ void initSystem()
     GraphicsObjects = new std::vector<EngineObject *>();
     engineCallBacks = new EngineCallBacks();
     debugLog("Engine Callbacks Init");
-    ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+    ENGINE_STATES::ChangeState(ENGINE_STATES::IDLE);
 }
 
-void Test()
+void TestGameObject()
 {
     //test gameobject
     GameObject* test = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,1}, Vector3{1,1,1},  LoadModel(RES_Models["ROBOT"].c_str()));
 }
+void TestVideo()
+{
+    //test video
+   Player::playbackInit("/video/test.mp4");
+}   
 
+void Idle()
+{
+      BeginDrawing();
+            ClearBackground(RAYWHITE);
+
+            DrawText("IDLE MODE - Cutscene Test", 190, 200, 20, BLACK);
+    EndDrawing();
+    
+    timer += GetFrameTime();
+    if (timer > 5)
+    {
+        timer = 0;
+        ENGINE_STATES::ChangeState(ENGINE_STATES::CUTSCENE);
+    }
+}
 void EngineMain()
 {
     debugLog("Engine Starting...");
       //init GM
     gameManager = &GameManager::getGameManager();
-    //TEST
-    Test();
+    TestVideo();
     debugLog("Living Objects Count: %d", GameObjects->size());
     while (!WindowShouldClose() && gameManager->Running())    // Detect window close button or ESC key
     {
+        
         if(ENGINE_STATES::GetState() == ENGINE_STATES::IN_GAME)
         {
             
@@ -116,6 +135,22 @@ void EngineMain()
             if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
                 gameManager->destroyGameManager();
         }
+        else if (ENGINE_STATES::GetState() == ENGINE_STATES::IDLE)
+        {
+            Idle();
+        }
+        else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
+        {
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+          //Video Playback Here
+            if(!Player::playbackLoop())
+            {
+                ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+            }
+            EndDrawing();
+        }
+        
     }
 
 }
