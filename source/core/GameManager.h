@@ -10,9 +10,6 @@ class GameManager
         GameManager(bool running);
         ~GameManager();
     public:
-    
-
-
     void renderLoop();
     void runGameLoop();
     void SceneInit();
@@ -22,6 +19,7 @@ class GameManager
     // ResourceManager *_resourceManager;
     static GameManager& getGameManager();
     static void destroyGameManager();
+
 };
 
 

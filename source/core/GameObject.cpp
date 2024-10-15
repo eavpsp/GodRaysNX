@@ -7,7 +7,13 @@ extern std::vector<EngineObject *> *GraphicsObjects;//NEED THIS FOR CALLBACKS
 
 void GameObject::Draw()
 {
-
+    if(!isActive)
+    {
+        return;
+    }
+    DrawModel(objectModel, position, 1.0f, WHITE);
+    
+  
 }
 
 
@@ -78,7 +84,9 @@ GameObject::GameObject()
  GameObject::~GameObject()
 {
    
-    delete objectModel;
+    
+    UnloadModel(objectModel);
+    
    
 
 }

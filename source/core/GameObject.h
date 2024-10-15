@@ -37,13 +37,22 @@ class GameObject : public EngineObject
         void onDestroy() override;
     public:
         //base model data
-        Model *objectModel;
+        Model objectModel;
         void Draw();
+        /*
+            // Load gltf model
+            Model model = LoadModel("resources/models/gltf/robot.glb");
+            Vector3 position = { 0.0f, 0.0f, 0.0f }; // Set model position
+            
+            // Load gltf model animations
+            int animsCount = 0;
+            unsigned int animIndex = 0;
+            unsigned int animCurrentFrame = 0;
+            ModelAnimation *modelAnimations = LoadModelAnimations("resources/models/gltf/robot.glb", &animsCount);
 
-
-        ///
+        */
         template <typename T>
-        static T* InstantiateGameObject(Material *mat, Vector3 _position, Quaternion _rotation, Vector3 _scale, Model *gameModel, std::string _name = "GameObject")
+        static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, Vector3 _scale, Model gameModel, const char* _name = "GameObject")
         {
             if (!std::is_base_of<EngineObject, T>::value) {
                 // Error: T is not a derived class of EngineObject
@@ -51,19 +60,18 @@ class GameObject : public EngineObject
             }
                 T *newObject =  new T();
                 //add callback
-                newObject->material = mat;
-                newObject->position = _position;//flipped y to work with BulletPhysics and OpenGL
+                //newObject->material = mat;
+                newObject->position = _position;
                 newObject->rotation = _rotation;
-                newObject->scale = Vector3(_scale.x, -_scale.y, _scale.z);//flipped y to work with BulletPhysics and OpenGL
+                newObject->scale = _scale;
                 newObject->objectModel = gameModel;
-                newObject->transform = Matrix(1.0f);
+                newObject->transform = Matrix();
 
                 newObject->name = _name;
                
                 newObject->onInit();
                 return newObject;
         }
-        void UpdateGLTF();
         void AddChild(GameObject *child);
         GameObject *GetChild(int index);
         int GetChildrenCount();

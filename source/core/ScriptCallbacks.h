@@ -26,6 +26,7 @@ class EngineCallBacks
   
     float _deltaTime;
     public:
+        static bool IsValidPointer(void* ptr) { return ptr != nullptr; }
         float interpolatedTickTime = (float)(updateTicks/ UPDATE_TICK_DELAY);
         float GetInterpolatedTickTime()
         {
@@ -54,27 +55,20 @@ class EngineCallBacks
 
        void RunUpdateCallbacks() 
         {
-            updateTicks += _deltaTime;
-           
 
-           if(updateTicks >= UPDATE_TICK_DELAY)
-           {
-                updateTicks -= UPDATE_TICK_DELAY;
-                   
-               
-                    for(int i = 0; i < GameObjects->size(); i++)
-                    {
-                        GameObject* obj = dynamic_cast<GameObject*>(GameObjects->at(i));
-                        if (obj != nullptr) 
-                        {
-                            obj->onUpdate(); // This will call TestObj::onUpdate() if obj is a TestObj
-                        }
-                    
-                    }
-                    RunGraphicsCallbacks();
+            for(int i = 0; i < GameObjects->size(); i++)
+            {
+                GameObject* obj = dynamic_cast<GameObject*>(GameObjects->at(i));
+                if (obj != nullptr) 
+                {
+                    obj->onUpdate(); // This will call TestObj::onUpdate() if obj is a TestObj
+                }
+            
             }
+            RunGraphicsCallbacks();
+
+            _deltaTime = get_detla_time();}
                
-        };
        
        
 };

@@ -370,3 +370,5 @@ build/debug.o
 switch-nx-raylib.nro
 switch-nx-raylib.nacp
 switch-nx-raylib.elf
+switch-nx-raylib.lst
+romfs
