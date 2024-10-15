@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+/build/
+*.o
+*.d
 # User-specific files
 *.rsuser
 *.suo
@@ -361,3 +364,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+build/main.d
+build/main.o
+build/debug.o
+switch-nx-raylib.nro
+switch-nx-raylib.nacp
+switch-nx-raylib.elf

@@ -2,54 +2,74 @@
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
+#include "debug/debug.h"
+#include <GameManager.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <switch.h>
+#include <ScriptCallbacks.h>
+#include <GameStates.h>
 
 
+EngineCallBacks *engineCallBacks;
+std::vector<GameObject *> *GameObjects;
+std::vector<EngineObject *> *GraphicsObjects;
+GameManager *gameManager;
+
+void initSystem()
+{   
+    romfsInit();
+     debugLogInit();
+    debugLog("romFS Init");
+    debugLog("System Starting...");
+    //init callbacks 
+    GameObjects = new std::vector<GameObject *>();
+    GraphicsObjects = new std::vector<EngineObject *>();
+    engineCallBacks = new EngineCallBacks();
+    debugLog("Engine Callbacks Init");
+    ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+}
+
+
+
+void EngineMain()
+{
+     debugLog("Engine Starting...");
+      //init GM
+    gameManager = &GameManager::getGameManager();
+
+    while (!WindowShouldClose() && gameManager->Running())    // Detect window close button or ESC key
+    {
+        if(ENGINE_STATES::GetState() == ENGINE_STATES::IN_GAME)
+        {
+            
+            gameManager->runGameLoop();
+            gameManager->renderLoop();
+            //Run Update Callbacks
+            engineCallBacks->RunUpdateCallbacks();
+            
+            // Get and process input
+            if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
+                gameManager->destroyGameManager();
+        }
+    }
+
+}
 int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    initSystem();
 
-    char textBoxText[64] = "Text box";
-    bool textBoxEditMode = true;
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - texture loading and drawing");
-    Font guiFont = LoadFont("romfs:/resources/mp1m.ttf");
+    EngineMain();
+    debugLog("Game Stopped....");
 
-    // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
-    Texture2D texture = LoadTexture("romfs:/resources/raylib_logo.png");        // Texture loading
-    //---------------------------------------------------------------------------------------
-
-    // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
-        // Update
-        //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-            ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
-
-            if (GuiTextBox((Rectangle){ 25, 215, 125, 30 }, textBoxText, 64, textBoxEditMode));
-
-            DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
-
-            DrawTextEx(guiFont, "this IS a texture!", Vector2{360, 370}, 40, 40/2,GRAY);
-
-        EndDrawing();
-        //----------------------------------------------------------------------------------
-    }
-
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadTexture(texture);       // Texture unloading
-
+    romfsExit();
     CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
+    debugLog("Exiting....");
+    appletExit();
+    return EXIT_SUCCESS;
 
-    return 0;
 }
