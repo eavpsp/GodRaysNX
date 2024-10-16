@@ -1,6 +1,6 @@
 #include "GameObject.h"
 #include "../debug/debug.h"
-
+#include <AnimationController.h>
 
 extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
 extern std::vector<EngineObject *> *GraphicsObjects;//NEED THIS FOR CALLBACKS
@@ -58,7 +58,13 @@ void GameObject::onUpdate()
     {
             
     }
+    AnimationComponent* animComp = GetComponent<AnimationComponent>();
+    if(animComp != nullptr)
+    {
+        animComp->animationController->OnUpdate();
+    }
    UpdateComponents();//NEDED TO UPDATE COMPONENT DATA
+
 }
 
 void GameObject::onDraw()

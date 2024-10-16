@@ -29,19 +29,20 @@ ___________________________
 Implement Game States - Done
 Video system (MP4 Playback)- FFMPEG - Done
 Loading Scene System - Done
+Physics system - Done
+Input System - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Physics system - WIP
-Input System - WIP
 Animation System - WIP
+    Animation Component, Animation Controller
 ESC System for Static Objects - WIP
 Particle system (Dynamic Batched Software Particles)- WIP
 ---------------------------
 *NOT STARTED
 __________________________
-
+More Overlays(Implement System to Send overlays to GM for own render calls)  
 ----------------------------
 *FUTURE IMPLEMENTATIONS
 _____________________________
@@ -70,10 +71,11 @@ Procedural Animation -
 #include <PhysicsComponent.h>
 #include <PhysicsWorld.h>
 #include <mwmath.h>
-
+#include <AnimationController.h>
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<int, std::string> RES_Models;
+extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
 EngineCallBacks *engineCallBacks;
@@ -132,7 +134,15 @@ void TestPhysics()
     
     
 }
-
+void TestAnimations()
+{
+        Vector3 pos = Vector3{0, 0, 0};
+        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1}, _RES::GetModel(_RES::Model_ID::ROBOT_ID));
+        AnimationComponent *animComp = new AnimationComponent(RES_ModelAnimations[_RES::Model_ID::ROBOT_ID].c_str());
+        AnimationControllerData *data = new AnimationControllerData();
+        AnimationController *anim = new AnimationController(animComp, data);
+        obj->AddComponent(animComp);
+}
 void BOOT()
 {
       BeginDrawing();
@@ -147,7 +157,7 @@ void BOOT()
         timer = 0;
         ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
 
-        TestPhysics();
+        TestAnimations();
 
     }
 
