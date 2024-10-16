@@ -80,7 +80,8 @@
                 "Z:\\SwitchProjects\\raylib-nx-master\\src",
                 "${workspaceFolder}\\source\\ext\\**",
                 "C:/devkitPro/libnx/include/switch",
-                "${workspaceFolder}/source/core/components"
+                "${workspaceFolder}/source/core/components",
+                "${workspaceFolder}/source/game/input"
             ],
             "defines": [
                 "\"__SWITCH__\"",

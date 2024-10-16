@@ -70,6 +70,7 @@ Procedural Animation -
 #include <PhysicsComponent.h>
 #include <PhysicsWorld.h>
 #include <mwmath.h>
+
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<int, std::string> RES_Models;
@@ -84,6 +85,7 @@ GameManager *gameManager;
 static float timer = 0;
 void initSystem()
 {   
+    //init gamepad
     romfsInit();
     debugLogInit();
     debugLog("romFS Init");

@@ -8,6 +8,8 @@
 #include <GameObject.h>
 #include <GameOverlays.h>
 #include "ScriptCallbacks.h"
+#include <StandardInput.h>
+#include <GamePad.h>
 
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Fonts;
@@ -18,7 +20,8 @@ Camera mainCamera;
 Texture2D texture;        // Texture loading
 const int screenWidth = 1280;
 const int screenHeight = 720;
-
+GamePads gamePads;
+StandardController controller;
 GameManager::GameManager(bool running) : _running{running}
 {
 
@@ -47,8 +50,12 @@ GameManager& GameManager::getGameManager()
         mainCamera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // mainCamera up vector (rotation towards target)
         mainCamera.fovy = 45.0f;                                // mainCamera field-of-view Y
         mainCamera.projection = CAMERA_PERSPECTIVE;   
+        //set up controller
+        controller = StandardController(&mainCamera);
+        gamePads = GamePads();
+        gamePads.Init(&controller);
         guiFont = LoadFont(RES_Fonts["DEFAULT"].c_str());//set var for game fonts
-        texture = LoadTexture(RES_Textures["ENGINE_LOGO"].c_str());  //texture test
+      //  texture = LoadTexture(RES_Textures["ENGINE_LOGO"].c_str());  //texture test
         debugLog("Made Game Manager!");
     }
     return *gameManager;
@@ -68,7 +75,8 @@ void GameManager::destroyGameManager()
 
 void GameManager::runGameLoop()
 {
-    UpdateCamera(&mainCamera, CAMERA_FREE);
+   // UpdateCamera(&mainCamera, CAMERA_FREE);
+   controller.UpdateInputs();
 }
  
 void GameManager::renderLoop()
@@ -87,7 +95,7 @@ void GameManager::renderLoop()
                 if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
                     GameObjects->at(i)->Draw();
             }   
-            //DrawGrid(10, 1.0f);
+            DrawGrid(10, 1.0f);
             
 
             EndMode3D();
