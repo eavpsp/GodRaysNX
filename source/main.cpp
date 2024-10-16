@@ -27,6 +27,7 @@ Todo:
 ___________________________
 
 Implement Game States - Done
+Video system (MP4 Playback)- FFMPEG - Done
 -------------------------
 *WIP
 ___________________________
@@ -34,7 +35,6 @@ ___________________________
 Loading Scene System - WIP
 Animation System - WIP
 Particle system (Dynamic Batched Software Particles)- WIP
-Video system (MP4 Playback)- MPV - WIP
 Physics system - WIP
 ---------------------------
 *NOT STARTED
@@ -60,13 +60,14 @@ Procedural Animation -
 #include <string>
 #include <switch.h>
 #include <ScriptCallbacks.h>
-#include <GameStates.h>
 #include <map>
 #include <VideoPlayer.h>
+#include <GameScene.h>
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Models;
-
+LoadingOverlay *loadingOverlay;
+GameSceneManager *sceneManager;
 EngineCallBacks *engineCallBacks;
 std::vector<GameObject *> *GameObjects;
 std::vector<EngineObject *> *GraphicsObjects;
@@ -98,19 +99,30 @@ void TestVideo()
    Player::playbackInit("/video/test.mp4");
 }   
 
+void TestLoadScene()
+{
+    //test load scene
+    sceneManager = new GameSceneManager();
+
+    sceneManager->LoadData("romfs:/test.grb");//convert to load scene
+    
+}
+
+
 void Idle()
 {
       BeginDrawing();
             ClearBackground(RAYWHITE);
 
-            DrawText("IDLE MODE", 640, 360, 20, BLACK);
+            DrawText("Welcome to GodRays Game Engine", 620, 360, 20, BLACK);
+            DrawText("Booting Up...", 640, 400, 20, BLACK);
     EndDrawing();
     
     timer += GetFrameTime();
     if (timer > 5)
     {
         timer = 0;
-        ENGINE_STATES::ChangeState(ENGINE_STATES::CUTSCENE);
+        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
     }
 }
 void EngineMain()
@@ -118,7 +130,7 @@ void EngineMain()
     debugLog("Engine Starting...");
       //init GM
     gameManager = &GameManager::getGameManager();
-   TestVideo();
+    TestLoadScene();
     debugLog("Living Objects Count: %d", GameObjects->size());
     while (!WindowShouldClose() && gameManager->Running())    // Detect window close button or ESC key
     {
@@ -139,7 +151,7 @@ void EngineMain()
         {
             Idle();
         }
-        else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
+        else if(ENGINE_STATES::GetState() == ENGINE_STATES::VIDEO)
         {
           
           //Video Playback Here
@@ -148,6 +160,21 @@ void EngineMain()
                 ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
             }
         
+        }
+        else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
+        {
+            //Cutscene Here
+            ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+        }
+        else if(ENGINE_STATES::GetState() == ENGINE_STATES::MENU)
+        {
+
+        }
+        else if(ENGINE_STATES::GetState() == ENGINE_STATES::LOADING)
+        {
+            BeginDrawing();
+                loadingOverlay->Draw();
+            EndDrawing();
         }
         
     }
@@ -161,6 +188,7 @@ int main(void)
     EngineMain();
     debugLog("Game Stopped....");
 
+    debugLogCleanup();
     romfsExit();
     CloseWindow();                // Close window and OpenGL context
     //--------------------------------------------------------------------------------------

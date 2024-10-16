@@ -84,10 +84,29 @@ GameObject::GameObject()
  GameObject::~GameObject()
 {
    
-    
+    onDestroy();
     UnloadModel(objectModel);
-    
-   
+    //destroy children
+    for (int i = 0; i < children.size(); i++)
+    {
+        delete children[i];
+    }
+    //destroy components
+    for (int i = 0; i < components.size(); i++)
+    {
+        delete components[i];
+    }
+
+   for (size_t i = 0; i < GameObjects->size(); i++)
+   {
+    /* code */
+        if(this == GameObjects->at(i))
+        {
+            GameObjects->erase(GameObjects->begin() + i);
+            break;
+        }
+   }
+   delete this;
 
 }
 

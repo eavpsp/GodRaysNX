@@ -38,13 +38,8 @@ void Player::playbackInit(string VideoPath)
             av_strerror(ret, error_message, sizeof(error_message));
             Player::playbackThrowError(std::string("Error opening file: ") + error_message);
         }
-        else
-        {
-            debugLog("File was opened");
-        }
         if(avformat_find_stream_info(ctx_format, NULL) < 0) Player::playbackThrowError("Error finding stream info.");
         av_dump_format(ctx_format, 0, VideoPath.c_str(), false);
-        debugLog("Number of streams: %d", ctx_format->nb_streams);
         for(int i = 0; i < ctx_format->nb_streams; i++) if(ctx_format->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         {
             stream_idx = i;
@@ -55,11 +50,9 @@ void Player::playbackInit(string VideoPath)
         codec = avcodec_find_decoder(vid_stream->codecpar->codec_id);
         if(!codec) Player::playbackThrowError("Error finding a decoder (strange)");
         ctx_codec = avcodec_alloc_context3(codec);
-        debugLog("Codec: %s", codec->long_name);
         if(avcodec_parameters_to_context(ctx_codec, vid_stream->codecpar) < 0) Player::playbackThrowError("Error sending parameters to codec context.");
         if(avcodec_open2(ctx_codec, codec, NULL) < 0) Player::playbackThrowError("Error opening codec with context.");
         ffinit = true;
-        debugLog("Player was initialized");
     }
 }
 void Player::playbackThrowError(string Error)
@@ -144,7 +137,9 @@ bool Player::playbackLoop()//reads data just no video
                     BeginDrawing();
                      ClearBackground(BLACK);
                         UpdateTexture(frameTexture,img.data);
-                        DrawTexture(frameTexture, 0, 0, WHITE);
+                        float x = (1280 - frameTexture.width) / 2;
+                        float y = (720 - frameTexture.height) / 2;
+                        DrawTexture(frameTexture, x, y, WHITE);
                     EndDrawing();
                     av_freep(rgbframe->data);
                 }
@@ -186,10 +181,6 @@ void Player::playbackStop()
 }
 
 
-
-
-
-
 void Player::playbackExit()
 {
     if(ffinit)
@@ -205,6 +196,7 @@ void Player::playbackExit()
         iffw = 1;
         ffinit = false;
         UnloadTexture(frameTexture);
+        UnloadImage(img);
     }
      debugLog("Player was closed.");
 }

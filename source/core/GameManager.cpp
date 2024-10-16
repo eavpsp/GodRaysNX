@@ -13,7 +13,7 @@ extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::vector<GameObject *> *GameObjects;
 Font guiFont;
-Camera camera;
+Camera mainCamera;
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 Texture2D texture;        // Texture loading
 const int screenWidth = 1280;
@@ -41,12 +41,12 @@ GameManager& GameManager::getGameManager()
             debugLog("\x1b[16;25HError Creating Window!");
         }
         SetTargetFPS(60);
-        camera = { 0 };
-        camera.position = (Vector3){ 6.0f, 6.0f, 6.0f };    // Camera position
-        camera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // Camera looking at point
-        camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-        camera.fovy = 45.0f;                                // Camera field-of-view Y
-        camera.projection = CAMERA_PERSPECTIVE;   
+        mainCamera = { 0 };
+        mainCamera.position = (Vector3){ 6.0f, 6.0f, 6.0f };    // mainCamera position
+        mainCamera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // mainCamera looking at point
+        mainCamera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // mainCamera up vector (rotation towards target)
+        mainCamera.fovy = 45.0f;                                // mainCamera field-of-view Y
+        mainCamera.projection = CAMERA_PERSPECTIVE;   
         guiFont = LoadFont(RES_Fonts["DEFAULT"].c_str());//set var for game fonts
         texture = LoadTexture(RES_Textures["ENGINE_LOGO"].c_str());  //texture test
         debugLog("Made Game Manager!");
@@ -68,7 +68,7 @@ void GameManager::destroyGameManager()
 
 void GameManager::runGameLoop()
 {
-    UpdateCamera(&camera, CAMERA_ORBITAL);
+    UpdateCamera(&mainCamera, CAMERA_ORBITAL);
 }
  
 void GameManager::renderLoop()
@@ -78,7 +78,7 @@ void GameManager::renderLoop()
             ClearBackground(RAYWHITE);
           
 
-            BeginMode3D(camera);
+            BeginMode3D(mainCamera);
 
             //Loop gameobjects
             for (size_t i = 0; i < GameObjects->size(); i++)

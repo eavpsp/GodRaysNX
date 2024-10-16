@@ -33,6 +33,5 @@ namespace Player
     void playbackExit();
     void playbackSetFastForward(int Power);
     void playbackThrowError(string Error);
-    vector<string> getVideoFiles();
 }
 #endif // GX_VIDEPLAYER_H

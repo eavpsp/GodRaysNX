@@ -41,18 +41,6 @@ class EngineCallBacks
         ~EngineCallBacks(){};
         
         
- 
-        void RunGraphicsCallbacks() 
-        {
-           
-                for (auto& obj : *GraphicsObjects)
-                {
-                    obj->onDraw();
-                }
-                
-            
-        };
-
        void RunUpdateCallbacks() 
         {
 
@@ -65,9 +53,9 @@ class EngineCallBacks
                 }
             
             }
-            RunGraphicsCallbacks();
 
-            _deltaTime = get_detla_time();}
+            _deltaTime = get_detla_time();
+        }
                
        
        

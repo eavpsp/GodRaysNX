@@ -2,7 +2,8 @@
 #define GAME_MANAGER_H
 
 #include <time.h>
-
+#include <GameStates.h>
+#include <ResourceManager.h>
 class GameManager
 {
     private:

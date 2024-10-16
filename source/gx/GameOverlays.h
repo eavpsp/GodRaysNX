@@ -9,12 +9,25 @@ extern Font guiFont;
 struct Drawable //Objects that can be drawn (Text, Images, etc)
 {
     virtual void draw() = 0;
+    Drawable() = default;
+    virtual ~Drawable(){};
 };
 struct TextDrawable : public Drawable
 {
     std::string text;
     Vector2 position;
     Color color;
+    void SetText(std::string t) { text = t; }
+    void SetText(const char* format, ...) {
+        va_list args;
+        va_start(args, format);
+        int len = vsnprintf(nullptr, 0, format, args) + 1;
+        char* buffer = new char[len];
+        va_start(args, format);
+        vsnprintf(buffer, len, format, args);
+        text = buffer;
+        delete[] buffer;
+    }
     TextDrawable() = default;
     TextDrawable(std::string t, Vector2 p, Color c = WHITE) : text(t), position(p), color(c) {}    
     void draw() override
@@ -35,7 +48,16 @@ struct Overlay//Game Overlays
         }
         
     }
-
+    template<typename T>
+    T* GetDrawable()
+    {
+        for (size_t i = 0; i < drawables.size(); i++)
+        {
+            if (dynamic_cast<T*>(drawables[i]))
+                return dynamic_cast<T*>(drawables[i]);
+        }
+        return nullptr;
+    }
     void AddDrawable(Drawable* d)
     {
         drawables.push_back(d);
@@ -54,7 +76,7 @@ struct Overlay//Game Overlays
         }
     }
     Overlay() = default;
-    ~Overlay()
+  virtual ~Overlay()
     {
         for (size_t i = 0; i < drawables.size(); i++)
         {
@@ -64,6 +86,18 @@ struct Overlay//Game Overlays
     }
 };
 
-
+struct LoadingOverlay : public Overlay
+{
+    TextDrawable* GetProgress()
+    {
+        return (TextDrawable*)drawables.at(1);
+    };
+    LoadingOverlay()
+    {
+        drawables.push_back(new TextDrawable("Loading", { 10, 10 }));
+        drawables.push_back(new TextDrawable("Progress", { 10, 40 }));
+    };
+    ~LoadingOverlay() = default;
+};
 
 #endif // GX_GAMEOVERLAYS_H

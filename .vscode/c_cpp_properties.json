@@ -78,7 +78,8 @@
                 "${workspaceFolder}/source/external/bullet",
                 "${workspaceFolder}/include/components",
                 "Z:\\SwitchProjects\\raylib-nx-master\\src",
-                "${workspaceFolder}\\source\\ext\\**"
+                "${workspaceFolder}\\source\\ext\\**",
+                "C:/devkitPro/libnx/include/switch"
             ],
             "defines": [
                 "\"__SWITCH__\"",
