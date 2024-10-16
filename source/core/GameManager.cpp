@@ -87,15 +87,15 @@ void GameManager::renderLoop()
                 if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
                     GameObjects->at(i)->Draw();
             }   
-            DrawGrid(10, 1.0f);
+            //DrawGrid(10, 1.0f);
             
 
             EndMode3D();
-            if (GuiTextBox((Rectangle){ 25, 215, 125, 30 }, "Hello", 64, false));
+            //if (GuiTextBox((Rectangle){ 25, 215, 125, 30 }, "Hello", 64, false));
 
-          //  DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
+            //DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
          
-           // DrawTextEx(guiFont, "this IS a texture!", Vector2{360, 650}, 40, 40/2,GRAY);
+           //DrawTextEx(guiFont, "this IS a texture!", Vector2{360, 650}, 40, 40/2,GRAY);
         EndDrawing();
     
 }

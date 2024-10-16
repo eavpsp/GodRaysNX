@@ -5,6 +5,7 @@
 class PhysicsWorld
 {   
 
+    //add functions for adding forces and other stuff
     public:
         static Vector3 GetGroundPosition();
         static float GetGravity();
@@ -12,6 +13,7 @@ class PhysicsWorld
         static void Init(float gravity = -9.8f);
         static void Shutdown();
         static void Update();
+        static void AddForce(PhysicsComponent *obj, Vector3 force);
 };
 
 

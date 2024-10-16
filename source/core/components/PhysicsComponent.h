@@ -4,6 +4,16 @@
 #include <raylib.h>
 #include <GameObject.h> 
 #include <vector>
+/*************************** 
+Physics System
+------------------
+TODO:
+Joints
+IK
+Rolling (Check if on a slope or slant and add velocity)
+Bouncing (check velocity going towards object and bounce off in opposite direction)
+
+****************************/
 enum CollisionShape
 {
     SPHERE,
@@ -37,8 +47,11 @@ class PhysicsComponent : public GameComponent
     public:
         bool isKinematic = false;
         bool isTrigger = false;
+        bool isGrounded = false;
         CollisionShape shape = CollisionShape::SPHERE;
-        float radius = 1;
+        float radius = 0;
+        bool canBounce = false;
+        bool canRoll = false;
         Vector3 size = {1,1,1};
         Vector3 velocity = {0,0,0};
         Vector3 acceleration = {0,0,0};

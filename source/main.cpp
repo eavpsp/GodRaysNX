@@ -36,8 +36,8 @@ ___________________________
 Physics system - WIP
 Input System - WIP
 Animation System - WIP
-Particle system (Dynamic Batched Software Particles)- WIP
 ESC System for Static Objects - WIP
+Particle system (Dynamic Batched Software Particles)- WIP
 ---------------------------
 *NOT STARTED
 __________________________
@@ -121,11 +121,13 @@ void TestPhysics()
     for (size_t i = 0; i < 2; i++)
     {
         /* code */
-        Vector3 pos = Vector3{MW_Math::Random(0,3), 20* i, MW_Math::Random(0,3)};
+        Vector3 pos = Vector3{0, 10 * i, 0};
         GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1}, _RES::GetModel(_RES::Model_ID::ROBOT_ID));
-        PhysicsComponent *comp = new PhysicsComponent(1000.0f, 2.0f, false);
+        PhysicsComponent *comp = new PhysicsComponent(1.0f, 2.0f,false,  i == 0 ? false : true);
         obj->AddComponent(comp);
     }
+  
+    
     
 }
 
