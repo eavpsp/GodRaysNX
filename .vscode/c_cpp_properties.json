@@ -79,7 +79,8 @@
                 "${workspaceFolder}/include/components",
                 "Z:\\SwitchProjects\\raylib-nx-master\\src",
                 "${workspaceFolder}\\source\\ext\\**",
-                "C:/devkitPro/libnx/include/switch"
+                "C:/devkitPro/libnx/include/switch",
+                "${workspaceFolder}/source/core/components"
             ],
             "defines": [
                 "\"__SWITCH__\"",

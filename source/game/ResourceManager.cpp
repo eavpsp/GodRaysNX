@@ -15,10 +15,10 @@ std::map<std::string, std::string> RES_Fonts =
   {"DEFAULT", "romfs:/resources/mp1m.ttf"},
 };
 //MODELS
-std::map<std::string, std::string> RES_Models = 
+std::map<int, std::string> RES_Models = 
 {
-  {"ROBOT", "romfs:/models/robot.glb"},
-  {"RAYLIB_LOGO", "romfs:/models/raylib_logo_3d.glb"},
+  {_RES::Model_ID::ROBOT_ID, "romfs:/models/robot.glb"},
+  {_RES::Model_ID::RAY_LIB_ID, "romfs:/models/raylib_logo_3d.glb"},
 };
 //MODELS ANIMATIONS
 std::map<std::string, std::string> RES_ModelAnimations = 
@@ -26,9 +26,16 @@ std::map<std::string, std::string> RES_ModelAnimations =
   {"ROBOT", "romfs:/models/robot.glb"},
 };
 
-Model _RES::GetModel(std::string name)
+
+std::map<_RES::Scenes_Types, std::string> RES_Scenes = 
+{
+  {_RES::Scenes_Types::ROBOT_SCENE, "romfs:/scenes/robot.grb"},
+};
+
+
+Model _RES::GetModel(int id)
 {
    
-    return LoadModel(RES_Models[name].c_str());
+    return LoadModel(RES_Models[id].c_str());
     
 }

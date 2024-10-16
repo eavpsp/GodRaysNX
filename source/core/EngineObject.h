@@ -6,6 +6,7 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+
 class EngineObject
 {
     //private funcs onUpdate, onDraw onInit onDestroy

@@ -5,10 +5,22 @@
 #include <raylib.h>
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
-extern std::map<std::string, std::string> RES_Models;
+extern std::map<int, std::string> RES_Models;
+
 
 namespace _RES
 {
-    Model GetModel(std::string name);
+    Model GetModel(int id);
+
+    enum Scenes_Types
+    {
+        ROBOT_SCENE = 1,
+    };
+
+    enum Model_ID
+    {
+        ROBOT_ID = 1,
+        RAY_LIB_ID
+    };
 }
 #endif

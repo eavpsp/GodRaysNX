@@ -28,14 +28,15 @@ ___________________________
 
 Implement Game States - Done
 Video system (MP4 Playback)- FFMPEG - Done
+Loading Scene System - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Loading Scene System - WIP
+Physics system - WIP
+Input System - WIP
 Animation System - WIP
 Particle system (Dynamic Batched Software Particles)- WIP
-Physics system - WIP
 ---------------------------
 *NOT STARTED
 __________________________
@@ -63,13 +64,15 @@ Procedural Animation -
 #include <map>
 #include <VideoPlayer.h>
 #include <GameScene.h>
+#include <PhysicsComponent.h>
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
-extern std::map<std::string, std::string> RES_Models;
+extern std::map<int, std::string> RES_Models;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
 EngineCallBacks *engineCallBacks;
 std::vector<GameObject *> *GameObjects;
+std::vector<PhysicsComponent *> *PhysicsObjects;
 std::vector<EngineObject *> *GraphicsObjects;
 GameManager *gameManager;
 
@@ -84,15 +87,11 @@ void initSystem()
     GameObjects = new std::vector<GameObject *>();
     GraphicsObjects = new std::vector<EngineObject *>();
     engineCallBacks = new EngineCallBacks();
+    PhysicsObjects = new std::vector<PhysicsComponent *>();
     debugLog("Engine Callbacks Init");
-    ENGINE_STATES::ChangeState(ENGINE_STATES::IDLE);
+    ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
 }
 
-void TestGameObject()
-{
-    //test gameobject
-    GameObject* test = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,1}, Vector3{1,1,1},  LoadModel(RES_Models["ROBOT"].c_str()));
-}
 void TestVideo()
 {
     //test video
@@ -103,21 +102,35 @@ void TestLoadScene()
 {
     //test load scene
     sceneManager = new GameSceneManager();
-
-    sceneManager->LoadData("romfs:/test.grb");//convert to load scene
+    GameScene *scene = new GameScene(_RES::Scenes_Types::ROBOT_SCENE);
+    sceneManager->LoadScene(scene);//convert to load scene
     
 }
 
 
-void Idle()
+void BOOT()
 {
       BeginDrawing();
             ClearBackground(RAYWHITE);
-
             DrawText("Welcome to GodRays Game Engine", 620, 360, 20, BLACK);
             DrawText("Booting Up...", 640, 400, 20, BLACK);
     EndDrawing();
     
+    timer += GetFrameTime();
+    if (timer > 5)
+    {
+        timer = 0;
+        TestLoadScene();
+
+    }
+
+}
+void Wait()
+{
+
+    BeginDrawing();
+                loadingOverlay->Draw();
+    EndDrawing();
     timer += GetFrameTime();
     if (timer > 5)
     {
@@ -130,8 +143,6 @@ void EngineMain()
     debugLog("Engine Starting...");
       //init GM
     gameManager = &GameManager::getGameManager();
-    TestLoadScene();
-    debugLog("Living Objects Count: %d", GameObjects->size());
     while (!WindowShouldClose() && gameManager->Running())    // Detect window close button or ESC key
     {
         
@@ -147,9 +158,9 @@ void EngineMain()
             if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
                 gameManager->destroyGameManager();
         }
-        else if (ENGINE_STATES::GetState() == ENGINE_STATES::IDLE)
+        else if (ENGINE_STATES::GetState() == ENGINE_STATES::BOOT)
         {
-            Idle();
+            BOOT();
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::VIDEO)
         {
@@ -164,11 +175,16 @@ void EngineMain()
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
         {
             //Cutscene Here
-            ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+            
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::MENU)
         {
 
+        }
+        else if (ENGINE_STATES::GetState() == ENGINE_STATES::IDLE)
+        {
+            Wait();
+            
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::LOADING)
         {
@@ -176,6 +192,7 @@ void EngineMain()
                 loadingOverlay->Draw();
             EndDrawing();
         }
+        
         
     }
 

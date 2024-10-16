@@ -11,7 +11,8 @@ namespace ENGINE_STATES
         MENU,
         IN_GAME,
         IDLE,
-        LOADING
+        LOADING, 
+        BOOT
     };
     static GAMESTATES currentState = GAMESTATES::IN_GAME;
 

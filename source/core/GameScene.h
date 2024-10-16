@@ -11,6 +11,9 @@
 extern Camera mainCamera;
 extern LoadingOverlay *loadingOverlay;
 extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
+extern std::map<_RES::Scenes_Types, std::string> RES_Scenes;
+static float sceneTimer = 0;
+
 enum GameObjectType
 {
     BASE_OBJ, LIGHT
@@ -22,17 +25,13 @@ enum CameraType
 struct __attribute__((packed)) SceneObjectData
 {
     u16 header;//object start header 0xAAAA
-    GameObjectType objType; //int
+    GameObjectType objType; //int custom class if needed
+    int objID;//int unique id
     Vector3 position; //float 3
     Quaternion rotation; //float 4
     Vector3 scale; //float 3
-    int nameSize;
-    char modelName[]; //char modelNameSize
-    ~SceneObjectData()
-    {
-        delete[] modelName;
-    
-    }
+    int modelID; //int model to load
+
 };
 
 struct __attribute__((packed)) SceneDataLoader//cast to start of .grb loads the camera for the scene
@@ -44,46 +43,42 @@ struct __attribute__((packed)) SceneDataLoader//cast to start of .grb loads the 
     Quaternion cameraRotation;//float4
     u16 SceneObjectDataLoaderHeader;//object start header 0xA4A4
     int numObjects;
-    SceneObjectData objectsInScene[];//auto sets if proper layout
+   // SceneObjectData objectsInScene[];//auto sets if proper layout
 
 };
 struct GameScene
 {
-    int sceneID;
+    _RES::Scenes_Types sceneID;
     bool isLoaded = false;  
-    std::string pathToBinary;  
-    ~GameScene()
+    std::vector<SceneObjectData*> objectsInScene;
+    GameScene(_RES::Scenes_Types _sceneID) : sceneID(_sceneID)
     {
-
-    }
-    GameScene(int _sceneID) : sceneID(_sceneID)
-    {
-        isLoaded = true;
+       objectsInScene = std::vector<SceneObjectData*>();
     }
      //.grb/
 };
 class GameSceneManager
 {
     private:
-
-    public:
-        static GameScene *CurrentScene;
-        GameSceneManager()
-        {
-            loadingOverlay = new LoadingOverlay();
-        };
-        ~GameSceneManager()
-        {
-            delete loadingOverlay;
-
-        };
-        void LoadData(const char *path)
+/**
+ * Loads a scene from a file with the given path. The file is expected to
+ * contain a SceneDataLoader struct at the start of the file, which contains
+ * information about the camera and the objects in the scene.
+ *
+ * The function reads the file, checks the header, and then iterates over the
+ * objects in the scene and creates a GameObject for each one.
+ *
+ * @param path The path to the file containing the scene data.
+ *
+ * @return true if the scene was loaded successfully, false otherwise.
+ */
+        bool LoadData(const char *path)
         {
             FILE *fp = fopen(path, "rb");
             if(fp == NULL)
             {
                 printf("File not found: %s", path);
-                return;
+                return false;
             }
 
             fseek(fp, 0, SEEK_END);
@@ -97,54 +92,88 @@ class GameSceneManager
             {
                 debugLog("Invalid .grb file");
                 debugLog("Header: %c", sceneLoaded->header);
+                fclose(fp);
+                delete[] data;
+                return false;
             }
             else
             {
-                debugLog("Scene ID: %i", sceneLoaded->sceneID);
-                debugLog("Camera Type: %i", sceneLoaded->cameraType);
-                debugLog("Camera Position: %f %f %f", sceneLoaded->cameraPosition.x, sceneLoaded->cameraPosition.y, sceneLoaded->cameraPosition.z);
-                debugLog("Camera Rotation: %f %f %f %f", sceneLoaded->cameraRotation.x, sceneLoaded->cameraRotation.y, sceneLoaded->cameraRotation.z, sceneLoaded->cameraRotation.w);
-                debugLog("Object Count: %i", sceneLoaded->numObjects);
-                debugLog("Object Position: %f %f %f", sceneLoaded->objectsInScene[0].position.x, sceneLoaded->objectsInScene[0].position.y, sceneLoaded->objectsInScene[0].position.z);
-                debugLog("Object Rotation: %f %f %f %f", sceneLoaded->objectsInScene[0].rotation.x, sceneLoaded->objectsInScene[0].rotation.y, sceneLoaded->objectsInScene[0].rotation.z, sceneLoaded->objectsInScene[0].rotation.w);
-                debugLog("Object Scale: %f %f %f", sceneLoaded->objectsInScene[0].scale.x, sceneLoaded->objectsInScene[0].scale.y, sceneLoaded->objectsInScene[0].scale.z);
-                debugLog("Object Model Name: %s", sceneLoaded->objectsInScene[0].modelName);
-            }
+                debugLog("Valid .grb file");
+                debugLog("Num Objects: %d", sceneLoaded->numObjects);
+                for (int i = 0; i < sceneLoaded->numObjects; i++) 
+                {
 
+                    SceneObjectData *objectLoaded = (SceneObjectData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData));//works
+                    CurrentScene->objectsInScene.push_back(objectLoaded);
+                    debugLog("Object ID: %d",objectLoaded->objID);
+
+                }
+               
+            }
+           
             fclose(fp);
 
             //gameobjects
             for (size_t i = 0; i < sceneLoaded->numObjects; i++)
             {   
                 loadingOverlay->GetProgress()->SetText("%d%%", (int)((i+1.0f)/sceneLoaded->numObjects*100.0f));
-                switch (sceneLoaded->objectsInScene[i].objType)
+                switch (CurrentScene->objectsInScene.at(i)->objType)
                 {
                 case LIGHT:
                     /* code */
                     break;
                 
                 default://gameobject
-                        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(sceneLoaded->objectsInScene[i].position, sceneLoaded->objectsInScene[i].rotation, sceneLoaded->objectsInScene[i].scale, _RES::GetModel(std::string(sceneLoaded->objectsInScene[i].modelName)));
+                        
+                        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene.at(i)->position, CurrentScene->objectsInScene.at(i)->rotation,CurrentScene->objectsInScene.at(i)->scale,_RES::GetModel(CurrentScene->objectsInScene.at(i)->modelID));
                     break;
                 }
             }
-            
+            return true;
         }
-/**
- * @brief Load a scene into memory
- * @details Set the current scene to the given one, unload the previous one, and update the progress bar
- * @param[in] scene The scene to be loaded
- */
-        void LoadScene(GameScene *scene)//change state to loading use num of objects as reference for progress bar use a numbered percentage system
+
+    public:
+        GameScene *CurrentScene;
+        GameSceneManager()
+        {
+            loadingOverlay = new LoadingOverlay();
+        };
+        ~GameSceneManager()
+        {
+            delete loadingOverlay;
+        };
+        
+        /**
+         * @brief Load a scene into memory
+         * @details Set the current scene to the given one, unload the previous one, and update the progress bar
+         * @param[in] scene The scene to be loaded
+         */
+        void LoadScene(GameScene *scene)
         {
             ENGINE_STATES::ChangeState(ENGINE_STATES::LOADING);
             loadingOverlay->GetProgress()->SetText("%d%%", 0);
             UnLoadScene();
             CurrentScene = scene;
             //create the game objects, add them to the scene
-
+            CurrentScene->isLoaded = LoadData(RES_Scenes[scene->sceneID].c_str());
+            if(!CurrentScene->isLoaded)
+            {
+                debugLog("Failed to load scene");
+                return;
+            }
+            else
+            {
+                
+               ENGINE_STATES::ChangeState(ENGINE_STATES::IDLE);
+                
+            }
 
         };
+
+        /**
+         * @brief Unload the current scene
+         * @details Clear all game objects, and reset the current scene pointer
+         */
         void UnLoadScene()
         {   
                 //clearr game objects
