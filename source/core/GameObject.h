@@ -60,7 +60,7 @@ class GameObject : public EngineObject
                 T *newObject =  new T();
                 //add callback
                 //newObject->material = mat;
-                newObject->position = _position;
+                newObject->position = Vector3{_position.x, -_position.y, _position.z};//flip Y 
                 newObject->rotation = _rotation;
                 newObject->scale = _scale;
                 newObject->objectModel = gameModel;

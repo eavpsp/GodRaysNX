@@ -2,6 +2,7 @@
 #include <raylib.h> 
 #include "../debug/debug.h"
 #include <switch.h>
+#include <GameStates.h>
 // Load frame data to image
 // load texture from image
 // render texture
@@ -26,6 +27,7 @@ void Player::playbackInit(string VideoPath)
 {
     if(!ffinit)
     {
+        ENGINE_STATES::ChangeState(ENGINE_STATES::VIDEO);
         frame = av_frame_alloc();
         rgbframe = av_frame_alloc();
         pkt = av_packet_alloc();
@@ -53,6 +55,7 @@ void Player::playbackInit(string VideoPath)
         if(avcodec_parameters_to_context(ctx_codec, vid_stream->codecpar) < 0) Player::playbackThrowError("Error sending parameters to codec context.");
         if(avcodec_open2(ctx_codec, codec, NULL) < 0) Player::playbackThrowError("Error opening codec with context.");
         ffinit = true;
+        debugLog("Player was initialized.");
     }
 }
 void Player::playbackThrowError(string Error)
@@ -62,7 +65,7 @@ void Player::playbackThrowError(string Error)
 
 }
 bool loadedTexture = false;
-bool Player::playbackLoop()//reads data just no video
+bool Player::playbackLoop()
 {
     if(ffinit)
     {

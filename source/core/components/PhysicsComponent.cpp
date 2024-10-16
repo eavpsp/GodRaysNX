@@ -1,15 +1,7 @@
 #include <PhysicsComponent.h>
 #include <raymath.h>
-
+#include "../debug/debug.h" 
 extern std::vector<PhysicsComponent *> *PhysicsObjects;
-PhysicsComponent::PhysicsComponent()
-{
-        updateBounds();
-        triggerEvents = std::vector<TriggerEvents *>();
-        collisionEvents = std::vector<CollisionEvents *>();
-
-}
-
 void PhysicsComponent::updateBounds()
 {
      _bounds = {(Vector3){parentObject->position.x - size.x/2,
@@ -18,10 +10,6 @@ void PhysicsComponent::updateBounds()
             (Vector3){ parentObject->position.x +  size.x/2,
                         parentObject->position.y +  size.y/2,
                         parentObject->position.z +  size.z/2 }};
-}
-
-PhysicsComponent::~PhysicsComponent()
-{
 }
 
 void PhysicsComponent::OnUpdate()
@@ -72,6 +60,7 @@ void PhysicsComponent::OnUpdate()
 
 void PhysicsComponent::onCollision(PhysicsComponent *other)
 {
+   
     if(!isKinematic)
     {
         //check side of collision and prevent movement
@@ -80,8 +69,11 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)
         if(depth > 0)
         {
             Vector3 normal = Vector3Normalize(displacement);
-            Vector3 correction = Vector3Scale(normal, depth);
+            float totalMass = mass + other->mass;
+            float scale = (mass / totalMass);
+            Vector3 correction = Vector3Scale(normal, depth * scale);
             parentObject->position = Vector3Subtract(parentObject->position, correction);
+            velocity = Vector3Scale(velocity, (1 - scale));
         }
     }
     for (size_t i = 0; i < collisionEvents.size(); i++)

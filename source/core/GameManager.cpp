@@ -68,7 +68,7 @@ void GameManager::destroyGameManager()
 
 void GameManager::runGameLoop()
 {
-    UpdateCamera(&mainCamera, CAMERA_ORBITAL);
+    UpdateCamera(&mainCamera, CAMERA_FREE);
 }
  
 void GameManager::renderLoop()

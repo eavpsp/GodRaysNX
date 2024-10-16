@@ -37,6 +37,7 @@ Physics system - WIP
 Input System - WIP
 Animation System - WIP
 Particle system (Dynamic Batched Software Particles)- WIP
+ESC System for Static Objects - WIP
 ---------------------------
 *NOT STARTED
 __________________________
@@ -44,6 +45,8 @@ __________________________
 ----------------------------
 *FUTURE IMPLEMENTATIONS
 _____________________________
+Multithreading -
+ComputeShader Pathfinding -
 Skeletal Animation -
 IK -
 Procedural Animation -
@@ -65,6 +68,8 @@ Procedural Animation -
 #include <VideoPlayer.h>
 #include <GameScene.h>
 #include <PhysicsComponent.h>
+#include <PhysicsWorld.h>
+#include <mwmath.h>
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<int, std::string> RES_Models;
@@ -87,6 +92,7 @@ void initSystem()
     GameObjects = new std::vector<GameObject *>();
     GraphicsObjects = new std::vector<EngineObject *>();
     engineCallBacks = new EngineCallBacks();
+    PhysicsWorld::Init();
     PhysicsObjects = new std::vector<PhysicsComponent *>();
     debugLog("Engine Callbacks Init");
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
@@ -106,21 +112,38 @@ void TestLoadScene()
     sceneManager->LoadScene(scene);//convert to load scene
     
 }
-
+void TestPhysics()
+{
+    //test physics
+    //create plane
+    //create objects in random positions
+    //add physics components to them
+    for (size_t i = 0; i < 2; i++)
+    {
+        /* code */
+        Vector3 pos = Vector3{MW_Math::Random(0,3), 20* i, MW_Math::Random(0,3)};
+        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1}, _RES::GetModel(_RES::Model_ID::ROBOT_ID));
+        PhysicsComponent *comp = new PhysicsComponent(1000.0f, 2.0f, false);
+        obj->AddComponent(comp);
+    }
+    
+}
 
 void BOOT()
 {
       BeginDrawing();
             ClearBackground(RAYWHITE);
-            DrawText("Welcome to GodRays Game Engine", 620, 360, 20, BLACK);
-            DrawText("Booting Up...", 640, 400, 20, BLACK);
+            DrawText("Welcome to GodRays Game Engine", 420, 260, 20, BLACK);
+            DrawText("Booting Up...", 440, 300, 20, BLACK);
     EndDrawing();
     
     timer += GetFrameTime();
     if (timer > 5)
     {
         timer = 0;
-        TestLoadScene();
+        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+
+        TestPhysics();
 
     }
 
@@ -151,6 +174,7 @@ void EngineMain()
             
             gameManager->runGameLoop();
             gameManager->renderLoop();
+            PhysicsWorld::Update();
             //Run Update Callbacks
             engineCallBacks->RunUpdateCallbacks();
             
