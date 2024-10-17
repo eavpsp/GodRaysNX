@@ -6,9 +6,78 @@
 #include <list>
 #include <memory>
 #include<array> 
+#include <raymath.h>
 constexpr size_t MAX_DEPTH = 8;
+//Search using the cameraview
+//all items returned will run their draw call to show on screen
+//load in scene objects into the octree
+//get them as gameobjects to render
+//tree for ecs also
+struct ViewFrustrum
+{
+    float nearPlane = 1.0f;
+    float farPlane = 1000.0f;
+    Vector3 corners[8];
+    BoundingBox viewFrustumBox;
+    ViewFrustrum(){};
+    ViewFrustrum(Vector3 cameraPosition, Vector3 cameraDirection, Vector3 cameraRight, Vector3 cameraUp,
+         float fov, float nearPlane = 1.0f, float farPlane = 1000.0f)
+        {
+            corners[0] = Vector3Scale(Vector3Add(cameraPosition, cameraDirection), nearPlane); // near top left
+            corners[1] = Vector3Scale(Vector3Add(cameraPosition, Vector3Add(cameraDirection, cameraRight)), nearPlane); // near top right
+            corners[2] = Vector3Scale(Vector3Add(cameraPosition, Vector3Add(cameraDirection, cameraUp)), nearPlane); // near bottom left
+            corners[3] = Vector3Scale(Vector3Add(cameraPosition, Vector3Add(cameraDirection, Vector3Add(cameraRight, cameraUp))), nearPlane); // near bottom right
+            corners[4] = Vector3Scale(Vector3Add(cameraPosition, Vector3Add(cameraDirection, Vector3Add(cameraRight, cameraUp))), farPlane); // far top left
+            corners[5] = Vector3Scale(Vector3Add(cameraPosition, Vector3Add(cameraDirection, Vector3Add(cameraRight, cameraUp))), farPlane); // far top right
+            corners[6] = Vector3Scale(Vector3Add(cameraPosition, Vector3Add(cameraDirection, cameraUp)), farPlane); // far bottom left
+            corners[7] = Vector3Scale(Vector3Add(cameraPosition, Vector3Add(cameraDirection, Vector3Add(cameraRight, cameraUp))), farPlane); // far bottom right
 
-BoundingBox CameraView = {0, 0, 0, 500, 500, 500};
+            // Create a bounding box that encloses the view frustum
+           viewFrustumBox.min = MW_Math::Min(corners, 8);
+           viewFrustumBox.max = MW_Math::Max(corners, 8);
+        }
+};
+struct MightyCam
+{
+    Camera *camToUse;
+    ViewFrustrum frustrum;
+    void SetCamPosition(Vector3 newpos)
+    {
+        camToUse->position = newpos;
+        UpdateViewFrustum();
+    }
+    void UpdateViewFrustum()
+    {
+            Vector3 camForward = Vector3Normalize(Vector3Subtract(camToUse->target, camToUse->position));
+            Vector3 camRight = Vector3CrossProduct(camForward, camToUse->up);
+            frustrum.corners[0] = Vector3Scale(Vector3Add(camToUse->position, camForward), frustrum.nearPlane); // near top left
+            frustrum.corners[1] = Vector3Scale(Vector3Add(camToUse->position, Vector3Add(camForward, camRight)), frustrum.nearPlane); // near top right
+            frustrum.corners[2] = Vector3Scale(Vector3Add(camToUse->position, Vector3Add(camForward, camToUse->up)), frustrum.nearPlane); // near bottom left
+            frustrum.corners[3] = Vector3Scale(Vector3Add(camToUse->position, Vector3Add(camForward, Vector3Add(camRight, camToUse->up))), frustrum.nearPlane); // near bottom right
+            frustrum.corners[4] = Vector3Scale(Vector3Add(camToUse->position, Vector3Add(camForward, Vector3Add(camRight, camToUse->up))), frustrum.farPlane); // far top left
+            frustrum.corners[5] = Vector3Scale(Vector3Add(camToUse->position, Vector3Add(camForward, Vector3Add(camRight, camToUse->up))), frustrum.farPlane); // far top right
+            frustrum.corners[6] = Vector3Scale(Vector3Add(camToUse->position, Vector3Add(camForward, camToUse->up)), frustrum.farPlane); // far bottom left
+            frustrum.corners[7] = Vector3Scale(Vector3Add(camToUse->position, Vector3Add(camForward, Vector3Add(camRight, camToUse->up))), frustrum.farPlane); // far bottom right
+
+            // Create a bounding box that encloses the view frustum
+            frustrum.viewFrustumBox.min = MW_Math::Min(frustrum.corners, 8);
+            frustrum.viewFrustumBox.max = MW_Math::Max(frustrum.corners, 8);
+         
+    }
+    MightyCam()
+    {
+        camToUse = new Camera();
+        camToUse->position = (Vector3){ 6.0f, 6.0f, 6.0f };    // mainCamera position
+        camToUse->target = (Vector3){ 0.0f, 2.0f, 0.0f };      // mainCamera looking at point
+        camToUse->up = (Vector3){ 0.0f, 1.0f, 0.0f };          // mainCamera up vector (rotation towards target)
+        camToUse->fovy = 45.0f;                                // mainCamera field-of-view Y
+        camToUse->projection = CAMERA_PERSPECTIVE; 
+        Vector3 camForward = Vector3Normalize(Vector3Subtract(camToUse->target, camToUse->position));
+        Vector3 camRight = Vector3CrossProduct(camForward, camToUse->up);
+        frustrum = ViewFrustrum(camToUse->position, camForward, camRight, camToUse->up, camToUse->fovy);
+    }
+};
+
 template <typename T>
 struct OctTreeItemLocation
 {

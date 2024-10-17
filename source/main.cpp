@@ -75,6 +75,7 @@ Procedural Animation -
 #include <mwmath.h>
 #include <AnimationController.h>
 #include <Entity.h>
+#include <RenderSystem.h>
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
@@ -82,8 +83,7 @@ EngineCallBacks *engineCallBacks;
 std::vector<GameObject *> *GameObjects;
 std::vector<PhysicsComponent *> *PhysicsObjects;
 GameManager *gameManager;
-EntityManager em;
-extern Camera mainCamera;
+extern MightyCam mainCamera;
 
 static float timer = 0;
 void initSystem()
@@ -143,14 +143,14 @@ void TestAnimations()
 
 void TestDOTS()
 {
-    em.SetModel(_RES::GetModel(_RES::Model_ID::ROBOT_ID));
+    EntityManager::SetModel(_RES::GetModel(_RES::Model_ID::ROBOT_ID));
     //load 100 objs in dif locations
     for (size_t i = 0; i < 100; i++)
     {
-        size_t index = em.AddEntity();
+        size_t index = EntityManager::AddEntity();
         //set position data
-        em.entities[index].position = Vector3{MW_Math::Random(0.0f, 100.0f), 0, MW_Math::Random(0.0f, 100.0f)};
-        em.entities[index].modelScale = 1.0f;
+        EntityManager::entities[index].position = Vector3{MW_Math::Random(0.0f, 100.0f), 0, MW_Math::Random(0.0f, 100.0f)};
+        EntityManager::entities[index].modelScale = 1.0f;
     }
     debugLog("DOTS Init");
 }
@@ -198,11 +198,11 @@ void EngineMain()
         {
             
             gameManager->runGameLoop();
-            BeginDrawing();//Create Render System with View Frustrum
-            BeginMode3D(mainCamera);
+            BeginDrawing();//Create Render System with View Frustrum //Move to render system
+            BeginMode3D(*mainCamera.camToUse);
                 ClearBackground(RAYWHITE);
                 gameManager->renderLoop();
-                em.DrawEntites();
+                EntityManager::DrawEntites();
             EndMode3D();
             EndDrawing();
             PhysicsWorld::Update();

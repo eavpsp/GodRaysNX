@@ -10,12 +10,12 @@
 #include "ScriptCallbacks.h"
 #include <StandardInput.h>
 #include <GamePad.h>
-
+#include <RenderSystem.h>
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Fonts;
 extern std::vector<GameObject *> *GameObjects;
 Font guiFont;
-Camera mainCamera;
+MightyCam mainCamera;
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 Texture2D texture;        // Texture loading
 const int screenWidth = 1280;
@@ -44,12 +44,7 @@ GameManager& GameManager::getGameManager()
             debugLog("\x1b[16;25HError Creating Window!");
         }
         SetTargetFPS(60);
-        mainCamera = { 0 };
-        mainCamera.position = (Vector3){ 6.0f, 6.0f, 6.0f };    // mainCamera position
-        mainCamera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // mainCamera looking at point
-        mainCamera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // mainCamera up vector (rotation towards target)
-        mainCamera.fovy = 45.0f;                                // mainCamera field-of-view Y
-        mainCamera.projection = CAMERA_PERSPECTIVE;   
+        
         //set up controller
         controller = StandardController(&mainCamera);
         gamePads = GamePads();

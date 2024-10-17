@@ -8,7 +8,7 @@
 // Holds Scene Gameobjects
 // Light Data
 // Camera Data
-extern Camera mainCamera;
+
 extern LoadingOverlay *loadingOverlay;
 extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
 extern std::map<_RES::Scenes_Types, std::string> RES_Scenes;

@@ -1,5 +1,6 @@
 #include <Entity.h>
 #include <bits/algorithmfwd.h>
+#include<arm_neon.h>
 
 Entity& EntityManager::GetEntity(size_t index)
 {
@@ -26,10 +27,5 @@ void EntityManager::DrawEntites()
     {
         DrawModel(model, entities[i].position, entities[i].modelScale, WHITE);
     }
-    
-}
-
-EntityManager::EntityManager()
-{
     
 }

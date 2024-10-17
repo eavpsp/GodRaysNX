@@ -142,4 +142,24 @@ float MW_Math::distance(float a, float b)
     return abs(b - a);
 }
 
+Vector3 MW_Math::Min(const Vector3 *vectors, int count)
+{
+        Vector3 minVector = vectors[0];
+        for (int i = 1; i < count; i++) {
+            if (vectors[i].x < minVector.x) minVector.x = vectors[i].x;
+            if (vectors[i].y < minVector.y) minVector.y = vectors[i].y;
+            if (vectors[i].z < minVector.z) minVector.z = vectors[i].z;
+        }
+        return minVector;
+}
 
+Vector3 MW_Math::Max(const Vector3 *vectors, int count)
+{
+        Vector3 maxVector = vectors[0];
+        for (int i = 1; i < count; i++) {
+            if (vectors[i].x > maxVector.x) maxVector.x = vectors[i].x;
+            if (vectors[i].y > maxVector.y) maxVector.y = vectors[i].y;
+            if (vectors[i].z > maxVector.z) maxVector.z = vectors[i].z;
+        }
+        return maxVector;
+}

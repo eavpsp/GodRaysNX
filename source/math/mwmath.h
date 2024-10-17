@@ -35,6 +35,9 @@ namespace MW_Math
                boundingBox.min.z <= boundingBox2.max.z &&
                boundingBox.max.z >= boundingBox2.min.z;
     }
+      Vector3 Min(const Vector3* vectors, int count);
+
+     Vector3 Max(const Vector3* vectors, int count);
 
 };
 

@@ -3,7 +3,7 @@
 
 void StandardController::UpdateButtonInputs()
 {
-    Vector3 forward = Vector3Normalize(Vector3Subtract(camera->target, camera->position));
+    Vector3 forward = Vector3Normalize(Vector3Subtract( mightyCam->camToUse->target,  mightyCam->camToUse->position));
     //button presed -- can be extended to all button positions
      switch (GetGamepadButtonPressed())
      {
@@ -16,14 +16,17 @@ void StandardController::UpdateButtonInputs()
         //Triggers
         case GAMEPAD_BUTTON_LEFT_TRIGGER_1:
             //move camera down 
-            camera->position.y -= 10.0f * GetFrameTime();
-            camera->target = forward;
+            mightyCam->SetCamPosition(Vector3Add(mightyCam->camToUse->position , Vector3{0.0f, -10.0f * GetFrameTime(), 0.0f}));
+            mightyCam->camToUse->target = forward;
+
             break;
         case GAMEPAD_BUTTON_LEFT_TRIGGER_2:
             break;
         case GAMEPAD_BUTTON_RIGHT_TRIGGER_1:
-            camera->position.y += 10.0f * GetFrameTime();
-            camera->target = forward;
+             mightyCam->SetCamPosition(Vector3Add(mightyCam->camToUse->position , Vector3{0.0f, +10.0f * GetFrameTime(), 0.0f}));
+             mightyCam->camToUse->target = forward;
+            mightyCam->UpdateViewFrustum();
+
             break;
         case GAMEPAD_BUTTON_RIGHT_TRIGGER_2:
             break;
@@ -72,12 +75,13 @@ void StandardController::UpdateAxisInputs()
    if(Leftx != 0 || Lefty != 0)
    {
         // move camera forward in the camera's view direction
-        Vector3 forward = Vector3Normalize(Vector3Subtract(camera->target, camera->position));
-        Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera->up));
+        Vector3 forward = Vector3Normalize(Vector3Subtract( mightyCam->camToUse->target, mightyCam->camToUse->position));
+        Vector3 right = Vector3Normalize(Vector3CrossProduct(forward,  mightyCam->camToUse->up));
         
         Vector3 direction = Vector3Add(Vector3Scale(forward, Lefty) , Vector3Scale(right, Leftx));
-        camera->position = Vector3Add(camera->position, Vector3Scale(direction, 10.0f * GetFrameTime()));
-        camera->target = Vector3Add(camera->position, forward);
+        mightyCam->SetCamPosition(Vector3Add( mightyCam->camToUse->position, Vector3Scale(direction, 10.0f * GetFrameTime())));
+        mightyCam->camToUse->target = Vector3Add( mightyCam->camToUse->position, forward);
+        mightyCam->UpdateViewFrustum();
    }
    if(Rightx != 0 || Righty != 0)
    {
@@ -86,8 +90,8 @@ void StandardController::UpdateAxisInputs()
         {
             //look up and down
             // Rotate camera up and down
-            Vector3 forward = Vector3Normalize(Vector3Subtract(camera->target, camera->position));
-            Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera->up));
+            Vector3 forward = Vector3Normalize(Vector3Subtract( mightyCam->camToUse->target,  mightyCam->camToUse->position));
+            Vector3 right = Vector3Normalize(Vector3CrossProduct(forward,  mightyCam->camToUse->up));
             Vector3 up = Vector3Normalize(Vector3CrossProduct(right, forward));
 
             // Calculate pitch rotation matrix
@@ -97,11 +101,11 @@ void StandardController::UpdateAxisInputs()
             forward = Vector3Transform(forward, pitch);
 
             // Update camera target
-            camera->target = Vector3Add(camera->position, forward);
+             mightyCam->camToUse->target = Vector3Add( mightyCam->camToUse->position, forward);
         }
         else if(Rightx != 0)
         {
-              camera->target = Vector3Add(camera->target, Vector3Scale(Vector3Normalize(Vector3CrossProduct(camera->up, Vector3Subtract(camera->target, camera->position))), Rightx * 10.0f * GetFrameTime()));
+               mightyCam->camToUse->target = Vector3Add( mightyCam->camToUse->target, Vector3Scale(Vector3Normalize(Vector3CrossProduct( mightyCam->camToUse->up, Vector3Subtract( mightyCam->camToUse->target,  mightyCam->camToUse->position))), Rightx * 10.0f * GetFrameTime()));
 
         }
    }
