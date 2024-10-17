@@ -12,7 +12,20 @@ namespace MW_Math
     float clamp(float value, float min, float max);
     float between(float a, float b, float t);
     float distance(float a, float b);
-};
+   
 
+    template <typename T>//Rectangle
+    bool contains(T rect, T rect2)
+    {
+       return rect.x <= rect2.x && rect.y <= rect2.y && rect.x + rect.width >= rect2.x + rect2.width && rect.y + rect.height >= rect2.y + rect2.height;
+    }
+
+    template <typename T>//Rectangle
+    bool overlaps(T rect, T rect2)
+    {
+        return rect.x < rect2.x + rect2.width && rect.x + rect.width > rect2.x && rect.y < rect2.y + rect2.height && rect.y + rect.height > rect2.y;
+    }
+
+};
 
 #endif /* MATH_H */

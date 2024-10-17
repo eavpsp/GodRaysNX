@@ -24,7 +24,7 @@ void EntityManager::DrawEntites()
 
     for (size_t i = 0; i < entities.size(); i++)
     {
-        DrawModel(model, entities[i].position, entities[i].scale, WHITE);
+        DrawModel(model, entities[i].position, entities[i].modelScale, WHITE);
     }
     
 }

@@ -82,11 +82,6 @@ void GameManager::runGameLoop()
 void GameManager::renderLoop()
 {
  
-       
-          
-
-           
-
             //Loop gameobjects
             for (size_t i = 0; i < GameObjects->size(); i++)
             {
@@ -95,9 +90,7 @@ void GameManager::renderLoop()
                     GameObjects->at(i)->Draw();
             }   
             DrawGrid(10, 1.0f);
-    
-     
-    
+
 }
 
 bool GameManager::Running(){

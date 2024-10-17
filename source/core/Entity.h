@@ -10,15 +10,17 @@
 struct Entity
 {
     int index;
-    //int modelID; //index to model in vector of models
+    int modelID; //index to model in vector of models
+    float rectScale;
     Vector3 position;
-    float scale;
+    float modelScale;
 };
 //vector of loaded models
 class EntityManager
 {
   public:
     std::vector<Entity> entities;
+    std::vector<Rectangle> boindBoxes;
     Model model;
     Entity& GetEntity(size_t index);
     size_t AddEntity();

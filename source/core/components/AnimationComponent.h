@@ -4,7 +4,7 @@
 
 class AnimationController;
 //controls animation playback
-class AnimationComponent : public GameComponent
+class AnimationComponent : public GameComponent//hash table for animations, anim name -> anim index
 {
 
     public:

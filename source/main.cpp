@@ -32,11 +32,14 @@ Loading Scene System - Done
 Physics system - Done
 Input System - Done
 Animation System - Done
+ESC System for Static Objects - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-ESC System for Static Objects - WIP
+View Frustrum -
+    Camera System
+    Render System
 Particle system (Dynamic Batched Software Particles)- WIP
 ---------------------------
 *NOT STARTED
@@ -146,8 +149,8 @@ void TestDOTS()
     {
         size_t index = em.AddEntity();
         //set position data
-        em.entities[index].position = Vector3{MW_Math::Random(0.0f, 100.0f), MW_Math::Random(0.0f, 100.0f), MW_Math::Random(0.0f, 100.0f)};
-        em.entities[index].scale = 1.0f;
+        em.entities[index].position = Vector3{MW_Math::Random(0.0f, 100.0f), 0, MW_Math::Random(0.0f, 100.0f)};
+        em.entities[index].modelScale = 1.0f;
     }
     debugLog("DOTS Init");
 }
