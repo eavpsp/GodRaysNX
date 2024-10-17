@@ -15,15 +15,25 @@ namespace MW_Math
    
 
     template <typename T>//Rectangle
-    bool contains(T rect, T rect2)
+    bool contains(T boundingBox, T boundingBox2)
     {
-       return rect.x <= rect2.x && rect.y <= rect2.y && rect.x + rect.width >= rect2.x + rect2.width && rect.y + rect.height >= rect2.y + rect2.height;
+       return boundingBox.min.x <= boundingBox2.max.x &&
+              boundingBox.max.x >= boundingBox2.min.x &&
+              boundingBox.min.y <= boundingBox2.max.y &&
+              boundingBox.max.y >= boundingBox2.min.y &&
+              boundingBox.min.z <= boundingBox2.max.z &&
+              boundingBox.max.z >= boundingBox2.min.z;
     }
 
     template <typename T>//Rectangle
-    bool overlaps(T rect, T rect2)
+    bool overlaps(T boundingBox, T boundingBox2)
     {
-        return rect.x < rect2.x + rect2.width && rect.x + rect.width > rect2.x && rect.y < rect2.y + rect2.height && rect.y + rect.height > rect2.y;
+        return boundingBox.min.x <= boundingBox2.max.x &&
+               boundingBox.max.x >= boundingBox2.min.x &&
+               boundingBox.min.y <= boundingBox2.max.y &&
+               boundingBox.max.y >= boundingBox2.min.y &&
+               boundingBox.min.z <= boundingBox2.max.z &&
+               boundingBox.max.z >= boundingBox2.min.z;
     }
 
 };
