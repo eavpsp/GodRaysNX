@@ -82,11 +82,10 @@ void GameManager::runGameLoop()
 void GameManager::renderLoop()
 {
  
-         BeginDrawing();
-            ClearBackground(RAYWHITE);
+       
           
 
-            BeginMode3D(mainCamera);
+           
 
             //Loop gameobjects
             for (size_t i = 0; i < GameObjects->size(); i++)
@@ -96,15 +95,8 @@ void GameManager::renderLoop()
                     GameObjects->at(i)->Draw();
             }   
             DrawGrid(10, 1.0f);
-            
-
-            EndMode3D();
-            //if (GuiTextBox((Rectangle){ 25, 215, 125, 30 }, "Hello", 64, false));
-
-            //DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
-         
-           //DrawTextEx(guiFont, "this IS a texture!", Vector2{360, 650}, 40, 40/2,GRAY);
-        EndDrawing();
+    
+     
     
 }
 

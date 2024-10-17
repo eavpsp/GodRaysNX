@@ -31,12 +31,11 @@ Video system (MP4 Playback)- FFMPEG - Done
 Loading Scene System - Done
 Physics system - Done
 Input System - Done
+Animation System - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Animation System - WIP
-    Animation Component, Animation Controller
 ESC System for Static Objects - WIP
 Particle system (Dynamic Batched Software Particles)- WIP
 ---------------------------
@@ -72,17 +71,16 @@ Procedural Animation -
 #include <PhysicsWorld.h>
 #include <mwmath.h>
 #include <AnimationController.h>
-extern std::map<std::string, std::string> RES_Fonts;
-extern std::map<std::string, std::string> RES_Textures;
-extern std::map<int, std::string> RES_Models;
+#include <Entity.h>
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
 EngineCallBacks *engineCallBacks;
 std::vector<GameObject *> *GameObjects;
 std::vector<PhysicsComponent *> *PhysicsObjects;
-std::vector<EngineObject *> *GraphicsObjects;
 GameManager *gameManager;
+EntityManager em;
+extern Camera mainCamera;
 
 static float timer = 0;
 void initSystem()
@@ -94,7 +92,6 @@ void initSystem()
     debugLog("System Starting...");
     //init callbacks 
     GameObjects = new std::vector<GameObject *>();
-    GraphicsObjects = new std::vector<EngineObject *>();
     engineCallBacks = new EngineCallBacks();
     PhysicsWorld::Init();
     PhysicsObjects = new std::vector<PhysicsComponent *>();
@@ -104,13 +101,13 @@ void initSystem()
 
 void TestVideo()
 {
-    //test video
+
    Player::playbackInit("/video/test.mp4");
 }   
 
 void TestLoadScene()
 {
-    //test load scene
+   
     sceneManager = new GameSceneManager();
     GameScene *scene = new GameScene(_RES::Scenes_Types::ROBOT_SCENE);
     sceneManager->LoadScene(scene);//convert to load scene
@@ -118,13 +115,9 @@ void TestLoadScene()
 }
 void TestPhysics()
 {
-    //test physics
-    //create plane
-    //create objects in random positions
-    //add physics components to them
+
     for (size_t i = 0; i < 2; i++)
     {
-        /* code */
         Vector3 pos = Vector3{0, 10 * i, 0};
         GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1}, _RES::GetModel(_RES::Model_ID::ROBOT_ID));
         PhysicsComponent *comp = new PhysicsComponent(1.0f, 2.0f,false,  i == 0 ? false : true);
@@ -143,6 +136,21 @@ void TestAnimations()
         AnimationController *anim = new AnimationController(animComp, data);
         obj->AddComponent(animComp);
 }
+
+
+void TestDOTS()
+{
+    em.SetModel(_RES::GetModel(_RES::Model_ID::ROBOT_ID));
+    //load 100 objs in dif locations
+    for (size_t i = 0; i < 100; i++)
+    {
+        size_t index = em.AddEntity();
+        //set position data
+        em.entities[index].position = Vector3{MW_Math::Random(0.0f, 100.0f), MW_Math::Random(0.0f, 100.0f), MW_Math::Random(0.0f, 100.0f)};
+        em.entities[index].scale = 1.0f;
+    }
+    debugLog("DOTS Init");
+}
 void BOOT()
 {
       BeginDrawing();
@@ -157,7 +165,7 @@ void BOOT()
         timer = 0;
         ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
 
-        TestAnimations();
+        TestDOTS();
 
     }
 
@@ -187,11 +195,16 @@ void EngineMain()
         {
             
             gameManager->runGameLoop();
-            gameManager->renderLoop();
+            BeginDrawing();//Create Render System with View Frustrum
+            BeginMode3D(mainCamera);
+                ClearBackground(RAYWHITE);
+                gameManager->renderLoop();
+                em.DrawEntites();
+            EndMode3D();
+            EndDrawing();
             PhysicsWorld::Update();
             //Run Update Callbacks
             engineCallBacks->RunUpdateCallbacks();
-            
             // Get and process input
             if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
                 gameManager->destroyGameManager();
@@ -227,7 +240,14 @@ void EngineMain()
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::LOADING)
         {
             BeginDrawing();
+            ClearBackground(RAYWHITE);
                 loadingOverlay->Draw();
+            EndDrawing();
+        }
+         else if(ENGINE_STATES::GetState() == ENGINE_STATES::TEST)
+        {
+            BeginDrawing();
+             //   
             EndDrawing();
         }
         

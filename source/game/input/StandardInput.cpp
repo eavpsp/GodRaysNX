@@ -1,4 +1,3 @@
-
 #include <StandardInput.h>
 #include <raymath.h>
 
@@ -13,10 +12,10 @@ void StandardController::UpdateButtonInputs()
             break;
         case GAMEPAD_BUTTON_RIGHT_THUMB:
             break;
+
         //Triggers
         case GAMEPAD_BUTTON_LEFT_TRIGGER_1:
             //move camera down 
-      
             camera->position.y -= 10.0f * GetFrameTime();
             camera->target = forward;
             break;
@@ -28,6 +27,7 @@ void StandardController::UpdateButtonInputs()
             break;
         case GAMEPAD_BUTTON_RIGHT_TRIGGER_2:
             break;
+
         //Middle
         case GAMEPAD_BUTTON_MIDDLE_LEFT:
             break;
@@ -35,6 +35,7 @@ void StandardController::UpdateButtonInputs()
             break;
         case GAMEPAD_BUTTON_MIDDLE_RIGHT:
             break;
+
         //Right Face
         case GAMEPAD_BUTTON_RIGHT_FACE_UP:
             break;
@@ -44,6 +45,7 @@ void StandardController::UpdateButtonInputs()
             break;
         case GAMEPAD_BUTTON_RIGHT_FACE_LEFT:
             break;
+
         //Left Face
         case GAMEPAD_BUTTON_LEFT_FACE_UP:
             break;
