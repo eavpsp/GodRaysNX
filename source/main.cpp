@@ -76,6 +76,7 @@ Procedural Animation -
 #include <AnimationController.h>
 #include <Entity.h>
 #include <RenderSystem.h>
+#include <RenderSystem.h>
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
@@ -85,8 +86,11 @@ std::vector<PhysicsComponent *> *PhysicsObjects;
 GameManager *gameManager;
 extern MightyCam mainCamera;
 static float timer = 0;
-
-
+EntityComponentSystem ecs;
+extern RenderSystemECS renderSystemECS;
+extern TransformSystemECS transformSystem;
+//QuadTrr
+StaticQuadTreeContainer<Entity> *quadTreeContainer;
 void initSystem()
 {   
     //init gamepad
@@ -99,9 +103,11 @@ void initSystem()
     engineCallBacks = new EngineCallBacks();
     PhysicsWorld::Init();
     PhysicsObjects = new std::vector<PhysicsComponent *>();
-    EntityComponentSystem::InitSystem();
+    ecs.InitSystem();
     debugLog("Engine Callbacks Init");
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
+    BoundingBox stageBounds = {Vector3{0,0,0}, Vector3{100,100,100}};
+    quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
 }
 
 void TestVideo()
@@ -145,7 +151,7 @@ void TestAnimations()
 
 void TestDOTS()
 {
-   
+   quadTreeContainer->resize({0,0,0,10000,10000,10000});
     //load 100 objs in dif locations
     for (size_t i = 0; i < 100; i++)
     {
@@ -153,14 +159,21 @@ void TestDOTS()
         TransformComponent transform =  TransformComponent();
         transform.position = Vector3{MW_Math::Random(0.0f, 100.0f), 0, MW_Math::Random(0.0f, 100.0f)};
         transform.scale = 1.0f;
-        TransformSystemESC::AddComponent(EntityManager::GetEntity(index), transform);
+        transformSystem.AddComponent(EntityManager::GetEntity(index), transform);
         ModelComponent model = ModelComponent();
         model.modelIndex = 0;
         model.modelScale = 1.0f;
-        RenderSystemESC::AddComponent(EntityManager::GetEntity(index), model);
-
+        renderSystemECS.AddComponent(EntityManager::GetEntity(index), model);
+        BoundingBox bounds = (BoundingBox){(Vector3){ transform.position.x - transform.scale/2,
+                                     transform.position.y - transform.scale/2,
+                                     transform.position.z - transform.scale/2 },
+                          (Vector3){ transform.position.x + transform.scale/2,
+                                     transform.position.y + transform.scale/2,
+                                     transform.position.z + transform.scale/2 }};
+        quadTreeContainer->insert(EntityManager::GetEntity(index), bounds);
     }
     debugLog("DOTS Init");
+    debugLog("Number of QuadTreeNodes: %d", quadTreeContainer->size());
 }
 void BOOT()
 {
@@ -199,20 +212,52 @@ void EngineMain()
     debugLog("Engine Starting...");
       //init GM
     gameManager = &GameManager::getGameManager();
-    Model model = LoadModel("romfs:/models/robot.glb");
-    while (!WindowShouldClose() && gameManager->Running())    // Detect window close button or ESC key
+    Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);     //LoadModel("romfs:/models/robot.glb");
+    while (!WindowShouldClose() && gameManager->Running())      // Detect window close button or ESC key
     {
         
         if(ENGINE_STATES::GetState() == ENGINE_STATES::IN_GAME)
         {
-            EntityComponentSystem::UpdateSystem();
+            ecs.UpdateSystem();
             gameManager->runGameLoop();
+            mainCamera.UpdateCamera();
             BeginDrawing();//Create Render System with View Frustrum //Move to render system
             BeginMode3D(*mainCamera.camToUse);
                 ClearBackground(RAYWHITE);
                 gameManager->renderLoop();
-                RenderSystemESC::Draw(model);
-               // DrawModel(model, Vector3{0,0,0}, 1.0f, WHITE);
+               MightyBoundingBox cameraBox = mainCamera.frustum.GetFrustumBoundingBox();
+               
+                //renderSystemECS.DrawAll(model);
+               for (const auto& entity : quadTreeContainer->search(cameraBox.GetBoundingBox()))
+               {
+                    TransformComponent transform = transformSystem.GetComponent(*entity);
+                    //make bounds
+                    BoundingBox bounds = {
+                                (Vector3){transform.position.x -transform.scale, 
+                                            transform.position.y -transform.scale,
+                                            transform.position.z -transform.scale },
+                                (Vector3){transform.position.x +transform.scale,
+                                            transform.position.y +transform.scale,
+                                            transform.position.z +transform.scale }};
+                    //check if in view
+                     //check if in frustr
+                        MightyBoundingBox box = MightyBoundingBox(bounds);
+                        
+                        cameraBox.DrawBoundingBox(BLUE);
+                      if (CheckCollisionBoxes(cameraBox.GetBoundingBox(), box.GetBoundingBox()) && !mainCamera.IsObjectBehindCamera(box))
+                     {
+                           renderSystemECS.DrawEntities(model, *entity);
+                        box.DrawBoundingBox(GREEN);
+
+                      }
+                      else{
+                        box.DrawBoundingBox(RED);
+                      }
+                            
+                     
+               }
+                //DrawModel(model, Vector3{0,0,0}, 1.0f, WHITE);
+
             EndMode3D();
             EndDrawing();
             PhysicsWorld::Update();

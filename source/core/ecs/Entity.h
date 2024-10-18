@@ -3,7 +3,7 @@
 #pragma once
 #include <vector>
 #include <raylib.h>
-#include <unordered_map>
+#include <map>
 #include<typeinfo>
 #include <map>
 #include <string>
@@ -34,7 +34,7 @@ struct __attribute__((packed)) ModelComponent
 };
 struct __attribute__((packed)) Entity
 {
-    int index;
+    uint32_t index;
     Entity() : index(-1) {};
     bool operator<(const Entity& rhs) const 
     {
@@ -42,27 +42,31 @@ struct __attribute__((packed)) Entity
     }   
 };
 
-namespace TransformSystemESC
+struct TransformSystemECS
 {
+public:
+    void Init();
     void UpdateTransform(Entity entity, Vector3 position, float scale);
-    static std::map<Entity, TransformComponent> entityWithTransformComponents;
+    std::map <Entity, TransformComponent> entityWithTransformComponents;
     void AddComponent(Entity entity, TransformComponent component);
     void RemoveComponent(Entity entity);
     TransformComponent GetComponent(Entity entity);
     std::vector<Entity> GetEntities();
-}
+};
 
-namespace RenderSystemESC
+struct RenderSystemECS
 {
-    
+public:
     void Init();
-    void Draw(Model model);
-    static std::map<Entity, ModelComponent> entityWithModelComponents;
+    void DrawEntities(Model model, Entity entity);
+    void Draw(Model model, Vector3 position, float scale);
+    void DrawAll(Model model);
+    std::map <Entity, ModelComponent> entityWithModelComponents;
     void AddComponent(Entity entity, ModelComponent component);
     void RemoveComponent(Entity entity);
     ModelComponent GetComponents(Entity entity);
     std::vector<Entity> GetEntities();
-}
+};
 namespace EntityManager
 {
   
@@ -73,12 +77,14 @@ namespace EntityManager
     
 };
 
-namespace EntityComponentSystem
+struct EntityComponentSystem
 {
+    public:
+
     //Run all systems here
     void UpdateSystem();
     
     void InitSystem();
 
-};
+}; 
 #endif // ENTITY_H
