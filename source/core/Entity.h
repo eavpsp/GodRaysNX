@@ -1,90 +1,84 @@
 #ifndef ENTITY_H
 #define ENTITY_H
+#pragma once
 #include <vector>
 #include <raylib.h>
 #include <unordered_map>
+#include<typeinfo>
+#include <map>
+#include <string>
+#include <list>
+#include <memory>
+#include<array> 
+#include <typeindex>
+#include <algorithm>
+#include <any>
 #define MAX_ENTITIES 100
 ///Data Cache: 32KB
 //L2 cache: 256 KB
 //L3 cache: 2 MB (shared between CPU and GPU)
-struct EntityComponent
-{
-
-};
-struct TransformComponent : public EntityComponent
+struct __attribute__((packed)) TransformComponent
 {
     Vector3 position;
     float scale;
-};
 
-struct ModelComponent : public EntityComponent
+};
+struct __attribute__((packed)) ModelComponent
+//must have a transform component
 {
-    int modelID;
+    int modelIndex;
     float modelScale;
     Vector3 min;
     Vector3 max;
+    
 };
-struct Entity
+struct __attribute__((packed)) Entity
 {
     int index;
+    Entity() : index(-1) {};
+    bool operator<(const Entity& rhs) const 
+    {
+        return index < rhs.index;
+    }   
 };
 
-namespace RenderSystem
+namespace TransformSystemESC
 {
-    std::vector<Model> modelsLoaded;
-    void Draw(std::vector<Entity>& entities, std::vector<TransformComponent>& transforms, std::vector<ModelComponent>& models)
-    {
-        for (auto& entity : entities)
-        {
-            // Get the transform and model components for this entity
-            auto& transform = transforms[entity.index];
-            auto& model = models[entity.index];
+    void UpdateTransform(Entity entity, Vector3 position, float scale);
+    static std::map<Entity, TransformComponent> entityWithTransformComponents;
+    void AddComponent(Entity entity, TransformComponent component);
+    void RemoveComponent(Entity entity);
+    TransformComponent GetComponent(Entity entity);
+    std::vector<Entity> GetEntities();
+}
 
-            // Render the entity using the transform and model components
-            DrawModel(modelsLoaded.at(model.modelID), transform.position, model.modelScale, WHITE);
-        }
-    }
+namespace RenderSystemESC
+{
+    
+    void Init();
+    void Draw(Model model);
+    static std::map<Entity, ModelComponent> entityWithModelComponents;
+    void AddComponent(Entity entity, ModelComponent component);
+    void RemoveComponent(Entity entity);
+    ModelComponent GetComponents(Entity entity);
+    std::vector<Entity> GetEntities();
 }
 namespace EntityManager
 {
   
-    std::vector<Entity> entities;
-    Model model;
+    static std::vector<Entity> entities;
     Entity& GetEntity(size_t index);
     size_t AddEntity();
     void RemoveEntity(size_t index);
-    // Entity-Component Mapping
-    std::unordered_map<Entity, std::vector<EntityComponent>> entityComponents;
-
-    // Add a component to an entity
-    void AddComponent(Entity entity, EntityComponent component)
-    {
-        auto& components = entityComponents[entity];
-        components.push_back(component);
-    }
-
-    // Remove a component from an entity
-    void RemoveComponent(Entity entity, EntityComponent component)
-    {
-        auto& components = entityComponents[entity];
-        components.erase(std::remove(components.begin(), components.end(), component), components.end());
-    }
-
-    // Get the components for an entity
-    std::vector<EntityComponent> GetComponents(Entity entity)
-    {
-        auto it = entityComponents.find(entity);
-        if (it != entityComponents.end())
-        {
-            return it->second;
-        }
-        else
-        {
-            return {};
-        }
-    }
-
-
+    
 };
 
+namespace EntityComponentSystem
+{
+    //Run all systems here
+    void UpdateSystem();
+    
+    void InitSystem();
+
+};
 #endif // ENTITY_H

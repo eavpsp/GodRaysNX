@@ -84,8 +84,9 @@ std::vector<GameObject *> *GameObjects;
 std::vector<PhysicsComponent *> *PhysicsObjects;
 GameManager *gameManager;
 extern MightyCam mainCamera;
-
 static float timer = 0;
+
+
 void initSystem()
 {   
     //init gamepad
@@ -98,6 +99,7 @@ void initSystem()
     engineCallBacks = new EngineCallBacks();
     PhysicsWorld::Init();
     PhysicsObjects = new std::vector<PhysicsComponent *>();
+    EntityComponentSystem::InitSystem();
     debugLog("Engine Callbacks Init");
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
 }
@@ -143,14 +145,20 @@ void TestAnimations()
 
 void TestDOTS()
 {
-    EntityManager::SetModel(_RES::GetModel(_RES::Model_ID::ROBOT_ID));
+   
     //load 100 objs in dif locations
     for (size_t i = 0; i < 100; i++)
     {
         size_t index = EntityManager::AddEntity();
-        //set position data
-        EntityManager::entities[index].position = Vector3{MW_Math::Random(0.0f, 100.0f), 0, MW_Math::Random(0.0f, 100.0f)};
-        EntityManager::entities[index].modelScale = 1.0f;
+        TransformComponent transform =  TransformComponent();
+        transform.position = Vector3{MW_Math::Random(0.0f, 100.0f), 0, MW_Math::Random(0.0f, 100.0f)};
+        transform.scale = 1.0f;
+        TransformSystemESC::AddComponent(EntityManager::GetEntity(index), transform);
+        ModelComponent model = ModelComponent();
+        model.modelIndex = 0;
+        model.modelScale = 1.0f;
+        RenderSystemESC::AddComponent(EntityManager::GetEntity(index), model);
+
     }
     debugLog("DOTS Init");
 }
@@ -191,18 +199,20 @@ void EngineMain()
     debugLog("Engine Starting...");
       //init GM
     gameManager = &GameManager::getGameManager();
+    Model model = LoadModel("romfs:/models/robot.glb");
     while (!WindowShouldClose() && gameManager->Running())    // Detect window close button or ESC key
     {
         
         if(ENGINE_STATES::GetState() == ENGINE_STATES::IN_GAME)
         {
-            
+            EntityComponentSystem::UpdateSystem();
             gameManager->runGameLoop();
             BeginDrawing();//Create Render System with View Frustrum //Move to render system
             BeginMode3D(*mainCamera.camToUse);
                 ClearBackground(RAYWHITE);
                 gameManager->renderLoop();
-                EntityManager::DrawEntites();
+                RenderSystemESC::Draw(model);
+               // DrawModel(model, Vector3{0,0,0}, 1.0f, WHITE);
             EndMode3D();
             EndDrawing();
             PhysicsWorld::Update();

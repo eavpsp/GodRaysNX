@@ -14,12 +14,12 @@ namespace _RES
 
     enum Scenes_Types
     {
-        ROBOT_SCENE = 1,
+        ROBOT_SCENE = 0,
     };
 
     enum Model_ID
     {
-        ROBOT_ID = 1,
+        ROBOT_ID = 0,
         RAY_LIB_ID
     };
 }

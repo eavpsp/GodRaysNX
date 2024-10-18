@@ -5,34 +5,28 @@
 #include <string>
 #include "ResourceManager.h"
 
-//FILEPATHS
-#define ROBOT_MODEL_PATH "romfs:/models/robot.glb"
-#define RAYLIB_MODEL_PATH "romfs:/models/raylib_logo_3d.glb"
 
-#define ENGINE_FONT_PATH "romfs:/resources/mp1m.ttf"
-
-#define ENGINE_LOGO_PATH "romfs:/resources/amw_icon.png"
 //---------------------
 //TEXTURES
 std::map<std::string, std::string> RES_Textures = 
 {
-  {"ENGINE_LOGO", ENGINE_LOGO_PATH},
+  {"ENGINE_LOGO", "romfs:/resources/amw_icon.png"},
 };
 //FONTS
 std::map<std::string, std::string> RES_Fonts = 
 {
-  {"DEFAULT", ENGINE_FONT_PATH},
+  {"DEFAULT", "romfs:/resources/mp1m.ttf"},
 };
 //MODELS
 std::map<int, std::string> RES_Models = 
 {
-  {_RES::Model_ID::ROBOT_ID, ROBOT_MODEL_PATH},
-  {_RES::Model_ID::RAY_LIB_ID, RAYLIB_MODEL_PATH},
+  {_RES::Model_ID::ROBOT_ID, "romfs:/models/robot.glb"},
+  {_RES::Model_ID::RAY_LIB_ID, "romfs:/models/raylib_logo_3d.glb"},
 };
 //MODELS ANIMATIONS
 std::map<int, std::string> RES_ModelAnimations = 
 {
-  {_RES::Model_ID::ROBOT_ID, ROBOT_MODEL_PATH},
+  {_RES::Model_ID::ROBOT_ID, "romfs:/models/robot.glb"},
 };
 
 
