@@ -151,6 +151,7 @@ void PhysicsComponent::onTrigger(PhysicsComponent *other)
 void PhysicsComponent::ComponentAddedCallback()
 {
     
-            PhysicsObjects->push_back(this);
+    PhysicsObjects->push_back(this);
+    debugLog("Added physics object");
         
 }

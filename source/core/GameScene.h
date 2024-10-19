@@ -4,6 +4,9 @@
 #include <GameObject.h>
 #include "../debug/debug.h"
 #include <GameOverlays.h>
+#include <AudioComponent.h>
+#include <PhysicsComponent.h>
+#include <AnimationComponent.h>
 #include <switch.h>
 // Holds Scene Gameobjects
 // Light Data
@@ -12,6 +15,9 @@
 extern LoadingOverlay *loadingOverlay;
 extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
 extern std::map<_RES::Scenes_Types, std::string> RES_Scenes;
+extern std::map<int, std::string> RES_ModelAnimations;
+extern std::map<int, std::string> RES_AudioFiles;
+extern std::map<int, std::string> RES_Models;
 static float sceneTimer = 0;
 
 enum GameObjectType//Add custom object types for implementation
@@ -23,17 +29,25 @@ enum CameraType
     PERSPECTIVE, OTHOGRAPHIC  
 };
 //COMPONENTS 0xC??? 
+struct __attribute__((packed)) ComponentDataBase
+{
+ 
+};
 //If components exist add them with the data in the GRB otherwise just use default data in Gameobject loaded
-struct __attribute__((packed)) AnimationComponentData //Header for animations 0xCA00
+struct __attribute__((packed)) AnimationComponentData : ComponentDataBase //Header for animations 0xCA00
 {
     int animationID;
 };
-struct __attribute__((packed)) PhysicsComponentsData//Header for physics 0xCB00
+struct __attribute__((packed)) PhysicsComponentsData : ComponentDataBase//Header for physics 0xCB00
 {
     float mass;
     Vector3 _size;
     bool _isTrig, _isKinematic;
     int shapeType;
+};
+struct __attribute__((packed)) AudioComponentData : ComponentDataBase//Header for audio 0xCC00
+{
+    int audioID;
 };
 //OBJECTS
 struct __attribute__((packed)) SceneObjectData//add data for children and parent
@@ -46,6 +60,7 @@ struct __attribute__((packed)) SceneObjectData//add data for children and parent
     Vector3 scale; //float 3
     int modelID;//int
     int parentIndex;//use this to add any children to parent
+    int numOfComponents;//int
 
 };
 struct __attribute__((packed)) SceneDataLoader//cast to start of .grb loads the camera for the scene
@@ -55,6 +70,7 @@ struct __attribute__((packed)) SceneDataLoader//cast to start of .grb loads the 
     CameraType cameraType;//int
     Vector3 cameraPosition;//float 3
     Quaternion cameraRotation;//float4
+    float gravityAmount;
     u16 SceneObjectDataLoaderHeader;//object start header 0xA4A4
     int numObjects;
    // SceneObjectData objectsInScene[];//auto sets if proper layout
@@ -65,15 +81,17 @@ struct GameScene
     _RES::Scenes_Types sceneID;
     bool isLoaded = false;  
     std::vector<SceneObjectData*> objectsInScene;
+    std::map<int, std::map<int, ComponentDataBase*>> objectsAndComponentsMap;
     GameScene(_RES::Scenes_Types _sceneID) : sceneID(_sceneID)
     {
-       objectsInScene = std::vector<SceneObjectData*>();
+      
     }
      //.grb/
 };
 class GameSceneManager
 {
     private:
+    
 /**
  * Loads a scene from a file with the given path. The file is expected to
  * contain a SceneDataLoader struct at the start of the file, which contains
@@ -88,6 +106,7 @@ class GameSceneManager
  */
         bool LoadData(const char *path)//Loads GRB Scene Data
         {
+            u16 addon;
             FILE *fp = fopen(path, "rb");
             if(fp == NULL)
             {
@@ -117,32 +136,109 @@ class GameSceneManager
                 for (int i = 0; i < sceneLoaded->numObjects; i++) 
                 {
 
-                    SceneObjectData *objectLoaded = (SceneObjectData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData));//works update to add header check after each obj check for component or object
-                    CurrentScene->objectsInScene.push_back(objectLoaded);//load object in same instance to add components
+                    SceneObjectData *objectLoaded = (SceneObjectData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon);//works update to add header check after each obj check for component or object
                     debugLog("Object ID: %d",objectLoaded->objID);
-
+                    switch (objectLoaded->objType)
+                    {
+                            case LIGHT:
+                           
+                            break;
+                        
+                            default://gameobject
+                                debugLog("Game Object Found");
+                                 // GameObject *obj = GameObject::InstantiateGameObject<GameObject>(objectLoaded->position, objectLoaded->rotation,objectLoaded->scale, LoadModel(RES_Models[objectLoaded->modelID].c_str()));
+                                CurrentScene->objectsInScene.push_back(objectLoaded);
+                                if(objectLoaded->numOfComponents > 0)
+                                {
+                                    for(int j = 0; j < objectLoaded->numOfComponents; j++)
+                                    {
+                                        u16 nextHeader = *(u16 *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
+                                        //add components here
+                                        addon += sizeof(u16);
+                                        if (nextHeader == 51967)
+                                        {//animation
+                                            AnimationComponentData *anim = (AnimationComponentData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
+                                            CurrentScene->objectsAndComponentsMap[i][51967] = (anim);
+                                            addon += sizeof(AnimationComponentData);
+                                            debugLog("Animation Component Found");
+                                        
+                                        }
+                                        else if(nextHeader == 52223)
+                                        {
+                                            
+                                            PhysicsComponentsData *physics = (PhysicsComponentsData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
+                                            CurrentScene->objectsAndComponentsMap[i][52223] = (physics);
+                                            addon += sizeof(PhysicsComponentsData);
+                                            debugLog("Physics Component Found");
+                                        }
+                                        else if(nextHeader == 52479)
+                                        {
+                                            
+                                            AudioComponentData *audio = (AudioComponentData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
+                                            CurrentScene->objectsAndComponentsMap[i][52479] = (audio);
+                                            addon += sizeof(AudioComponentData);
+                                            debugLog("Audio Component Found");
+                                        }
+                                        
+                                    }
+                                }
+                            break;
+                    }
+                    
+                    
                 }
                
             }
-           
+
             fclose(fp);
 
             //gameobjects
             for (size_t i = 0; i < sceneLoaded->numObjects; i++)
             {   
                 loadingOverlay->GetProgress()->SetText("%d%%", (int)((i+1.0f)/sceneLoaded->numObjects*100.0f));
-                switch (CurrentScene->objectsInScene.at(i)->objType)
+                GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale, LoadModel(RES_Models[CurrentScene->objectsInScene[i]->modelID].c_str()));
+                debugLog("Number of Components: %d", CurrentScene->objectsInScene[i]->numOfComponents);
+                if (CurrentScene->objectsInScene[i]->numOfComponents > 0)
                 {
-                case LIGHT:
-                    /* code */
-                    break;
+                    
+                    for (size_t f = 0; f < CurrentScene->objectsInScene[i]->numOfComponents; f++)
+                    {
+                        for(auto& objComps : CurrentScene->objectsAndComponentsMap[i])
+                        {
+                            if(objComps.first == 51967)
+                            {
+                                    AnimationComponentData *anim = (AnimationComponentData *)(CurrentScene->objectsAndComponentsMap[i][51967]);//i = current obj, map key = 51967 obj is the val returned
+                                    AnimationComponent *animComp = new AnimationComponent(RES_ModelAnimations[anim->animationID].c_str());
+                                    obj->AddComponent(animComp);
+                            }
+                            else if(objComps.first == 52223)
+                            {
+                                    PhysicsComponentsData *physics = (PhysicsComponentsData *)(CurrentScene->objectsAndComponentsMap[i][52223]);
+                                    PhysicsComponent *physicsComp = new PhysicsComponent(physics->mass, physics->_size,physics->_isTrig, physics->_isKinematic);
+                                    obj->AddComponent(physicsComp);
+                                    debugLog("Physics Component Added");
+                            }
+                            else if(objComps.first == 52479)
+                            {
+                                    AudioComponentData *audio = (AudioComponentData *)(CurrentScene->objectsAndComponentsMap[i][52479]);
+                                    AudioComponent *audioComp = new AudioComponent(RES_AudioFiles[audio->audioID].c_str());
+                                    obj->AddComponent(audioComp);
+                            }
+                            else
+                            {
+                                debugLog("Unknown Component Found %c", objComps.first);
+                            }
                 
-                default://gameobject
-                        
-                        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene.at(i)->position, CurrentScene->objectsInScene.at(i)->rotation,CurrentScene->objectsInScene.at(i)->scale,_RES::GetModel(_RES::Model_ID::ROBOT_ID));
-                    break;
+                        }
+                     
+      
                 }
+                    
             }
+                
+        }
+            
+            
             return true;
         }
 
@@ -196,6 +292,7 @@ class GameSceneManager
                     /* code */
                     delete GameObjects->at(i);
                 }
+                debugLog("Unloading scene");
                 
         };
 

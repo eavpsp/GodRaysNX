@@ -2,14 +2,14 @@
 #define GAMEOBJECT_H
 
 #include <EngineObject.h>
-#include <raymath.h>
+
 
 /**
  * @class GameComponent
  * @brief This is the base class for all game components.
  * @details This class is the base class for all game components. It provides a common interface for all components to inherit from and implement. The interface includes a method to update the component and a method to set the parent object of the component.
  */
-class GameComponent
+struct GameComponent
 {
     public:
         EngineObject* parentObject;
@@ -27,7 +27,7 @@ class GameComponent
  * @details GameObjects can have children, a parent, and they can draw their own models. This class is used to create objects that are a bit more complex than the standard EngineObject.
  * used as a template for all objects to inherit from. Registers to script callbacks to manage update ticks and drawing calls
  */
-class GameObject : public EngineObject
+struct GameObject : public EngineObject
 {
     private:
         GameObject *parent = nullptr;
@@ -37,6 +37,7 @@ class GameObject : public EngineObject
     public:
         //base model data
         Model objectModel;
+        int gameObjectID;
         void Draw();
         template <typename T>
         static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, Vector3 _scale, Model gameModel, const char* _name = "GameObject")
@@ -48,14 +49,11 @@ class GameObject : public EngineObject
                 T *newObject =  new T();
                 //add callback
                 //newObject->material = mat;
-                newObject->position = Vector3{_position.x, -_position.y, _position.z};//flip Y 
+                newObject->position = Vector3{_position.x, _position.y, _position.z};//flip Y 
                 newObject->rotation = _rotation;
                 newObject->scale = _scale;
                 newObject->objectModel = gameModel;
                 newObject->transform = Matrix();
-                gameModel.transform = newObject->transform;
-                gameModel.transform = MatrixRotateXYZ(QuaternionToEuler(_rotation));
-                gameModel.transform = MatrixScale(newObject->scale.x, newObject->scale.y, newObject->scale.z);
                 newObject->name = _name;
                
                 newObject->onInit();

@@ -372,3 +372,8 @@ switch-nx-raylib.nacp
 switch-nx-raylib.elf
 switch-nx-raylib.lst
 romfs
+tools/MatrixEditor/AlmightyMatrixEditor/EngineComponents/ComponentEnums.cs
+tools/MatrixEditor/AlmightyMatrixEditor/EngineComponents/ComponentsTemplate.cs
+tools/MatrixEditor/AlmightyMatrixEditor/EngineComponents/ComponentsTemplate.cs
+tools/MatrixEditor/AlmightyMatrixEditor/Editor/ExportMatrixData.cs
+tools/MatrixEditor/AlmightyMatrixEditor/EngineComponents/ComponentsTemplate.cs

@@ -8,34 +8,40 @@ namespace AlmightyMatrixEditor.EngineComponents
 {
     //AMW MATRIX
     [Serializable]
-    public class AWM_Matrix : MonoBehaviour
+    public class GodRay_Matrix : MonoBehaviour
     {
-        public int gravityAmount = -10;
-        public Vector4 sceneColor;
-        public string skyBoxName, meshName;
+        public float gravityAmount = -10;
+        public int sceneID = 0;
+        public Camera cam;
+        public enum CameraType
+        {
+            Perspective = 0,
+            Orthographic = 1
+        }
+        public CameraType cameraType;
+        public List<GodRay_GameObject> objectsInScene = new List<GodRay_GameObject>();
 
-        public byte[] ExportAWMMatrix()
+        public byte[] ExportGodRayMatrix()
         {
                 MemoryStream ms = new MemoryStream();
                 BinaryWriter bw = new BinaryWriter(ms);
-                bw.Write(0xA4A4);//start of matrix
-                bw.Write(transform.position.x);//position
-                bw.Write(transform.position.y);
-                bw.Write(transform.position.z);
-                bw.Write(transform.rotation.x);//rotation
-                bw.Write(transform.rotation.y);
-                bw.Write(transform.rotation.z);
-                bw.Write(transform.rotation.w);
-                bw.Write(transform.localScale.x);//scale
-                bw.Write(transform.localScale.y);
-                bw.Write(transform.localScale.z);
+                bw.Write((ushort)0xA0A0);//start of matrix
+                bw.Write(sceneID);//scene
+                bw.Write((int)cameraType);//camera
+                bw.Write(cam.transform.position.x);//position
+                bw.Write(cam.transform.position.y);//flip y axis
+                bw.Write(cam.transform.position.z);
+                bw.Write(cam.transform.rotation.x);//rotation
+                bw.Write(cam.transform.rotation.y);
+                bw.Write(cam.transform.rotation.z);
+                bw.Write(cam.transform.rotation.w);
                 bw.Write(gravityAmount);//gravity
-                bw.Write(sceneColor.x);//Scene color data
-                bw.Write(sceneColor.y);
-                bw.Write(sceneColor.z);
-                bw.Write(sceneColor.w);
-                bw.Write(skyBoxName);//skybox name count, then chars
-                bw.Write(meshName);//mesh name count, then chars
+                bw.Write((ushort)0xA4A4);
+                bw.Write(objectsInScene.Count);
+                for (int i = 0; i < objectsInScene.Count; i++)
+                {
+                   bw.Write(objectsInScene[i].ExportGodRayGameObject());
+                }
                 bw.Close();
                 return ms.ToArray();
         }
@@ -51,15 +57,15 @@ namespace AlmightyMatrixEditor.EngineComponents
         int objectID = 0;
         int parentID = -1;
         int modelID;
-        public List<AWM_Component> awmGameObjectComponents;
+        public List<GodRay_Component> awmGameObjectComponents;
         public string awmObjectName = "GODRAY_BASE_GAMEOBJECT";
        //export
        //component ID, number of components, write component data
-        public void ExportAWMGameObject()
+        public byte[] ExportGodRayGameObject()
         {
             MemoryStream ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
-            bw.Write(0xAAAA);//start of object
+            bw.Write((ushort)0xAAAA);//start of object
             bw.Write(ClassID);
             bw.Write(objectID);
             //position, rotation, scale
@@ -75,6 +81,7 @@ namespace AlmightyMatrixEditor.EngineComponents
             bw.Write(transform.localScale.z);
             bw.Write(modelID);
             bw.Write(parentID);
+            bw.Write(awmGameObjectComponents.Count);
             if(awmGameObjectComponents.Count > 0)
             {
                 for(int j = 0; j < awmGameObjectComponents.Count; j++)//loop each component
@@ -84,6 +91,7 @@ namespace AlmightyMatrixEditor.EngineComponents
                 bw.Close();
 
             }
+             return ms.ToArray();
         }
     }
     //COMPONENTS
@@ -95,7 +103,7 @@ namespace AlmightyMatrixEditor.EngineComponents
 
     */
     [Serializable]
-    public class AWM_Component : ScriptableObject
+    public class GodRay_Component : ScriptableObject
     {
      
         public virtual byte[] ExportComponentData() 
@@ -106,8 +114,8 @@ namespace AlmightyMatrixEditor.EngineComponents
     }
     //BPhysics
     [Serializable]
-    [CreateAssetMenu(fileName = "New AWM BPhysics Component", menuName = "Almighty Matrix Editor/Bullet Physics Components")]
-    public class BulletPhysicsComponent : AWM_Component
+    [CreateAssetMenu(fileName = "New GodRay Physics Component", menuName = "Almighty Matrix Editor/Physics Components")]
+    public class GodRay_PhysicsComponent : GodRay_Component
     {
     
         public enum Shape
@@ -116,6 +124,7 @@ namespace AlmightyMatrixEditor.EngineComponents
             Sphere = 1
         }
         public float mass = 1.0f;
+        public float radius = 1.0f;
         public Vector3 size;
         public bool isTrigger, isKinematic;
         public Shape shape;
@@ -124,7 +133,7 @@ namespace AlmightyMatrixEditor.EngineComponents
         
             MemoryStream ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
-            bw.Write(0xCB00);
+            bw.Write((ushort)0xCBFF);
             bw.Write(mass);
             bw.Write(size.x);
             bw.Write(size.y);
@@ -139,17 +148,18 @@ namespace AlmightyMatrixEditor.EngineComponents
     }
     //Animation
     [Serializable]
-    [CreateAssetMenu(fileName = "New AWM Animator Component", menuName = "Almighty Matrix Editor/Animation Components")]
-    public class AnimatorComponent : AWM_Component
+    [CreateAssetMenu(fileName = "New GodRay Animator Component", menuName = "Almighty Matrix Editor/Animation Components")]
+    public class GodRay_AnimatorComponent : GodRay_Component
     {
-        public int animationToLoadID = 0;
+    
+        public AnimationFile animationToLoadID;
         public override byte[] ExportComponentData() 
        {
             
             MemoryStream ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
-            bw.Write(0xCA00);
-            bw.Write(animationToLoadID);
+            bw.Write((ushort)0xCAFF);
+            bw.Write((int)animationToLoadID);
             bw.Close();
             return ms.ToArray();
        }
@@ -157,16 +167,17 @@ namespace AlmightyMatrixEditor.EngineComponents
     //Audio
     [Serializable]
     [CreateAssetMenu(fileName = "New AWM Audio Component", menuName = "Almighty Matrix Editor/Audio Components")]
-    public class AudioComponent : AWM_Component
+    public class GodRay_AudioComponent : GodRay_Component
     {
-        public string fileName;
+   
+        public AudioFile audioFileToLoadID;
          public override byte[] ExportComponentData() 
        {
-            SetComponentID(0x03);
+  
             MemoryStream ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
-            bw.Write((byte)GetComponentID());
-            bw.Write(fileName);
+            bw.Write((ushort)0xCCFF);
+            bw.Write((int)audioFileToLoadID);
             bw.Close();
             return ms.ToArray();
        }

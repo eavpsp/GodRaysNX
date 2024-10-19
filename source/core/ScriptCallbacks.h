@@ -26,7 +26,7 @@ class EngineCallBacks
   
     float _deltaTime;
     public:
-        static bool IsValidPointer(void* ptr) { return ptr != nullptr; }
+        static bool IsValidPointer(void* ptr) {  return ptr != nullptr; }//
         float interpolatedTickTime = (float)(updateTicks/ UPDATE_TICK_DELAY);
         float GetInterpolatedTickTime()
         {

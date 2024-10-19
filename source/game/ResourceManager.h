@@ -10,11 +10,12 @@ extern std::map<int, std::string> RES_Models;
 
 namespace _RES
 {
-    Model GetModel(int id);
+    static Model GetModel(int id);
 
     enum Scenes_Types
     {
         ROBOT_SCENE = 0,
+        TEST_SCENE
     };
 
     enum Model_ID
@@ -22,5 +23,6 @@ namespace _RES
         ROBOT_ID = 0,
         RAY_LIB_ID
     };
+
 }
 #endif

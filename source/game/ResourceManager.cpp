@@ -29,10 +29,16 @@ std::map<int, std::string> RES_ModelAnimations =
   {_RES::Model_ID::ROBOT_ID, "romfs:/models/robot.glb"},
 };
 
-
+//GAME SCENES
 std::map<_RES::Scenes_Types, std::string> RES_Scenes = 
 {
   {_RES::Scenes_Types::ROBOT_SCENE, "romfs:/scenes/robot.grb"},
+  {_RES::Scenes_Types::TEST_SCENE, "romfs:/scenes/godRayMatrix.grb"},
+};
+//GAME AUDIO 
+std::map<int, std::string> RES_AudioFiles = 
+{
+  {0, "romfs:/audio/test.wav"},
 };
 
 

@@ -58,6 +58,8 @@ void PhysicsWorld::Update()
             {
                 PhysicsObjects->at(i)->parentObject->position = Vector3{PhysicsObjects->at(i)->parentObject->position.x, PhysicsWorld::GetGroundPosition().y, PhysicsObjects->at(i)->parentObject->position.z}; 
                 PhysicsObjects->at(i)->velocity.y = 0; // Implement dampening to reduce speed
+                PhysicsObjects->at(i)->isGrounded = true;
+
                 continue;
             }
 
@@ -65,7 +67,7 @@ void PhysicsWorld::Update()
             PhysicsObjects->at(i)->velocity.y += gravityEffect; // Make the velocity influence the object
             
             //check if the object is accelerating up
-            if(PhysicsObjects->at(i)->velocity.y <= 0)
+            if(PhysicsObjects->at(i)->velocity.y < 0)
             {
                 PhysicsObjects->at(i)->parentObject->position.y += PhysicsObjects->at(i)->velocity.y + 0.5f * gravityEffect; // Make the velocity influence the object
             }

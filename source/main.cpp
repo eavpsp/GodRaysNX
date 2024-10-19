@@ -31,13 +31,15 @@ ESC System for Static Objects - Done
 View Frustrum - Done
 Particle system (Dynamic Batched Software Particles)- Done
 Audio Component - Done;
+Level Editor - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Level Editor - WIP
-    Create GRB Files
-    Components loaded in GRB
+
+Raycasting - WIP
+    Raycasting System
+     Include Debugging
 ---------------------------
 *NOT STARTED
 __________________________
@@ -90,25 +92,9 @@ extern TransformSystemECS transformSystem;
 //QuadTrr
 StaticQuadTreeContainer<Entity> *quadTreeContainer;
 BurstParticleSystem* burstParticleSystem;
-void initSystem()
-{   
-    //init gamepad
-    romfsInit();
-    debugLogInit();
-    debugLog("romFS Init");
-    debugLog("System Starting...");
-    //init callbacks 
-    GameObjects = new std::vector<GameObject *>();
-    engineCallBacks = new EngineCallBacks();
-    PhysicsWorld::Init();
-    PhysicsObjects = new std::vector<PhysicsComponent *>();
-    ecs.InitSystem();
-    debugLog("Engine Callbacks Init");
-    ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
-    BoundingBox stageBounds = {Vector3{-1000,-1000,-1000}, Vector3{1000,1000,1000}};
-    quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
-}
 
+
+/////////////TEST
 void TestVideo()
 {
 
@@ -178,6 +164,47 @@ void TestParticles()
     burstParticleSystem = new BurstParticleSystem(10, Vector3{0,0,0});
 
 }
+void TestLoadSceneFromEditor()
+{
+    sceneManager = new GameSceneManager();
+    GameScene *scene = new GameScene(_RES::Scenes_Types::TEST_SCENE);
+    sceneManager->LoadScene(scene);//convert to load scene
+}
+
+
+
+
+////////////END TEST--------------------
+
+
+
+
+
+
+
+
+
+
+void initSystem()
+{   
+    //init gamepad
+    romfsInit();
+    debugLogInit();
+    debugLog("romFS Init");
+    debugLog("System Starting...");
+    //init callbacks 
+    GameObjects = new std::vector<GameObject *>();
+    engineCallBacks = new EngineCallBacks();
+    PhysicsWorld::Init();
+    PhysicsObjects = new std::vector<PhysicsComponent *>();
+    ecs.InitSystem();
+    debugLog("Engine Callbacks Init");
+    ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
+    BoundingBox stageBounds = {Vector3{-1000,-1000,-1000}, Vector3{1000,1000,1000}};
+    quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
+}
+
+
 void BOOT()
 {
       BeginDrawing();
@@ -190,9 +217,9 @@ void BOOT()
     if (timer > 5)
     {
         timer = 0;
-        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+        ENGINE_STATES::ChangeState(ENGINE_STATES::LOADING);
 
-        TestParticles();
+        TestLoadSceneFromEditor();
 
     }
 
@@ -215,7 +242,7 @@ void EngineMain()
     debugLog("Engine Starting...");
       //init GM
     gameManager = &GameManager::getGameManager();
-    Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);     //LoadModel("romfs:/models/robot.glb");
+    //Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);     //LoadModel("romfs:/models/robot.glb");
     while (!WindowShouldClose() && gameManager->Running())      // Detect window close button or ESC key
     {
         
@@ -228,7 +255,7 @@ void EngineMain()
             BeginMode3D(*mainCamera.camToUse);
                 ClearBackground(RAYWHITE);
                 gameManager->renderLoop();
-                burstParticleSystem->Draw();
+                
                 //Entity, Octree, Frustum
             /*   MightyBoundingBox cameraBox = mainCamera.frustum.GetFrustumBoundingBox();
                for (const auto& entity : quadTreeContainer->search(cameraBox.GetBoundingBox()))
