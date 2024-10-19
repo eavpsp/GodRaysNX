@@ -115,7 +115,7 @@ struct MightyCam
 {
     Camera *camToUse;
     Frustum frustum;
-    float drawDistance = 60.0f;
+    float drawDistance = 100.0f;
     float clippingDistance = 0.5f;
     void SetCamPosition(Vector3 newpos)
     {

@@ -33,14 +33,14 @@ Physics system - Done
 Input System - Done
 Animation System - Done
 ESC System for Static Objects - Done
+View Frustrum - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-View Frustrum -
-    Camera System
-    Render System
 Particle system (Dynamic Batched Software Particles)- WIP
+    Use billboards
+    Use instancing
 ---------------------------
 *NOT STARTED
 __________________________
@@ -77,6 +77,7 @@ Procedural Animation -
 #include <Entity.h>
 #include <RenderSystem.h>
 #include <RenderSystem.h>
+#include <ParticleSystem.h>
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
@@ -91,6 +92,7 @@ extern RenderSystemECS renderSystemECS;
 extern TransformSystemECS transformSystem;
 //QuadTrr
 StaticQuadTreeContainer<Entity> *quadTreeContainer;
+BurstParticleSystem* burstParticleSystem;
 void initSystem()
 {   
     //init gamepad
@@ -106,7 +108,7 @@ void initSystem()
     ecs.InitSystem();
     debugLog("Engine Callbacks Init");
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
-    BoundingBox stageBounds = {Vector3{0,0,0}, Vector3{100,100,100}};
+    BoundingBox stageBounds = {Vector3{-1000,-1000,-1000}, Vector3{1000,1000,1000}};
     quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
 }
 
@@ -151,18 +153,16 @@ void TestAnimations()
 
 void TestDOTS()
 {
-   quadTreeContainer->resize({0,0,0,10000,10000,10000});
+  
     //load 100 objs in dif locations
-    for (size_t i = 0; i < 100; i++)
+    for (size_t i = 0; i < 1000; i++)
     {
         size_t index = EntityManager::AddEntity();
         TransformComponent transform =  TransformComponent();
-        transform.position = Vector3{MW_Math::Random(0.0f, 100.0f), 0, MW_Math::Random(0.0f, 100.0f)};
+        transform.position = Vector3{MW_Math::Random(0.0f, 1000.0f), 0, MW_Math::Random(0.0f, 1000.0f)};
         transform.scale = 1.0f;
         transformSystem.AddComponent(EntityManager::GetEntity(index), transform);
         ModelComponent model = ModelComponent();
-        model.modelIndex = 0;
-        model.modelScale = 1.0f;
         renderSystemECS.AddComponent(EntityManager::GetEntity(index), model);
         BoundingBox bounds = (BoundingBox){(Vector3){ transform.position.x - transform.scale/2,
                                      transform.position.y - transform.scale/2,
@@ -174,6 +174,12 @@ void TestDOTS()
     }
     debugLog("DOTS Init");
     debugLog("Number of QuadTreeNodes: %d", quadTreeContainer->size());
+}
+
+void TestParticles()
+{
+    burstParticleSystem = new BurstParticleSystem(10, Vector3{0,0,0});
+
 }
 void BOOT()
 {
@@ -189,7 +195,7 @@ void BOOT()
         timer = 0;
         ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
 
-        TestDOTS();
+        TestParticles();
 
     }
 
@@ -218,16 +224,16 @@ void EngineMain()
         
         if(ENGINE_STATES::GetState() == ENGINE_STATES::IN_GAME)
         {
-            ecs.UpdateSystem();
+            //ecs.UpdateSystem();
             gameManager->runGameLoop();
             mainCamera.UpdateCamera();
             BeginDrawing();//Create Render System with View Frustrum //Move to render system
             BeginMode3D(*mainCamera.camToUse);
                 ClearBackground(RAYWHITE);
                 gameManager->renderLoop();
-               MightyBoundingBox cameraBox = mainCamera.frustum.GetFrustumBoundingBox();
-               
-                //renderSystemECS.DrawAll(model);
+                burstParticleSystem->Draw();
+                //Entity, Octree, Frustum
+            /*   MightyBoundingBox cameraBox = mainCamera.frustum.GetFrustumBoundingBox();
                for (const auto& entity : quadTreeContainer->search(cameraBox.GetBoundingBox()))
                {
                     TransformComponent transform = transformSystem.GetComponent(*entity);
@@ -256,8 +262,8 @@ void EngineMain()
                             
                      
                }
-                //DrawModel(model, Vector3{0,0,0}, 1.0f, WHITE);
-
+               
+            */
             EndMode3D();
             EndDrawing();
             PhysicsWorld::Update();

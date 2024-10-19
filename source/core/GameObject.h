@@ -2,8 +2,8 @@
 #define GAMEOBJECT_H
 
 #include <EngineObject.h>
-
-
+#include <raymath.h>
+//Heap 256MB
 /**
  * @class GameComponent
  * @brief This is the base class for all game components.
@@ -65,7 +65,9 @@ class GameObject : public EngineObject
                 newObject->scale = _scale;
                 newObject->objectModel = gameModel;
                 newObject->transform = Matrix();
-
+                gameModel.transform = newObject->transform;
+                gameModel.transform = MatrixRotateXYZ(QuaternionToEuler(_rotation));
+                gameModel.transform = MatrixScale(newObject->scale.x, newObject->scale.y, newObject->scale.z);
                 newObject->name = _name;
                
                 newObject->onInit();

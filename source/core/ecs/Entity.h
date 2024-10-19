@@ -17,22 +17,18 @@
 ///Data Cache: 32KB
 //L2 cache: 256 KB
 //L3 cache: 2 MB (shared between CPU and GPU)
-struct __attribute__((packed)) TransformComponent
+struct __attribute__((packed)) TransformComponent//16Bytes
 {
     Vector3 position;
     float scale;
 
 };
-struct __attribute__((packed)) ModelComponent
+struct __attribute__((packed)) ModelComponent//0Bytes
 //must have a transform component
 {
-    int modelIndex;
-    float modelScale;
-    Vector3 min;
-    Vector3 max;
-    
+
 };
-struct __attribute__((packed)) Entity
+struct __attribute__((packed)) Entity//4Bytes
 {
     uint32_t index;
     Entity() : index(-1) {};
