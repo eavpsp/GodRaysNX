@@ -20,26 +20,143 @@ struct Plane {
     Vector3 GetNormal() { return normal; }
     Vector3 GetPoint() { return point; }
 };
-struct MightyBoundingBox {
-    Vector3 min; // minimum point of the box (x, y, z)
-    Vector3 max; // maximum point of the box (x, y, z)
-
-    void DrawBoundingBox(Color color) 
+struct MightyBoundingBox 
+{
+  
+    Vector3 corners[8];
+    
+    void UpdateCorners(Vector3 parentPos, Vector3 size)
     {
-        DrawCubeWires(GetCenter(), fabs(max.x - min.x), fabs(max.y - min.y), fabs(max.z - min.z), color);
+    
+        for (int i = 0; i < 8; i++) {
+            corners[i] = Vector3{
+                parentPos.x + ((i & 1) ? size.x : -size.x),
+                parentPos.y + ((i & 2) ? size.y : 0),
+                parentPos.z + ((i & 4) ? size.z : -size.z)
+            };
+        }
     }
-    Vector3 GetCenter() {
-        return Vector3Add(min, Vector3Scale(Vector3Subtract(max, min), 0.5f));
+    
+bool IsColliding(const MightyBoundingBox& box1, const MightyBoundingBox& box2) {
+    // Check if there is a separating plane between the two OOBBs
+    Vector3 axes[15];
+    for (int i = 0; i < 3; i++) {
+        axes[i] = Vector3Subtract(box1.corners[i + 1], box1.corners[i]);
+        axes[i + 3] = Vector3Subtract(box2.corners[i + 1], box2.corners[i]);
     }
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            axes[6 + i * 3 + j] = Vector3CrossProduct(axes[i], axes[3 + j]);
+        }
+    }
+    
+    for (int i = 0; i < 15; i++) {
+        float min1, max1, min2, max2;
+        ProjectOntoAxis(box1, axes[i], min1, max1);
+        ProjectOntoAxis(box2, axes[i], min2, max2);
+
+        if (max1 < min2 || max2 < min1) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void ProjectOntoAxis(const MightyBoundingBox& box, Vector3 axis, float& min, float& max) {
+    min = max = Vector3DotProduct(box.corners[0], axis);
+    for (int i = 1; i < 8; i++) {
+        float projection = Vector3DotProduct(box.corners[i], axis);
+        if (projection < min) min = projection;
+        if (projection > max) max = projection;
+    }
+}
+    void DrawBoundingBox(Color color) 
+{
+    // Draw bounding box lines
+    DrawLine3D(corners[0], corners[1], color);
+    DrawLine3D(corners[1], corners[3], color);
+    DrawLine3D(corners[3], corners[2], color);
+    DrawLine3D(corners[2], corners[0], color);
+
+    DrawLine3D(corners[4], corners[5], color);
+    DrawLine3D(corners[5], corners[7], color);
+    DrawLine3D(corners[7], corners[6], color);
+    DrawLine3D(corners[6], corners[4], color);
+
+    DrawLine3D(corners[0], corners[4], color);
+    DrawLine3D(corners[1], corners[5], color);
+    DrawLine3D(corners[2], corners[6], color);
+    DrawLine3D(corners[3], corners[7], color);
+}
+
     BoundingBox GetBoundingBox() {
+        Vector3 min = GetMinVector3(corners, 8);
+        Vector3 max = GetMaxVector3(corners, 8);
         return {min, max};
     }
-    MightyBoundingBox(BoundingBox box)
-     {
-        min = box.min;
-        max = box.max;
+    Vector3 GetCorner(int index)
+    {
+        // Define the corners of the bounding box
+       
+        // Return the corner at the specified index
+        return corners[index];
     }
-    MightyBoundingBox();
+    Vector3 GetMaxVector3(Vector3* vectors, int count)
+    {
+        Vector3 maxVector = vectors[0];
+        for (int i = 1; i < count; i++) {
+            if (vectors[i].x > maxVector.x) maxVector.x = vectors[i].x;
+            if (vectors[i].y > maxVector.y) maxVector.y = vectors[i].y;
+            if (vectors[i].z > maxVector.z) maxVector.z = vectors[i].z;
+        }
+        return maxVector;
+    }
+    Vector3 GetMinVector3(Vector3* vectors, int count) 
+    {
+        Vector3 minVector = vectors[0];
+        for (int i = 1; i < count; i++) {
+            if (vectors[i].x < minVector.x) minVector.x = vectors[i].x;
+            if (vectors[i].y < minVector.y) minVector.y = vectors[i].y;
+            if (vectors[i].z < minVector.z) minVector.z = vectors[i].z;
+        }
+        return minVector;
+    }
+    Vector3 GetCenter() {
+        Vector3 min = GetMinVector3(corners, 8);
+        Vector3 max = GetMaxVector3(corners, 8);
+        return Vector3Add(Vector3Scale(min, 0.5f), Vector3Scale(max, 0.5f));
+    }
+    
+    void Rotate(float rotationX, float rotationY, float rotationZ) {
+        // Define the rotation matrices
+        // Define individual rotation matrices for X, Y, and Z axes
+        Matrix rotationXMat = MatrixRotateX(DEG2RAD * rotationX);
+        Matrix rotationYMat = MatrixRotateY(DEG2RAD * rotationY);
+        Matrix rotationZMat = MatrixRotateZ(DEG2RAD * rotationZ);
+
+        // Combine the rotation matrices
+        Matrix rotationMat = MatrixMultiply(rotationZMat, MatrixMultiply(rotationYMat, rotationXMat));
+
+        // Get the corners of the bounding box after rotation
+      
+        GetBoundingBoxCorners(rotationMat, corners);
+
+        // Update the bounding box with the new corners
+       
+    }
+    void GetBoundingBoxCorners(Matrix rotationMat, Vector3* corners)
+     {
+        // Calculate the corners of the rotated bounding box
+        for (int i = 0; i < 8; i++) {
+            Vector3 corner = Vector3Transform(GetCorner(i), rotationMat);
+            corners[i] = corner;
+    }
+ 
+    
+}
+
+    MightyBoundingBox(){};
 };
 struct Frustum
 {
@@ -73,38 +190,20 @@ struct Frustum
        
     }
     MightyBoundingBox GetFrustumBoundingBox() const {
-        Vector3 min = {
-        std::min(std::min(nearFace.point.x, farFace.point.x), std::min(leftFace.point.x, std::min(rightFace.point.x, std::min(topFace.point.x, bottomFace.point.x)))),
-        std::min(std::min(nearFace.point.y, farFace.point.y), std::min(leftFace.point.y, std::min(rightFace.point.y, std::min(topFace.point.y, bottomFace.point.y)))),
-        std::min(std::min(nearFace.point.z, farFace.point.z), std::min(leftFace.point.z, std::min(rightFace.point.z, std::min(topFace.point.z, bottomFace.point.z))))
-    };
+     MightyBoundingBox boundingBox;
+        Vector3 points[8] = {};
+        points[0] = Vector3Add(farFace.point, Vector3Scale(farFace.normal, -Vector3Length(farFace.point)));
+        points[1] = Vector3Add(farFace.point, Vector3Scale(farFace.normal, Vector3Length(farFace.point)));
+        points[2] = Vector3Add(nearFace.point, Vector3Scale(nearFace.normal, -Vector3Length(nearFace.point)));
+        points[3] = Vector3Add(nearFace.point, Vector3Scale(nearFace.normal, Vector3Length(nearFace.point)));
+        points[4] = Vector3Add(rightFace.point, Vector3Scale(rightFace.normal, -Vector3Length(rightFace.point)));
+        points[5] = Vector3Add(rightFace.point, Vector3Scale(rightFace.normal, Vector3Length(rightFace.point)));
+        points[6] = Vector3Add(leftFace.point, Vector3Scale(leftFace.normal, -Vector3Length(leftFace.point)));
+        points[7] = Vector3Add(leftFace.point, Vector3Scale(leftFace.normal, Vector3Length(leftFace.point)));
+        
 
     
-   Vector3 max = 
-   {
-    std::max(std::max(nearFace.point.x, farFace.point.x), std::max(leftFace.point.x, std::max(rightFace.point.x, std::max(topFace.point.x, bottomFace.point.x)))),
-    std::max(std::max(nearFace.point.y, farFace.point.y), std::max(leftFace.point.y, std::max(rightFace.point.y, std::max(topFace.point.y, bottomFace.point.y)))),
-    std::max(std::max(nearFace.point.z, farFace.point.z), std::max(leftFace.point.z, std::max(rightFace.point.z, std::max(topFace.point.z, bottomFace.point.z))))
-    };
-
-    //make sure bounding box is never too thin
-    if (max.x - min.x < 3.0f)
-    {
-        min.x = (max.x + min.x) / 2.0f - 10.0f;
-        max.x = (max.x + min.x) / 2.0f + 10.0f;
-    }
-    if (max.y - min.y < 3.0f)
-    {
-        min.y = (max.y + min.y) / 2.0f - 10.0f;
-        max.y = (max.y + min.y) / 2.0f + 10.0f;
-    }
-    if (max.z - min.z < 3.0f)
-    {
-        min.z = (max.z + min.z) / 2.0f - 10.0f;
-        max.z = (max.z + min.z) / 2.0f + 10.0f;
-    }
-    
-    return MightyBoundingBox(BoundingBox{min, max});
+    return boundingBox;
 }
   
     

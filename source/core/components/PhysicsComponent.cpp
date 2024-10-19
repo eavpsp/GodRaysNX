@@ -2,30 +2,27 @@
 #include <raymath.h>
 #include "../debug/debug.h" 
 #include <PhysicsWorld.h>
+#include <RenderSystem.h>   
 extern std::vector<PhysicsComponent *> *PhysicsObjects;
-void PhysicsComponent::updateBounds()
+void PhysicsComponent::updateBounds()//
 {
-     _bounds = {(Vector3){parentObject->position.x - size.x/2,
-                        parentObject->position.y -  size.y/2,
-                        parentObject->position.z -  size.z/2 },
-            (Vector3){ parentObject->position.x +  size.x/2,
-                        parentObject->position.y +  size.y/2,
-                        parentObject->position.z +  size.z/2 }};
+    
+    _bounds.UpdateCorners(parentObject->position, size);
+    _bounds.Rotate(parentObject->rotation.x, parentObject->rotation.y, parentObject->rotation.z);
 }
 
 void PhysicsComponent::OnUpdate()
 {
-    if(radius == 0)
-    {
-         updateBounds();
+    
+    updateBounds();
 
-    }
+    
     if(isGrounded)
     {   
         if(canRoll)
         {
             //check if there is a slope
-            //roll in the direction of gravity
+            //roll in the direction of gravity//
             Vector3 direction = Vector3Normalize(Vector3Subtract(Vector3{0,PhysicsWorld::GetGravity(),0}, parentObject->position));
             velocity = Vector3Add(velocity, Vector3Scale(direction, 50 * GetFrameTime() / mass));
             parentObject->rotation = QuaternionFromVector3ToVector3(QuaternionToEuler(parentObject->rotation), direction);
@@ -42,8 +39,11 @@ void PhysicsComponent::OnUpdate()
         }
         if(PhysicsObjects->at(i)->shape == SPHERE)
         {
-            if(CheckCollisionBoxSphere(_bounds , PhysicsObjects->at(i)->parentObject->position, PhysicsObjects->at(i)->radius))
+              if(_bounds.IsColliding(_bounds, PhysicsObjects->at(i)->_bounds))
+           // if(CheckCollisionBoxSphere(_bounds.GetBoundingBox() , PhysicsObjects->at(i)->parentObject->position, PhysicsObjects->at(i)->radius))
             {
+              
+               
                 if(isTrigger)
                 {
                         onTrigger(PhysicsObjects->at(i));
@@ -57,8 +57,11 @@ void PhysicsComponent::OnUpdate()
         }
         else
         {
-            if(CheckCollisionBoxes(_bounds, PhysicsObjects->at(i)->_bounds))
+             if(_bounds.IsColliding(_bounds, PhysicsObjects->at(i)->_bounds))
+           // if(CheckCollisionBoxes(_bounds.GetBoundingBox(), PhysicsObjects->at(i)->_bounds.GetBoundingBox()))
             {
+                 
+               
                 if(isTrigger)
                 {
                         onTrigger(PhysicsObjects->at(i));
@@ -81,7 +84,7 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)
    
     if(!isKinematic)
     {
-        //check side of collision and prevent movement
+        //check side of collision and prevent movement//
        if(other->isKinematic)
        {
            if(velocity.y + parentObject->position.y < other->parentObject->position.y + other->size.y/2)
@@ -117,22 +120,24 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)
        }
        else
        {
-            float j = -(1 + 0.15f) * (velocity.x * (other->parentObject->position.x - parentObject->position.x) +
-                                    velocity.y * (other->parentObject->position.y - parentObject->position.y) +
-                                    velocity.z * (other->parentObject->position.z - parentObject->position.z)) /
-                       (mass + other->mass);
+            Vector3 diff = Vector3Subtract(other->parentObject->position, parentObject->position);
+            float len = Vector3Length(diff);
+            float velocityLen = Vector3Length(other->velocity);
+            float impulseAmount = 1.5f;
+            if (velocityLen > 0)
+            {
+                impulseAmount += velocityLen;
+            }
+            Vector3 impulse = Vector3Scale(diff, impulseAmount / len);
+            impulse.y = 0;
+            other->velocity = Vector3Add(other->velocity, Vector3Scale(impulse, 1 / other->mass));
 
-            Vector3 impulse = Vector3Scale(Vector3Subtract(parentObject->position, other->parentObject->position),
-                                           j);
-
-            velocity = Vector3Subtract(velocity, Vector3Scale(impulse, 1 / (mass * 2)));
-            other->velocity = Vector3Add(other->velocity, Vector3Scale(impulse, 1 / (other->mass * 2)));
-            
+                        
        }
     }
     for (size_t i = 0; i < collisionEvents.size(); i++)
     {
-        /* code */
+        
         collisionEvents[i]->DoEvent(other);
     }
     

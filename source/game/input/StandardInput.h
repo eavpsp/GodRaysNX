@@ -8,6 +8,8 @@ struct StandardController : ControllerMap
     void UpdateButtonInputs() override;
     void UpdateAxisInputs() override;
     MightyCam *mightyCam;
+    float speed = 10.0f;
+    float modifiedSpeed = 10.0f;
     ~StandardController() { }
     StandardController(MightyCam* playerToControl){ mightyCam = playerToControl; }
     StandardController() { }

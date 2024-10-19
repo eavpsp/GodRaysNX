@@ -36,10 +36,10 @@ Level Editor - Done
 *WIP
 ___________________________
 **Current
-
 Raycasting - WIP
     Raycasting System
      Include Debugging
+Menu Controller - WIP
 ---------------------------
 *NOT STARTED
 __________________________
@@ -171,7 +171,15 @@ void TestLoadSceneFromEditor()
     sceneManager->LoadScene(scene);//convert to load scene
 }
 
-
+void DrawPhysicsObjects()
+{
+       for (size_t i = 0; i < PhysicsObjects->size(); i++)
+           {
+                MightyBoundingBox box = MightyBoundingBox(PhysicsObjects->at(i)->_bounds);
+                box.DrawBoundingBox(RED);
+           }
+           
+}
 
 
 ////////////END TEST--------------------
@@ -202,6 +210,7 @@ void initSystem()
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
     BoundingBox stageBounds = {Vector3{-1000,-1000,-1000}, Vector3{1000,1000,1000}};
     quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
+    loadingOverlay = new LoadingOverlay();
 }
 
 
@@ -228,10 +237,11 @@ void Wait()
 {
 
     BeginDrawing();
+    ClearBackground(RAYWHITE);
                 loadingOverlay->Draw();
     EndDrawing();
     timer += GetFrameTime();
-    if (timer > 5)
+    if (timer > 2)
     {
         timer = 0;
         ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
@@ -288,6 +298,9 @@ void EngineMain()
                }
                
             */
+           //draw physics obj colliders//
+            DrawPhysicsObjects();
+           
             EndMode3D();
             EndDrawing();
             PhysicsWorld::Update();

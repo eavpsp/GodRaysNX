@@ -91,6 +91,14 @@ struct GameScene
 class GameSceneManager
 {
     private:
+    Model LoadModelData(int id)
+    {
+        if(id == -1)
+        {
+            return Model();
+        }
+        return LoadModel(RES_Models[id].c_str());
+    }
     
 /**
  * Loads a scene from a file with the given path. The file is expected to
@@ -195,8 +203,10 @@ class GameSceneManager
             //gameobjects
             for (size_t i = 0; i < sceneLoaded->numObjects; i++)
             {   
-                loadingOverlay->GetProgress()->SetText("%d%%", (int)((i+1.0f)/sceneLoaded->numObjects*100.0f));
-                GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale, LoadModel(RES_Models[CurrentScene->objectsInScene[i]->modelID].c_str()));
+                
+
+                GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale, LoadModelData(CurrentScene->objectsInScene[i]->modelID));
+
                 debugLog("Number of Components: %d", CurrentScene->objectsInScene[i]->numOfComponents);
                 if (CurrentScene->objectsInScene[i]->numOfComponents > 0)
                 {
@@ -233,6 +243,7 @@ class GameSceneManager
                      
       
                 }
+                loadingOverlay->GetProgress()->SetText("%d%%", (int)((i+1.0f)/sceneLoaded->numObjects*100.0f));
                     
             }
                 
@@ -264,7 +275,7 @@ class GameSceneManager
             loadingOverlay->GetProgress()->SetText("%d%%", 0);
             UnLoadScene();
             CurrentScene = scene;
-            //create the game objects, add them to the scene
+            //create the game objects, add them to the scene//
             CurrentScene->isLoaded = LoadData(RES_Scenes[scene->sceneID].c_str());
             if(!CurrentScene->isLoaded)
             {

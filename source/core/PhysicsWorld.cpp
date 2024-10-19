@@ -5,6 +5,7 @@ extern std::vector<PhysicsComponent *> *PhysicsObjects;
 static float gravity;
 static bool _initialized;
 static Vector3 groundPosition = {0,0,0};
+static bool useGround = false;
 Vector3 PhysicsWorld::GetGroundPosition()
 {
     return groundPosition;
@@ -19,8 +20,9 @@ void PhysicsWorld::SetGravity(float value)
     gravity = value;
 }
 
-void PhysicsWorld::Init(float gravity)
+void PhysicsWorld::Init(float gravity, bool ground)
 {
+    useGround = ground;    
     PhysicsWorld::SetGravity(gravity);
     _initialized = true;
 }
@@ -45,22 +47,22 @@ void PhysicsWorld::Update()
            {
                 PhysicsObjects->at(i)->isGrounded = false;  
            }
-            PhysicsObjects->at(i)->velocity = Vector3Add(PhysicsObjects->at(i)->velocity, Vector3Scale(PhysicsObjects->at(i)->acceleration, GetFrameTime() / PhysicsObjects->at(i)->mass));
+            PhysicsObjects->at(i)->velocity  = Vector3Add(PhysicsObjects->at(i)->velocity , Vector3Add(PhysicsObjects->at(i)->velocity, Vector3Scale(PhysicsObjects->at(i)->acceleration, GetFrameTime() / PhysicsObjects->at(i)->mass)));
             PhysicsObjects->at(i)->parentObject->position = Vector3Add(PhysicsObjects->at(i)->parentObject->position, Vector3Scale(PhysicsObjects->at(i)->velocity, GetFrameTime()));
 
-            if(PhysicsObjects->at(i)->parentObject->position.y == PhysicsWorld::GetGroundPosition().y)
+            if(PhysicsObjects->at(i)->parentObject->position.y == PhysicsWorld::GetGroundPosition().y && useGround)
             {
                 PhysicsObjects->at(i)->velocity = Vector3Zero(); // Implement dampening to reduce speed
                 PhysicsObjects->at(i)->isGrounded = true;
-                continue;
+               
             }
-            if(PhysicsObjects->at(i)->parentObject->position.y < PhysicsWorld::GetGroundPosition().y)
+            if(PhysicsObjects->at(i)->parentObject->position.y < PhysicsWorld::GetGroundPosition().y && useGround)
             {
                 PhysicsObjects->at(i)->parentObject->position = Vector3{PhysicsObjects->at(i)->parentObject->position.x, PhysicsWorld::GetGroundPosition().y, PhysicsObjects->at(i)->parentObject->position.z}; 
                 PhysicsObjects->at(i)->velocity.y = 0; // Implement dampening to reduce speed
                 PhysicsObjects->at(i)->isGrounded = true;
 
-                continue;
+               
             }
 
             float gravityEffect = PhysicsWorld::GetGravity() * GetFrameTime();
@@ -71,7 +73,7 @@ void PhysicsWorld::Update()
             {
                 PhysicsObjects->at(i)->parentObject->position.y += PhysicsObjects->at(i)->velocity.y + 0.5f * gravityEffect; // Make the velocity influence the object
             }
-            
+            PhysicsObjects->at(i)->velocity = Vector3Scale(PhysicsObjects->at(i)->velocity,  -PhysicsObjects->at(i)->mass * 0.05f);
         }
     }
 }

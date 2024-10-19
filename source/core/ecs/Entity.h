@@ -37,7 +37,7 @@ struct __attribute__((packed)) Entity//4Bytes
         return index < rhs.index;
     }   
 };
-
+//add physics component
 struct TransformSystemECS
 {
 public:

@@ -11,8 +11,12 @@ void GameObject::Draw()
     {
         return;
     }
-    DrawModel(objectModel, position, 1.0f, WHITE);
-    
+    if(objectModel != nullptr)
+    {
+        DrawModel(objectModel->model, position, 1.0f, WHITE);
+
+    }
+    onDraw();
   
 }
 
@@ -69,6 +73,7 @@ void GameObject::onUpdate()
 
 void GameObject::onDraw()
 {
+
 }
 
 void GameObject::onInit()
@@ -91,7 +96,10 @@ GameObject::GameObject()
 {
    
     onDestroy();
-    UnloadModel(objectModel);
+    if(objectModel != nullptr)
+    {
+        UnloadModel(objectModel->model);
+    }
     //destroy children
     for (int i = 0; i < children.size(); i++)
     {

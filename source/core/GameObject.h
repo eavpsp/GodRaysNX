@@ -2,7 +2,7 @@
 #define GAMEOBJECT_H
 
 #include <EngineObject.h>
-
+#include <GR_Mesh.h>
 
 /**
  * @class GameComponent
@@ -36,7 +36,7 @@ struct GameObject : public EngineObject
         void onDestroy() override;
     public:
         //base model data
-        Model objectModel;
+        GR_Mesh *objectModel;
         int gameObjectID;
         void Draw();
         template <typename T>
@@ -52,10 +52,13 @@ struct GameObject : public EngineObject
                 newObject->position = Vector3{_position.x, _position.y, _position.z};//flip Y 
                 newObject->rotation = _rotation;
                 newObject->scale = _scale;
-                newObject->objectModel = gameModel;
+                if(gameModel.meshCount > 0)
+                {
+                    newObject->objectModel = new GR_Mesh();
+                    newObject->objectModel->model = gameModel;
+                }
                 newObject->transform = Matrix();
                 newObject->name = _name;
-               
                 newObject->onInit();
                 return newObject;
         }

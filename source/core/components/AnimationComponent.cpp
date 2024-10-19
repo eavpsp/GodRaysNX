@@ -33,7 +33,7 @@ void AnimationComponent::Play(const char *animName)
 void AnimationComponent::OnUpdate()
 {
      animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-    UpdateModelAnimation(((GameObject*)parentObject)->objectModel, anim, animCurrentFrame);
+    UpdateModelAnimation(((GameObject*)parentObject)->objectModel->model, anim, animCurrentFrame);
 }
 
 AnimationComponent::AnimationComponent(const char *filePath)

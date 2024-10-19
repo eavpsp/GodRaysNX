@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <GameObject.h> 
 #include <vector>
+#include <RenderSystem.h>
 /*************************** 
 Physics System
 ------------------
@@ -39,6 +40,7 @@ struct CollisionEvents : public PhysicsEvents
 
     };
 };
+
 class PhysicsComponent : public GameComponent
 {
     //
@@ -56,7 +58,7 @@ class PhysicsComponent : public GameComponent
         Vector3 velocity = {0,0,0};
         Vector3 acceleration = {0,0,0};
         float mass = 1.0f;
-        BoundingBox _bounds;
+        MightyBoundingBox _bounds;
         std::vector<TriggerEvents *> triggerEvents;
         std::vector<CollisionEvents *> collisionEvents;
         PhysicsComponent(float mass, Vector3 _size, bool _isTrig, bool _isKinematic = false) 

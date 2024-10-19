@@ -53,10 +53,10 @@ namespace AlmightyMatrixEditor.EngineComponents
     public class GodRay_GameObject : MonoBehaviour //Add custom class ID
     {
         //steals data from gameobject
-        int ClassID = 0;
-        int objectID = 0;
+        public int ClassID = 0;
+        public int objectID = 0;
         int parentID = -1;
-        int modelID;
+        public int modelID;
         public List<GodRay_Component> awmGameObjectComponents;
         public string awmObjectName = "GODRAY_BASE_GAMEOBJECT";
        //export
@@ -166,7 +166,7 @@ namespace AlmightyMatrixEditor.EngineComponents
     }
     //Audio
     [Serializable]
-    [CreateAssetMenu(fileName = "New AWM Audio Component", menuName = "Almighty Matrix Editor/Audio Components")]
+    [CreateAssetMenu(fileName = "New GodRay Audio Component", menuName = "Almighty Matrix Editor/Audio Components")]
     public class GodRay_AudioComponent : GodRay_Component
     {
    

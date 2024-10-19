@@ -29,7 +29,7 @@ struct TextDrawable : public Drawable
         delete[] buffer;
     }
     TextDrawable() = default;
-    TextDrawable(std::string t, Vector2 p, Color c = WHITE) : text(t), position(p), color(c) {}    
+    TextDrawable(std::string t, Vector2 p, Color c = BLACK) : text(t), position(p), color(c) {}    
     void draw() override
     {
         DrawTextEx(guiFont, text.c_str(), position, 20, 20/2, color);

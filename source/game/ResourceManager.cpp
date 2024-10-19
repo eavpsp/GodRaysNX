@@ -44,7 +44,10 @@ std::map<int, std::string> RES_AudioFiles =
 
 Model _RES::GetModel(int id)
 {
-   
+   if(id == -1)
+   {
+       return Model();
+   }
     return LoadModel(RES_Models[id].c_str());
     
 }
