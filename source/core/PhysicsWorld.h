@@ -24,6 +24,12 @@ class PhysicsWorld
         {
             return GetRayCollisionMesh(ray, mesh, transform);
         }
+
+        static void DebugDrawRay(Vector3 pos, Vector3 dir, Color color)
+        {
+            Ray ray = {pos, dir};
+            DrawRay(ray, color);
+        }
 };
 
 

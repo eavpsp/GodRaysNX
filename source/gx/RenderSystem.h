@@ -8,13 +8,16 @@
 #include<array> 
 #include <raymath.h>
 #include<algorithm>
+#include "../debug/debug.h"
+#include <cfloat>   
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
 //load in scene objects into the octree
 //get them as gameobjects to render
 //tree for ecs also
-struct Plane {
+struct Plane 
+{
     Vector3 point;
     Vector3 normal;
     Vector3 GetNormal() { return normal; }
@@ -24,7 +27,30 @@ struct MightyBoundingBox
 {
   
     Vector3 corners[8];
-    
+    float GetDepth() {
+        return corners[2].z - corners[0].z;
+    }
+    float GetWidth() {
+        return corners[6].x - corners[0].x;
+    }
+    float GetHeight() {
+        return corners[7].y - corners[0].y;
+    }
+    Vector3 GetClosestPoint(MightyBoundingBox other) {
+        Vector3 closestPoint;
+        float closestDistance = FLT_MAX;
+        for (int i = 0; i < 8; i++) {
+            Vector3 point = corners[i];
+            Vector3 otherCenter = other.GetCenter();
+            Vector3 diff = Vector3Subtract(point, otherCenter);
+            float distance = Vector3Length(diff);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestPoint = point;
+            }
+        }
+        return closestPoint;
+    }
     void UpdateCorners(Vector3 parentPos, Vector3 size)
     {
     
@@ -128,23 +154,14 @@ void ProjectOntoAxis(const MightyBoundingBox& box, Vector3 axis, float& min, flo
         return Vector3Add(Vector3Scale(min, 0.5f), Vector3Scale(max, 0.5f));
     }
     
-    void Rotate(float rotationX, float rotationY, float rotationZ) {
-        // Define the rotation matrices
-        // Define individual rotation matrices for X, Y, and Z axes
-        Matrix rotationXMat = MatrixRotateX(DEG2RAD * rotationX);
-        Matrix rotationYMat = MatrixRotateY(DEG2RAD * rotationY);
-        Matrix rotationZMat = MatrixRotateZ(DEG2RAD * rotationZ);
+    void Rotate(Matrix *parentTransform) {
+    // Define the rotation matrices
 
-        // Combine the rotation matrices
-        Matrix rotationMat = MatrixMultiply(rotationZMat, MatrixMultiply(rotationYMat, rotationXMat));
+    // Get the corners of the OBB after rotation
+    GetBoundingBoxCorners(*parentTransform, corners);
 
-        // Get the corners of the bounding box after rotation
-      
-        GetBoundingBoxCorners(rotationMat, corners);
-
-        // Update the bounding box with the new corners
-       
-    }
+    // Update the bounding box with the new corners
+}
     void GetBoundingBoxCorners(Matrix rotationMat, Vector3* corners)
      {
         // Calculate the corners of the rotated bounding box

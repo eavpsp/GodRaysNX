@@ -47,12 +47,9 @@ void PhysicsWorld::Update()
            {
                 PhysicsObjects->at(i)->isGrounded = false;  
            }
-            PhysicsObjects->at(i)->velocity  = Vector3Add(PhysicsObjects->at(i)->velocity , Vector3Add(PhysicsObjects->at(i)->velocity, Vector3Scale(PhysicsObjects->at(i)->acceleration, GetFrameTime() / PhysicsObjects->at(i)->mass)));
-            PhysicsObjects->at(i)->parentObject->position = Vector3Add(PhysicsObjects->at(i)->parentObject->position, Vector3Scale(PhysicsObjects->at(i)->velocity, GetFrameTime()));
-
-            if(PhysicsObjects->at(i)->parentObject->position.y == PhysicsWorld::GetGroundPosition().y && useGround)
+              if(PhysicsObjects->at(i)->parentObject->position.y == PhysicsWorld::GetGroundPosition().y && useGround)
             {
-                PhysicsObjects->at(i)->velocity = Vector3Zero(); // Implement dampening to reduce speed
+                
                 PhysicsObjects->at(i)->isGrounded = true;
                
             }
@@ -73,7 +70,13 @@ void PhysicsWorld::Update()
             {
                 PhysicsObjects->at(i)->parentObject->position.y += PhysicsObjects->at(i)->velocity.y + 0.5f * gravityEffect; // Make the velocity influence the object
             }
-            PhysicsObjects->at(i)->velocity = Vector3Scale(PhysicsObjects->at(i)->velocity,  -PhysicsObjects->at(i)->mass * 0.05f);
+            if(PhysicsObjects->at(i)->velocity.x != 0 || PhysicsObjects->at(i)->velocity.y != 0 || PhysicsObjects->at(i)->velocity.z != 0) 
+            {
+                PhysicsObjects->at(i)->velocity  = Vector3Add(PhysicsObjects->at(i)->velocity , Vector3Add(PhysicsObjects->at(i)->velocity, Vector3Scale(PhysicsObjects->at(i)->acceleration, GetFrameTime() / PhysicsObjects->at(i)->mass)));
+                PhysicsObjects->at(i)->parentObject->position = Vector3Add(PhysicsObjects->at(i)->parentObject->position, Vector3Scale(PhysicsObjects->at(i)->velocity, GetFrameTime()));
+                PhysicsObjects->at(i)->velocity = Vector3Scale(PhysicsObjects->at(i)->velocity,  -PhysicsObjects->at(i)->mass * 0.05f);
+
+            }
         }
     }
 }

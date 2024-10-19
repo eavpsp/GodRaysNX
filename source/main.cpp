@@ -32,14 +32,16 @@ View Frustrum - Done
 Particle system (Dynamic Batched Software Particles)- Done
 Audio Component - Done;
 Level Editor - Done
+Raycasting - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Raycasting - WIP
-    Raycasting System
-     Include Debugging
 Menu Controller - WIP
+Texture2D component - Mesh Component - WIP
+Post Processing - WIP
+Shaders - WIP
+Lights - WIP
 ---------------------------
 *NOT STARTED
 __________________________

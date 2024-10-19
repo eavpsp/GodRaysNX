@@ -8,7 +8,8 @@ void PhysicsComponent::updateBounds()//
 {
     
     _bounds.UpdateCorners(parentObject->position, size);
-    _bounds.Rotate(parentObject->rotation.x, parentObject->rotation.y, parentObject->rotation.z);
+    Matrix rotMat = MatrixRotateXYZ(QuaternionToEuler (parentObject->rotation));
+    _bounds.Rotate(&rotMat);
 }
 
 void PhysicsComponent::OnUpdate()
@@ -72,7 +73,6 @@ void PhysicsComponent::OnUpdate()
                 }
             }
         }
-        /* code */
        
     }
 
@@ -81,46 +81,116 @@ void PhysicsComponent::OnUpdate()
 
 void PhysicsComponent::onCollision(PhysicsComponent *other)
 {
+    
+    Vector3 diff = Vector3Subtract(other->parentObject->position, parentObject->position);
    
     if(!isKinematic)
     {
-        //check side of collision and prevent movement//
+      
        if(other->isKinematic)
        {
-           if(velocity.y + parentObject->position.y < other->parentObject->position.y + other->size.y/2)
-           {
-               velocity = Vector3Scale(velocity, -1);
-               return;
-           }
-           if(velocity.y + parentObject->position.y > other->parentObject->position.y + other->size.y/2)
-           {
-               velocity = Vector3Scale(velocity, -1);
-               return;
-           }
-           if (velocity.x + parentObject->position.x < other->parentObject->position.x + other->size.x/2)
-           {
-               velocity = Vector3Scale(velocity, -1);
-               return;
-           }
-           if (velocity.x + parentObject->position.x > other->parentObject->position.x + other->size.x/2)
-           {
-               velocity = Vector3Scale(velocity, -1);
-               return;
-           }
-           if (velocity.z + parentObject->position.z < other->parentObject->position.z + other->size.z/2)
-           {
-               velocity = Vector3Scale(velocity, -1);
-               return;
-           }
-           if (velocity.z + parentObject->position.z > other->parentObject->position.z + other->size.z/2)
-           {
-               velocity = Vector3Scale(velocity, -1);
-               return;
-           }
+            float oldLeft = parentObject->position.x - _bounds.GetWidth();
+            float oldRight = parentObject->position.x + _bounds.GetWidth();
+            float oldFront = parentObject->position.z + _bounds.GetDepth();
+            float oldBack = parentObject->position.z - _bounds.GetDepth();
+            bool canHitX = true;
+            bool canHitZ = true;
+            
+            if (velocity.x + parentObject->position.x > other->parentObject->position.x + other->_bounds.GetWidth())	// our front is to the right of wall back
+                canHitX = false;
+            else if (velocity.x + parentObject->position.x - _bounds.GetWidth() < other->parentObject->position.x) // our back is to the left of the wall front
+                canHitX = false;
+            
+            if (velocity.y + parentObject->position.y > other->parentObject->position.y + other->_bounds.GetHeight())	// our top is above wall bottom
+                canHitX = false;
+            else if (velocity.y + parentObject->position.y - _bounds.GetHeight() < other->parentObject->position.y) // our bottom is below the wall top
+                canHitX = false;
+            
+            if (velocity.z + parentObject->position.z > other->parentObject->position.z + other->_bounds.GetDepth())	// our front is below wall back
+                canHitZ = false;
+            else if (velocity.z + parentObject->position.z - _bounds.GetDepth() < other->parentObject->position.z) // our back is over the wall front
+                canHitZ = false;
+            
+            if (canHitX)
+            {
+                float newLeft = velocity.x + parentObject->position.x - _bounds.GetWidth();
+                float newRight = velocity.x + parentObject->position.x + _bounds.GetWidth();
+                float objectLeft = other->parentObject->position.x - other->_bounds.GetWidth();
+                float objectRight = other->parentObject->position.x + other->_bounds.GetWidth();
+
+                // check the box moving to the left
+                // if we were outside the right wall before, and are not now, we hit something
+                if (velocity.x < 0)
+                {
+                    if (oldRight > other->parentObject->position.x)
+                    {
+                        if (newLeft < other->parentObject->position.x)
+                        {
+                            // we hit moving to the left, so set us back to where we hit the wall
+                            parentObject->position.x = other->parentObject->position.x + other->_bounds.GetWidth();
+                            //if (hitSide)
+                            //    *hitSide = true;
+                        }
+                    }		
+                }
+                
+                if (velocity.x > 0)
+                {
+                    // check the box moving to the right
+                    // if we were outside the left wall before, and are not now, we hit something
+                    if (velocity.x >= objectRight)
+                    {
+                        if (velocity.x + parentObject->position.x > objectRight)
+                        {
+                            // we hit moving to the right, so set us back to where we hit the wall
+                            parentObject->position.x = objectRight;
+                            //if (hitSide)
+                            //    *hitSide = true;
+                        }
+                    }
+                }
+            }
+            
+            if (canHitZ)
+            {
+                float newFront = velocity.z + parentObject->position.z + _bounds.GetDepth();
+                float objectFront = other->parentObject->position.z + other->_bounds.GetDepth();
+
+                // check the box moving to the front
+                // if we were outside the back wall before, and are not now, we hit something
+                if (velocity.z > 0)
+                {
+                    if (oldFront <= other->parentObject->position.z)
+                    {
+                        if (newFront > other->parentObject->position.z)
+                        {
+                            // we hit moving to the front, so set us back to where we hit the wall
+                            parentObject->position.z = parentObject->position.z - _bounds.GetDepth();
+                            //if (hitSide)
+                            //    *hitSide = true;
+                        }
+                    }		
+                }
+                
+                if (velocity.z < 0)
+                {
+                    // check the box moving to the back
+                    // if we were outside the front wall before, and are not now, we hit something
+                    if (velocity.z >= objectFront)
+                    {
+                        if (velocity.z + parentObject->position.z < objectFront)
+                        {
+                            // we hit moving to the back, so set us back to where we hit the wall
+                            parentObject->position.z = objectFront;
+                            //if (hitSide)
+                            //    *hitSide = true;
+                        }
+                    }
+                }
+            }
        }
        else
        {
-            Vector3 diff = Vector3Subtract(other->parentObject->position, parentObject->position);
             float len = Vector3Length(diff);
             float velocityLen = Vector3Length(other->velocity);
             float impulseAmount = 1.5f;
@@ -135,6 +205,10 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)
                         
        }
     }
+ 
+        //is Kinematic
+        //prevent object
+    
     for (size_t i = 0; i < collisionEvents.size(); i++)
     {
         

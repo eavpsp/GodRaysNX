@@ -3,7 +3,7 @@
 
 #include <EngineObject.h>
 #include <GR_Mesh.h>
-
+#include <raymath.h>
 /**
  * @class GameComponent
  * @brief This is the base class for all game components.
@@ -36,7 +36,7 @@ struct GameObject : public EngineObject
         void onDestroy() override;
     public:
         //base model data
-        GR_Mesh *objectModel;
+        GR_Mesh *objectModel;//convert to component
         int gameObjectID;
         void Draw();
         template <typename T>
@@ -49,15 +49,17 @@ struct GameObject : public EngineObject
                 T *newObject =  new T();
                 //add callback
                 //newObject->material = mat;
+                newObject->transform = Matrix();
                 newObject->position = Vector3{_position.x, _position.y, _position.z};//flip Y 
-                newObject->rotation = _rotation;
-                newObject->scale = _scale;
+                newObject->rotation = Quaternion{_rotation.x, _rotation.y, _rotation.z, _rotation.w};
+                newObject->transform = MatrixMultiply(MatrixRotateXYZ(QuaternionToEuler (newObject->rotation)), MatrixTranslate(newObject->position.x, newObject->position.y, newObject->position.z));
+                newObject->scale = Vector3 { _scale.x, _scale.y, _scale.z };;
                 if(gameModel.meshCount > 0)
                 {
                     newObject->objectModel = new GR_Mesh();
                     newObject->objectModel->model = gameModel;
+                    newObject->objectModel->model.transform = MatrixRotateXYZ(QuaternionToEuler(newObject->rotation));
                 }
-                newObject->transform = Matrix();
                 newObject->name = _name;
                 newObject->onInit();
                 return newObject;
