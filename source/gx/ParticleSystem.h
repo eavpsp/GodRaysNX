@@ -48,8 +48,9 @@ struct BurstParticleSystem : public ParticleSystem
             for (size_t i = 0; i < numberOfParticles; i++)
             {
                 //create entities and store them
-                Entity entity;
-                AddComponent(entity, P_SPHERE);
+                size_t entity = EntityManager::AddEntity();
+                Entity entity_data = EntityManager::GetEntity(entity);
+                AddComponent(entity_data, P_SPHERE);
             }
             
         };   

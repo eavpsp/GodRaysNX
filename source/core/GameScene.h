@@ -14,7 +14,7 @@ extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
 extern std::map<_RES::Scenes_Types, std::string> RES_Scenes;
 static float sceneTimer = 0;
 
-enum GameObjectType
+enum GameObjectType//Add custom object types for implementation
 {
     BASE_OBJ, LIGHT
 };
@@ -22,18 +22,32 @@ enum CameraType
 {
     PERSPECTIVE, OTHOGRAPHIC  
 };
-struct __attribute__((packed)) SceneObjectData
+//COMPONENTS 0xC??? 
+//If components exist add them with the data in the GRB otherwise just use default data in Gameobject loaded
+struct __attribute__((packed)) AnimationComponentData //Header for animations 0xCA00
 {
-    u16 header;//object start header 0xAAAA
+    int animationID;
+};
+struct __attribute__((packed)) PhysicsComponentsData//Header for physics 0xCB00
+{
+    float mass;
+    Vector3 _size;
+    bool _isTrig, _isKinematic;
+    int shapeType;
+};
+//OBJECTS
+struct __attribute__((packed)) SceneObjectData//add data for children and parent
+{
+    u16 header;//object start header 0xAAAA end
     GameObjectType objType; //int custom class if needed
     int objID;//int unique id
     Vector3 position; //float 3
     Quaternion rotation; //float 4
     Vector3 scale; //float 3
-    int modelID; //int model to load
+    int modelID;//int
+    int parentIndex;//use this to add any children to parent
 
 };
-
 struct __attribute__((packed)) SceneDataLoader//cast to start of .grb loads the camera for the scene
 {
     u16 header;//file header 0XA0A0
@@ -72,7 +86,7 @@ class GameSceneManager
  *
  * @return true if the scene was loaded successfully, false otherwise.
  */
-        bool LoadData(const char *path)
+        bool LoadData(const char *path)//Loads GRB Scene Data
         {
             FILE *fp = fopen(path, "rb");
             if(fp == NULL)
@@ -103,8 +117,8 @@ class GameSceneManager
                 for (int i = 0; i < sceneLoaded->numObjects; i++) 
                 {
 
-                    SceneObjectData *objectLoaded = (SceneObjectData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData));//works
-                    CurrentScene->objectsInScene.push_back(objectLoaded);
+                    SceneObjectData *objectLoaded = (SceneObjectData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData));//works update to add header check after each obj check for component or object
+                    CurrentScene->objectsInScene.push_back(objectLoaded);//load object in same instance to add components
                     debugLog("Object ID: %d",objectLoaded->objID);
 
                 }
@@ -125,7 +139,7 @@ class GameSceneManager
                 
                 default://gameobject
                         
-                        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene.at(i)->position, CurrentScene->objectsInScene.at(i)->rotation,CurrentScene->objectsInScene.at(i)->scale,_RES::GetModel(CurrentScene->objectsInScene.at(i)->modelID));
+                        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene.at(i)->position, CurrentScene->objectsInScene.at(i)->rotation,CurrentScene->objectsInScene.at(i)->scale,_RES::GetModel(_RES::Model_ID::ROBOT_ID));
                     break;
                 }
             }

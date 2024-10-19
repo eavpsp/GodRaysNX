@@ -3,7 +3,7 @@
 
 #include <EngineObject.h>
 #include <raymath.h>
-//Heap 256MB
+
 /**
  * @class GameComponent
  * @brief This is the base class for all game components.
@@ -38,18 +38,6 @@ class GameObject : public EngineObject
         //base model data
         Model objectModel;
         void Draw();
-        /*
-            // Load gltf model
-            Model model = LoadModel("resources/models/gltf/robot.glb");
-            Vector3 position = { 0.0f, 0.0f, 0.0f }; // Set model position
-            
-            // Load gltf model animations
-            int animsCount = 0;
-            unsigned int animIndex = 0;
-            unsigned int animCurrentFrame = 0;
-            ModelAnimation *modelAnimations = LoadModelAnimations("resources/models/gltf/robot.glb", &animsCount);
-
-        */
         template <typename T>
         static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, Vector3 _scale, Model gameModel, const char* _name = "GameObject")
         {

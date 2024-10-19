@@ -3,24 +3,19 @@
 
 
 
-custom z-lib compression for game data
+                            custom z-lib compression for grb data
 
 
--Text only menus for now-
-selction options
-change text color when hilighted
---
+                            -Text only menus for now-
+                            selction options
+                            change text color when hilighted
+                            --
 
--Demo Levels
-Plane and Sphere
+                            -Demo Levels
+                            Plane and Sphere
 
-add more camera types to be used in game
-view frustrum
+                            add more camera types to be used in game
 
-*/
-
-
-/*
 Todo:
 ----------------------------
 *DONE
@@ -34,13 +29,15 @@ Input System - Done
 Animation System - Done
 ESC System for Static Objects - Done
 View Frustrum - Done
+Particle system (Dynamic Batched Software Particles)- Done
+Audio Component - Done;
 -------------------------
 *WIP
 ___________________________
 **Current
-Particle system (Dynamic Batched Software Particles)- WIP
-    Use billboards
-    Use instancing
+Level Editor - WIP
+    Create GRB Files
+    Components loaded in GRB
 ---------------------------
 *NOT STARTED
 __________________________
@@ -55,7 +52,7 @@ IK -
 Procedural Animation -
 
 */
-
+//Heap 256MB
 #include <switch.h>
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION

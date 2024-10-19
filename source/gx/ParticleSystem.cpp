@@ -10,7 +10,6 @@ void ParticleSystem::AddComponent(Entity entity, ParticleType particleType)
     component.startPos = Vector3Zero();
     component.velocity = Vector3Zero();
     component.scale = 1.0f;
-    entity.index = particles.size();
     particles[entity] = component;
     
 }

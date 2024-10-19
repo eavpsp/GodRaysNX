@@ -44,12 +44,15 @@ namespace AlmightyMatrixEditor.EngineComponents
     //GameObject Default : 0x01
     //Anything else needs custom implementaion
     [Serializable]
-    public class AWM_GameObject : MonoBehaviour //Add custom class ID
+    public class GodRay_GameObject : MonoBehaviour //Add custom class ID
     {
         //steals data from gameobject
-        byte ClassID = 0x01;
+        int ClassID = 0;
+        int objectID = 0;
+        int parentID = -1;
+        int modelID;
         public List<AWM_Component> awmGameObjectComponents;
-        public string awmObjectName = "AWM_BASE_GAMEOBJECT";
+        public string awmObjectName = "GODRAY_BASE_GAMEOBJECT";
        //export
        //component ID, number of components, write component data
         public void ExportAWMGameObject()
@@ -58,7 +61,7 @@ namespace AlmightyMatrixEditor.EngineComponents
             BinaryWriter bw = new BinaryWriter(ms);
             bw.Write(0xAAAA);//start of object
             bw.Write(ClassID);
-            bw.Write(awmObjectName);//object name
+            bw.Write(objectID);
             //position, rotation, scale
             bw.Write(transform.position.x);
             bw.Write(transform.position.y); 
@@ -70,20 +73,16 @@ namespace AlmightyMatrixEditor.EngineComponents
             bw.Write(transform.localScale.x);
             bw.Write(transform.localScale.y);
             bw.Write(transform.localScale.z);
+            bw.Write(modelID);
+            bw.Write(parentID);
             if(awmGameObjectComponents.Count > 0)
             {
-            
-                bw.Write(awmGameObjectComponents.Count);//number of components
-                for(int i = 0; i < awmGameObjectComponents.Count; i++)
-                {
-              
                 for(int j = 0; j < awmGameObjectComponents.Count; j++)//loop each component
                 {
                     bw.Write(awmGameObjectComponents[j].ExportComponentData());
                 }
                 bw.Close();
-                
-                }
+
             }
         }
     }
@@ -98,15 +97,7 @@ namespace AlmightyMatrixEditor.EngineComponents
     [Serializable]
     public class AWM_Component : ScriptableObject
     {
-        byte componentID;
-        public byte GetComponentID()
-        {
-            return componentID;
-        }
-        public void SetComponentID(byte componentID)
-        {
-            this.componentID = componentID;
-        }
+     
         public virtual byte[] ExportComponentData() 
         {
             return null;
@@ -119,22 +110,28 @@ namespace AlmightyMatrixEditor.EngineComponents
     public class BulletPhysicsComponent : AWM_Component
     {
     
-       public enum PhysicsShape
+        public enum Shape
         {
-            Shpere,
-            Cube,
-            Plane
+            Box = 0,
+            Sphere = 1
         }
-       public PhysicsShape shape;
-       public float mass = 1.0f;
+        public float mass = 1.0f;
+        public Vector3 size;
+        public bool isTrigger, isKinematic;
+        public Shape shape;
        public override byte[] ExportComponentData() 
        {
-            SetComponentID(0x01);
+        
             MemoryStream ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
-            bw.Write((byte)GetComponentID());
-            bw.Write((byte)shape);
+            bw.Write(0xCB00);
             bw.Write(mass);
+            bw.Write(size.x);
+            bw.Write(size.y);
+            bw.Write(size.z);
+            bw.Write(isTrigger);
+            bw.Write(isKinematic);
+            bw.Write((int)shape);
             bw.Close();
             return ms.ToArray();
        }
@@ -145,29 +142,17 @@ namespace AlmightyMatrixEditor.EngineComponents
     [CreateAssetMenu(fileName = "New AWM Animator Component", menuName = "Almighty Matrix Editor/Animation Components")]
     public class AnimatorComponent : AWM_Component
     {
-        public List<AnimationData> animationData;
+        public int animationToLoadID = 0;
         public override byte[] ExportComponentData() 
        {
-            SetComponentID(0x02);
+            
             MemoryStream ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
-            bw.Write((byte)GetComponentID());
-            bw.Write(animationData.Count);
-            for (int i = 0; i < animationData.Count; i++)
-            {
-                bw.Write(animationData[i].animationName);
-                bw.Write(animationData[i].pathToFile);
-            }
+            bw.Write(0xCA00);
+            bw.Write(animationToLoadID);
             bw.Close();
             return ms.ToArray();
        }
-    }
-    [Serializable]
-    
-    public struct AnimationData
-    {
-        public string animationName;
-        public string pathToFile;//path to compiled animation object
     }
     //Audio
     [Serializable]

@@ -55,14 +55,14 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ `$(PREFIX)pkg-config --cflags SDL2_mixer`
 
 CXXFLAGS	:= $(CFLAGS) -frtti -fno-exceptions -g
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lass -ltheora -lvorbis -logg -lraylib -lglfw3 -lEGL -lGLESv2 -lglapi -ldrm_nouveau -lnx -lm -lz
+LIBS	:= -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lass -ltheora -lvorbis -logg -lraylib -lglfw3 -lEGL -lGLESv2 -lglapi -ldrm_nouveau -lnx -lm -lz `$(PREFIX)pkg-config --libs SDL2_mixer`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
