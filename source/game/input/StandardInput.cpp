@@ -16,14 +16,14 @@ void StandardController::UpdateButtonInputs()
         //Triggers
         case GAMEPAD_BUTTON_LEFT_TRIGGER_1:
             //move camera down 
-            mightyCam->SetCamPosition(Vector3Add(mightyCam->camToUse->position , Vector3{0.0f, -10.0f * GetFrameTime(), 0.0f}));
+            mightyCam->SetCamPosition(Vector3Add(mightyCam->camToUse->position , Vector3{0.0f, -modifiedSpeed * GetFrameTime(), 0.0f}));
             mightyCam->camToUse->target = forward;
 
             break;
         case GAMEPAD_BUTTON_LEFT_TRIGGER_2:
             break;
         case GAMEPAD_BUTTON_RIGHT_TRIGGER_1:
-             mightyCam->SetCamPosition(Vector3Add(mightyCam->camToUse->position , Vector3{0.0f, +10.0f * GetFrameTime(), 0.0f}));
+             mightyCam->SetCamPosition(Vector3Add(mightyCam->camToUse->position , Vector3{0.0f, +modifiedSpeed* GetFrameTime(), 0.0f}));
              mightyCam->camToUse->target = forward;
             mightyCam->UpdateViewFrustum();
 
@@ -41,6 +41,7 @@ void StandardController::UpdateButtonInputs()
 
         //Right Face
         case GAMEPAD_BUTTON_RIGHT_FACE_UP:
+            modifiedSpeed = speed * 2.0f;//
             break;
         case GAMEPAD_BUTTON_RIGHT_FACE_RIGHT:
             break;
@@ -59,6 +60,7 @@ void StandardController::UpdateButtonInputs()
         case GAMEPAD_BUTTON_LEFT_FACE_LEFT:
             break;
         default:
+            modifiedSpeed = speed;
             break;
      }
      
@@ -79,7 +81,7 @@ void StandardController::UpdateAxisInputs()
         Vector3 right = Vector3Normalize(Vector3CrossProduct(forward,  mightyCam->camToUse->up));
         
         Vector3 direction = Vector3Add(Vector3Scale(forward, Lefty) , Vector3Scale(right, Leftx));
-        mightyCam->SetCamPosition(Vector3Add( mightyCam->camToUse->position, Vector3Scale(direction, 10.0f * GetFrameTime())));
+        mightyCam->SetCamPosition(Vector3Add( mightyCam->camToUse->position, Vector3Scale(direction, modifiedSpeed * GetFrameTime())));
         mightyCam->camToUse->target = Vector3Add( mightyCam->camToUse->position, forward);
         mightyCam->UpdateViewFrustum();
    }

@@ -36,7 +36,6 @@ Level Editor - Done
 *WIP
 ___________________________
 **Current
-
 Raycasting - WIP
     Raycasting System
      Include Debugging
@@ -288,6 +287,14 @@ void EngineMain()
                }
                
             */
+           //draw physics obj colliders//
+          /* for (size_t i = 0; i < PhysicsObjects->size(); i++)
+           {
+                MightyBoundingBox box = MightyBoundingBox(PhysicsObjects->at(i)->_bounds);
+                box.DrawBoundingBox(RED);
+           }
+           */
+           
             EndMode3D();
             EndDrawing();
             PhysicsWorld::Update();
