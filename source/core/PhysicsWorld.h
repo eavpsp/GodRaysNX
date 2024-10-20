@@ -16,12 +16,14 @@ class PhysicsWorld
         static void Shutdown();
         static void Update();
         static void AddForce(PhysicsComponent *obj, Vector3 force);
-        static RayCollision ShootRayCollision(Ray ray, BoundingBox box)
+        static RayCollision ShootRayCollision(Vector3 pos, Vector3 dir, BoundingBox box)
         {
+            Ray ray = {pos, dir};
             return GetRayCollisionBox(ray, box);
         }
-        static RayCollision ShootRayMesh(Ray ray, Mesh mesh, Matrix transform)
+        static RayCollision ShootRayMesh(Vector3 pos, Vector3 dir, Mesh mesh, Matrix transform)
         {
+            Ray ray = {pos, dir};
             return GetRayCollisionMesh(ray, mesh, transform);
         }
 

@@ -22,6 +22,7 @@ const int screenWidth = 1280;
 const int screenHeight = 720;
 GamePads gamePads;
 StandardController controller;
+//MenuController menuController;
 GameManager::GameManager(bool running) : _running{running}
 {
 

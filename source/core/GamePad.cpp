@@ -32,6 +32,9 @@ void GamePads::AddGamePad(ControllerMap *controllerMap)
         }
         
         
-};
-
+}
+void GamePads::SwapControllerMap(ControllerMap *currentController, ControllerMap *newController)
+{
+    currentController = newController;
+}
 

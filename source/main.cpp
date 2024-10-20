@@ -16,6 +16,8 @@
 
                             add more camera types to be used in game
 
+                            add animation events
+
 Todo:
 ----------------------------
 *DONE
@@ -33,11 +35,12 @@ Particle system (Dynamic Batched Software Particles)- Done
 Audio Component - Done;
 Level Editor - Done
 Raycasting - Done
+Menu Controller - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Menu Controller - WIP
+
 Texture2D component - Mesh Component - WIP
 Post Processing - WIP
 Shaders - WIP
@@ -94,7 +97,7 @@ extern TransformSystemECS transformSystem;
 //QuadTrr
 StaticQuadTreeContainer<Entity> *quadTreeContainer;
 BurstParticleSystem* burstParticleSystem;
-
+//vector of menu controllers
 
 /////////////TEST
 void TestVideo()
@@ -364,6 +367,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     initSystem();
     EngineMain();
+    PhysicsWorld::Shutdown();
     debugLog("Game Stopped....");
 
     debugLogCleanup();

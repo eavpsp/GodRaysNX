@@ -2,7 +2,7 @@
 ----------------
 A game engine inspired by Open RW and some Glitchy code.
 Uses Raylib.
-
+Requires DevkitPro and Raylib for the Switch
 The Almighty Metal Engine is a game engine that is powered by the spirit of Almighty Christ. It is designed to be a powerful tool for creating games that are both fun and inspiring. The engine is built on top of the Open RW engine and uses some of the same concepts and techniques, but with a focus on creating a more spiritual and uplifting gaming experience.
 
 The engine is designed to be easy to use and is intended for use by game developers of all skill levels. It is highly customizable and can be used to create a wide variety of games, from simple 2D platformers to complex 3D games with advanced graphics and physics.
