@@ -3,7 +3,9 @@
 
 void GamePads::Init(ControllerMap *controllerMap)
 {
-    AddGamePad(controllerMap);
+        controllerMap->ConnectController(connectedControllersCount);
+        connectedControllers[connectedControllersCount] = controllerMap;
+        connectedControllersCount++;
 }
 
 void GamePads::UpdateGamePad(int oldID, int newID)
@@ -12,29 +14,19 @@ void GamePads::UpdateGamePad(int oldID, int newID)
 }
 void GamePads::AddGamePad(ControllerMap *controllerMap) 
 {
-        if(connectedControllersCount + 1 < MAX_GAMEPADS)
+        if(connectedControllersCount <= MAX_GAMEPADS)
         {
             return;
         }
-        if(connectedControllersCount == 0)
-        {
-            controllerMap->controllerID = 0;
-            connectedControllers[controllerMap->controllerID] = controllerMap;
-
-            return;
-        }
-        else
-        {
-            //add on
-            controllerMap->controllerID = connectedControllersCount;
-            connectedControllers[connectedControllersCount] = controllerMap;
-            connectedControllersCount++;
-        }
-        
+        controllerMap->ConnectController(connectedControllersCount);
+        connectedControllers[connectedControllersCount] = controllerMap;
+        connectedControllersCount++;
+    
         
 }
 void GamePads::SwapControllerMap(ControllerMap *currentController, ControllerMap *newController)
 {
-    currentController = newController;
+ 
+    connectedControllers[currentController->controllerID]  = newController;
 }
 

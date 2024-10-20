@@ -6,11 +6,6 @@
                             custom z-lib compression for grb data
 
 
-                            -Text only menus for now-
-                            selction options
-                            change text color when hilighted
-                            --
-
                             -Demo Levels
                             Plane and Sphere
 

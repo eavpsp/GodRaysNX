@@ -48,7 +48,6 @@ GameManager& GameManager::getGameManager()
         
         //set up controller
         controller = StandardController(&mainCamera);
-        gamePads = GamePads();
         gamePads.Init(&controller);
         guiFont = LoadFont(RES_Fonts["DEFAULT"].c_str());//set var for game fonts
       //  texture = LoadTexture(RES_Textures["ENGINE_LOGO"].c_str());  //texture test

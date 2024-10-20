@@ -3,6 +3,7 @@
 #define GAMEPAD_H
 #include <GameObject.h>
 #include <map>
+#include "../debug/debug.h"
 #define MAX_GAMEPADS 4
 //add gampads with control layouts
 struct ControllerMap
@@ -14,7 +15,16 @@ struct ControllerMap
     virtual void UpdateAxisInputs() = 0;
     void ConnectController(int id) { isConnected = true; controllerID = id; }
     void DisableController() { isConnected = false; controllerID = -1; }
-    void UpdateInputs() { if(!isConnected || controllerID == -1)return; UpdateButtonInputs(); UpdateAxisInputs(); }
+    void UpdateInputs() 
+    { 
+        if(!isConnected || controllerID == -1)
+        {
+            debugLog("Controller %d is not connected", controllerID);
+            return; 
+        }
+        UpdateButtonInputs(); 
+        UpdateAxisInputs(); 
+    }
     virtual ~ControllerMap(){}
     ControllerMap() = default;
 };
@@ -27,7 +37,7 @@ struct GamePads
     void AddGamePad(ControllerMap *controllerMap);
     bool isConnected(int id){return connectedControllers[id]->isConnected;}
     void Disconnect(int id){connectedControllers[id] = nullptr;}
-    static void SwapControllerMap(ControllerMap *currentController, ControllerMap* newController);
+    void SwapControllerMap(ControllerMap *currentController, ControllerMap* newController);
     ~GamePads()
     {
         for (size_t i = 0; i < MAX_GAMEPADS; i++)
