@@ -36,12 +36,11 @@ Audio Component - Done;
 Level Editor - Done
 Raycasting - Done
 Menu Controller - Done
+Texture2D component - Mesh Component - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-
-Texture2D component - Mesh Component - WIP
 Post Processing - WIP
 Shaders - WIP
 Lights - WIP
@@ -120,7 +119,9 @@ void TestPhysics()
     for (size_t i = 0; i < 2; i++)
     {
         Vector3 pos = Vector3{0, 10 * i, 0};
-        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1}, _RES::GetModel(_RES::Model_ID::ROBOT_ID));
+        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);
+        obj->AddComponent(new GR_MeshComponent(new GR_Mesh(model)));
         PhysicsComponent *comp = new PhysicsComponent(1.0f, 2.0f,false,  i == 0 ? false : true);
         obj->AddComponent(comp);
     }
@@ -131,7 +132,9 @@ void TestPhysics()
 void TestAnimations()
 {
         Vector3 pos = Vector3{0, 0, 0};
-        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1}, _RES::GetModel(_RES::Model_ID::ROBOT_ID));
+        Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);
+        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        obj->AddComponent(new GR_MeshComponent(new GR_Mesh(model)));
         AnimationComponent *animComp = new AnimationComponent(RES_ModelAnimations[_RES::Model_ID::ROBOT_ID].c_str());
         AnimationControllerData *data = new AnimationControllerData();
         AnimationController *anim = new AnimationController(animComp, data);

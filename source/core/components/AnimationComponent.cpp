@@ -1,5 +1,6 @@
 #include <AnimationComponent.h>
 #include <string.h>
+#include <GR_Mesh.h>
 
 void AnimationComponent::Play()
 {
@@ -33,7 +34,7 @@ void AnimationComponent::Play(const char *animName)
 void AnimationComponent::OnUpdate()
 {
      animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-    UpdateModelAnimation(((GameObject*)parentObject)->objectModel->model, anim, animCurrentFrame);
+    UpdateModelAnimation(((GameObject*)parentObject)->GetComponent<GR_MeshComponent>()->mesh->model, anim, animCurrentFrame);
 }
 
 AnimationComponent::AnimationComponent(const char *filePath)

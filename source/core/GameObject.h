@@ -2,13 +2,13 @@
 #define GAMEOBJECT_H
 
 #include <EngineObject.h>
-#include <GR_Mesh.h>
 #include <raymath.h>
 /**
  * @class GameComponent
  * @brief This is the base class for all game components.
  * @details This class is the base class for all game components. It provides a common interface for all components to inherit from and implement. The interface includes a method to update the component and a method to set the parent object of the component.
  */
+
 struct GameComponent
 {
     public:
@@ -16,9 +16,15 @@ struct GameComponent
         virtual void OnUpdate() = 0;
         void SetParentObject(EngineObject* obj) { parentObject = obj; }
         bool isActive = true;
+
         virtual void ComponentAddedCallback() = 0;
         GameComponent(){};
         virtual ~GameComponent() {}
+};
+struct ObjectDrawable
+{
+    GameComponent* componentParent;
+    virtual void draw(){};
 };
 
 /**
@@ -36,11 +42,10 @@ struct GameObject : public EngineObject
         void onDestroy() override;
     public:
         //base model data
-        GR_Mesh *objectModel;//convert to component
         int gameObjectID;
         void Draw();
         template <typename T>
-        static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, Vector3 _scale, Model gameModel, const char* _name = "GameObject")
+        static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, Vector3 _scale, const char* _name = "GameObject")
         {
             if (!std::is_base_of<EngineObject, T>::value) {
                 // Error: T is not a derived class of EngineObject
@@ -54,12 +59,6 @@ struct GameObject : public EngineObject
                 newObject->rotation = Quaternion{_rotation.x, _rotation.y, _rotation.z, _rotation.w};
                 newObject->transform = MatrixMultiply(MatrixRotateXYZ(QuaternionToEuler (newObject->rotation)), MatrixTranslate(newObject->position.x, newObject->position.y, newObject->position.z));
                 newObject->scale = Vector3 { _scale.x, _scale.y, _scale.z };;
-                if(gameModel.meshCount > 0)
-                {
-                    newObject->objectModel = new GR_Mesh();
-                    newObject->objectModel->model = gameModel;
-                    newObject->objectModel->model.transform = MatrixRotateXYZ(QuaternionToEuler(newObject->rotation));
-                }
                 newObject->name = _name;
                 newObject->onInit();
                 return newObject;

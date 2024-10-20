@@ -7,6 +7,8 @@
 #include <typeinfo>
 #include <vector>
 
+struct ObjectDrawable;
+
 class EngineObject
 {
     //private funcs onUpdate, onDraw onInit onDestroy
@@ -24,6 +26,7 @@ class EngineObject
         virtual void onDraw() = 0;
         EngineObject();
         virtual ~EngineObject(){};
+        std::vector<ObjectDrawable*> objectDrawables;
         Vector3 position, scale;
         Quaternion rotation;
         Matrix transform;

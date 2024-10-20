@@ -8,8 +8,7 @@ void GamePads::Init(ControllerMap *controllerMap)
 
 void GamePads::UpdateGamePad(int oldID, int newID)
 {
-    connectedControllers[oldID] = false;
-    connectedControllers[newID] = true;
+    connectedControllers[oldID]->controllerID = newID;
 }
 void GamePads::AddGamePad(ControllerMap *controllerMap) 
 {
@@ -19,15 +18,16 @@ void GamePads::AddGamePad(ControllerMap *controllerMap)
         }
         if(connectedControllersCount == 0)
         {
-            connectedControllers[0] = true;
             controllerMap->controllerID = 0;
+            connectedControllers[controllerMap->controllerID] = controllerMap;
+
             return;
         }
         else
         {
             //add on
             controllerMap->controllerID = connectedControllersCount;
-            connectedControllers[connectedControllersCount] = true;
+            connectedControllers[connectedControllersCount] = controllerMap;
             connectedControllersCount++;
         }
         

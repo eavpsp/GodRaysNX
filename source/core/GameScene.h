@@ -8,6 +8,7 @@
 #include <PhysicsComponent.h>
 #include <AnimationComponent.h>
 #include <switch.h>
+#include <GR_Mesh.h>
 // Holds Scene Gameobjects
 // Light Data
 // Camera Data
@@ -205,8 +206,9 @@ class GameSceneManager
             {   
                 
 
-                GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale, LoadModelData(CurrentScene->objectsInScene[i]->modelID));
-
+                GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale);
+                Model model = LoadModelData(CurrentScene->objectsInScene[i]->modelID);
+                obj->AddComponent(new GR_MeshComponent(new GR_Mesh(model)));
                 debugLog("Number of Components: %d", CurrentScene->objectsInScene[i]->numOfComponents);
                 if (CurrentScene->objectsInScene[i]->numOfComponents > 0)
                 {

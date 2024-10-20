@@ -16,7 +16,7 @@ struct MenuItem//template class
     std::string text;
     Delegate<void()> delegate;
     bool selected = false;
-    virtual void DrawItem() = 0; 
+    virtual void DrawItem(){}; 
     MenuItem(std::string t, Delegate<void()> d) : text(t), delegate(d) {};
     virtual ~MenuItem() {};
 };
@@ -39,18 +39,18 @@ struct MenuController//add to vector of menus when active
 {
     private:
     ControllerMap *controllerMap;//how the menu is controlled
-    ControllerMap *currentControllerMap;
+    ControllerMap *currentControllerMap;//controll map before menu was opened
     public:
     Menu menu;
     bool isActive;
     int currentSelection = 0;
     void DrawMenu();
     void UpdateMenu();//update selection
-    void OpenMenu();
+    void OpenMenu(ControllerMap *cMap);//send current controller map
     void CloseMenu();
     virtual void ExecuteSelection() = 0;
-    MenuController(ControllerMap *cMap) :currentControllerMap(cMap) 
-    {};
+    MenuController(ControllerMap *menuControllerMap) :controllerMap(menuControllerMap) //set the menu control map
+    { };
     virtual ~MenuController() {};
 };
 #endif // MENUCONTROLLER_H
