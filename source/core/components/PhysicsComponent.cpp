@@ -48,9 +48,8 @@ g is the gravity vector
 void PhysicsComponent::updateBounds()//
 {
     _bounds.UpdateCorners(parentObject->position, size);
-  
-   
-
+    Matrix rotMatrix = MatrixRotateXYZ({parentObject->rotation.x, parentObject->rotation.y, parentObject->rotation.z});
+    _bounds.Rotate(&rotMatrix);
 }
 void PhysicsComponent::SetAngularVelocity(float vel, Vector3 axis)
 {
@@ -65,7 +64,7 @@ void PhysicsComponent::OnUpdate()
     {
         isGrounded = false;
     }
-    //update this to use an octree
+    //update this to use an octree//
     for (size_t i = 0; i < PhysicsObjects->size(); i++)
     {
         if(PhysicsObjects->at(i) == this)
@@ -74,7 +73,8 @@ void PhysicsComponent::OnUpdate()
         }
         if(PhysicsObjects->at(i)->shape == SPHERE)
         {
-              if(CheckCollisionBoxSphere(_bounds.GetBoundingBox(),PhysicsObjects->at(i)->parentObject->position, PhysicsObjects->at(i)->radius)) 
+            if(_bounds.CheckSATCollision(_bounds, PhysicsObjects->at(i)->_bounds))
+              //if(CheckCollisionBoxSphere(_bounds.GetBoundingBox(),PhysicsObjects->at(i)->parentObject->position, PhysicsObjects->at(i)->radius)) 
               {
               
                
@@ -95,7 +95,8 @@ void PhysicsComponent::OnUpdate()
         }
         else
         {
-             if(CheckCollisionBoxes(_bounds.GetBoundingBox(), PhysicsObjects->at(i)->_bounds.GetBoundingBox())) 
+            if(_bounds.CheckSATCollision(_bounds, PhysicsObjects->at(i)->_bounds))
+            // if(CheckCollisionBoxes(_bounds.GetBoundingBox(), PhysicsObjects->at(i)->_bounds.GetBoundingBox())) 
             {
                  //
                
@@ -128,12 +129,11 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)//update to get angul
     if(!isKinematic)
     {
         Vector3 dir = Vector3Subtract(parentObject->position, other->parentObject->position);
-
         if(other->isKinematic)
         {
-            debugLog("Collision with kinematic object");
-
-                RayCollision collision = PhysicsWorld::ShootRayCollision(parentObject->position, dir, other->_bounds.GetBoundingBox());
+                Ray ray = {parentObject->position, dir};
+                RayCollision collision = _bounds.GetSATCollision(_bounds, other->_bounds, ray);
+                //RayCollision collision = PhysicsWorld::ShootRayCollision(parentObject->position, dir, other->_bounds.GetBoundingBox());
                 if(parentObject->position.y < other->parentObject->position.y)//standing on top of an object
                 {
                     parentObject->position.y = collision.point.y;
@@ -151,24 +151,32 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)//update to get angul
                     parentObject->position = collision.point;
                     velocity = Vector3Zero();
                 }
+                //get dot product of hit point and normal
+                Vector3 currentDir = Vector3Subtract(parentObject->position, parentObject->forward);
+                float dot = Vector3DotProduct(collision.normal, Vector3Normalize(velocity));
+                debugLog("Dot Product: %f", dot);   
                 _bounds.boxColor = BLUE;
         }
         else
         {
-            //dis dir 
+           
             float dist = Vector3Distance(parentObject->position, other->parentObject->position);
             RayCollision collision = PhysicsWorld::ShootRayCollision(parentObject->position, dir, other->_bounds.GetBoundingBox());
+           // RayCollision collision = _bounds.GetSATCollision(_bounds,other->_bounds);
+            Vector3 hitDir = Vector3Subtract(parentObject->position, collision.point);
+            Vector3 oldPos = parentObject->position;
             if(dist > collision.distance)
             {
                 dist = collision.distance;
             }
-            Vector3 hitDir = Vector3Subtract(parentObject->position, collision.point);
-            parentObject->position = Vector3Subtract(parentObject->position, Vector3Scale(hitDir, dist * 6.0f * GetFrameTime()));//works
+            Vector3 newPos =Vector3Lerp(oldPos, Vector3Subtract(parentObject->position, Vector3Scale(hitDir, dist)), 6.0f * GetFrameTime());//works
+            parentObject->position = newPos;
+
             velocity = Vector3Add(velocity, Vector3Scale(collision.normal,-10.0f * GetFrameTime()));
             _bounds.boxColor = GREEN;
         }
-        
-//
+        //Angular stuff
+
     }
     else
     {

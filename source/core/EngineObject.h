@@ -28,6 +28,8 @@ class EngineObject
         virtual ~EngineObject(){};
         std::vector<ObjectDrawable*> objectDrawables;
         Vector3 position, scale;
+        Vector3 forward = {0, 0, 1};
+        Vector3 upVector = {0, 1, 0};
         Quaternion rotation;
         Matrix transform;
         std::string name;
