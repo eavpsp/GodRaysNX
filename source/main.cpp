@@ -320,7 +320,7 @@ void EngineMain()
             EndDrawing();
 
             //Run Update Callbacks//
-            PhysicsWorld::Update();
+            engineCallBacks->PhysicsUpdate();
             engineCallBacks->RunUpdateCallbacks();
 
             // Get and process input

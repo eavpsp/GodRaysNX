@@ -46,7 +46,9 @@ class PhysicsComponent : public GameComponent
     //
     private:
         void updateBounds();
+        
     public:
+        float groundedYPos=0;
         bool isKinematic = false;
         bool isTrigger = false;
         bool isGrounded = false;

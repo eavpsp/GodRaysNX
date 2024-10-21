@@ -61,7 +61,10 @@ void PhysicsComponent::OnUpdate()
 {
     
     updateBounds();
-
+    if(parentObject->position.y != groundedYPos)
+    {
+        isGrounded = false;
+    }
     //update this to use an octree
     for (size_t i = 0; i < PhysicsObjects->size(); i++)
     {
@@ -119,10 +122,9 @@ void PhysicsComponent::OnUpdate()
     
 }
 
-void PhysicsComponent::onCollision(PhysicsComponent *other)
+void PhysicsComponent::onCollision(PhysicsComponent *other)//update to get angular rotation
 {
-    
-   
+
     if(!isKinematic)
     {
         Vector3 dir = Vector3Subtract(parentObject->position, other->parentObject->position);
@@ -132,17 +134,41 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)
             debugLog("Collision with kinematic object");
 
                 RayCollision collision = PhysicsWorld::ShootRayCollision(parentObject->position, dir, other->_bounds.GetBoundingBox());
-                velocity = Vector3Subtract(velocity, Vector3Scale(dir, -90.0f * GetFrameTime()));
-                _bounds.boxColor = PINK;
+                if(parentObject->position.y < other->parentObject->position.y)//standing on top of an object
+                {
+                    parentObject->position.y = collision.point.y;
+                    velocity.y = 0;
+                    groundedYPos = parentObject->position.y;
+                    isGrounded = true;
+                }
+                else if(parentObject->position.y > other->parentObject->position.y)//standing below an object
+                {
+                    velocity.y = 0;//no velocity let gravity take over//
+                }
+                //side faces
+                else
+                {
+                    parentObject->position = collision.point;
+                    velocity = Vector3Zero();
+                }
+                _bounds.boxColor = BLUE;
         }
         else
         {
+            //dis dir 
+            float dist = Vector3Distance(parentObject->position, other->parentObject->position);
             RayCollision collision = PhysicsWorld::ShootRayCollision(parentObject->position, dir, other->_bounds.GetBoundingBox());
-            velocity = Vector3Subtract(velocity, Vector3Scale(collision.normal, -90.0f * GetFrameTime()));
+            if(dist > collision.distance)
+            {
+                dist = collision.distance;
+            }
+            Vector3 hitDir = Vector3Subtract(parentObject->position, collision.point);
+            parentObject->position = Vector3Subtract(parentObject->position, Vector3Scale(hitDir, dist * 6.0f * GetFrameTime()));//works
+            velocity = Vector3Add(velocity, Vector3Scale(collision.normal,-10.0f * GetFrameTime()));
             _bounds.boxColor = GREEN;
         }
         
-
+//
     }
     else
     {

@@ -1,6 +1,6 @@
 #ifndef SCRIPTCALLBACKS_H
 #define SCRIPTCALLBACKS_H
-constexpr int TARGET_FPS = 60;
+constexpr int TARGET_FPS = 120;
 constexpr double UPDATE_TICK_DELAY = 1.0 / TARGET_FPS;
 
 #include <vector>
@@ -8,6 +8,7 @@ constexpr double UPDATE_TICK_DELAY = 1.0 / TARGET_FPS;
 #include <GameObject.h>
 #include "../debug/debug.h"
 #include <chrono>
+#include "PhysicsWorld.h"
 extern std::vector<GameObject *> *GameObjects;
 extern std::vector<EngineObject *> *GraphicsObjects;
 
@@ -39,6 +40,20 @@ class EngineCallBacks
        
         };
         ~EngineCallBacks(){};
+        void PhysicsUpdate()
+        {
+            updateTicks += _deltaTime;
+           
+
+           if(updateTicks >= UPDATE_TICK_DELAY)
+           {
+                updateTicks -= UPDATE_TICK_DELAY;
+                   
+               
+                PhysicsWorld::Update();
+            
+            }
+        }
         
         
        void RunUpdateCallbacks() 

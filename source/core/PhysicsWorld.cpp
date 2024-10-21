@@ -47,11 +47,17 @@ void PhysicsWorld::Update()
             {
                 PhysicsObjects->at(i)->parentObject->position = Vector3{PhysicsObjects->at(i)->parentObject->position.x, PhysicsWorld::GetGroundPosition().y, PhysicsObjects->at(i)->parentObject->position.z}; 
                 PhysicsObjects->at(i)->velocity.y = 0; // Implement dampening to reduce speed
+                PhysicsObjects->at(i)->groundedYPos = PhysicsObjects->at(i)->parentObject->position.y;
+                PhysicsObjects->at(i)->isGrounded = true;
                
             }
-
             float gravityEffect = PhysicsWorld::GetGravity() * GetFrameTime();
-            PhysicsObjects->at(i)->velocity.y += gravityEffect; // gravity
+
+            if(!PhysicsObjects->at(i)->isGrounded)
+            {
+                PhysicsObjects->at(i)->velocity.y += gravityEffect; // gravity
+            }
+            
           
             if(PhysicsObjects->at(i)->velocity.y < 0)
             {
