@@ -9,9 +9,8 @@
                             -Demo Levels
                             Plane and Sphere
 
-                            add more camera types to be used in game
-
                             add animation events
+                            cache data
 
 Todo:
 ----------------------------
@@ -31,14 +30,22 @@ Audio Component - Done;
 Level Editor - Done
 Raycasting - Done
 Menu Controller - Done
+    TODO: Default Controller and Main Menu(Scene Selection)
 Texture2D component - Mesh Component - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Post Processing - WIP
-Shaders - WIP
+Angular Physics - WIP
+    Spring and Joints
+    Friction
+    Inertia
+    Torque
 Lights - WIP
+Shaders - WIP
+Post Processing - WIP
+LOD - WIP
+Update Editor Components - WIP
 ---------------------------
 *NOT STARTED
 __________________________
@@ -51,7 +58,10 @@ ComputeShader Pathfinding -
 Skeletal Animation -
 IK -
 Procedural Animation -
-
+Animation Events -
+File Archive System -
+ARM SIMD Instruction Set Implementation - 
+Add Smart Pointers -
 */
 //Heap 256MB
 #include <switch.h>
@@ -179,7 +189,7 @@ void DrawPhysicsObjects()
        for (size_t i = 0; i < PhysicsObjects->size(); i++)
            {
                 MightyBoundingBox box = MightyBoundingBox(PhysicsObjects->at(i)->_bounds);
-                box.DrawBoundingBox(RED);
+                box.DrawBoundingBox(box.boxColor);
            }
            
 }
@@ -264,6 +274,7 @@ void EngineMain()
             //ecs.UpdateSystem();
             gameManager->runGameLoop();
             mainCamera.UpdateCamera();
+
             BeginDrawing();//Create Render System with View Frustrum //Move to render system
             BeginMode3D(*mainCamera.camToUse);
                 ClearBackground(RAYWHITE);
@@ -302,13 +313,16 @@ void EngineMain()
                
             */
            //draw physics obj colliders//
+
             DrawPhysicsObjects();
            ////
             EndMode3D();
             EndDrawing();
+
+            //Run Update Callbacks//
             PhysicsWorld::Update();
-            //Run Update Callbacks
             engineCallBacks->RunUpdateCallbacks();
+
             // Get and process input
             if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
                 gameManager->destroyGameManager();

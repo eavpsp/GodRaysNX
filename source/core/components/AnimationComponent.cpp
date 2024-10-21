@@ -1,6 +1,6 @@
 #include <AnimationComponent.h>
 #include <string.h>
-#include <GR_Mesh.h>
+#include <GR_MeshComponent.h>
 
 void AnimationComponent::Play()
 {

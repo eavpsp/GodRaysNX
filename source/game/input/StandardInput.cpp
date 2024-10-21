@@ -105,7 +105,7 @@ void StandardController::UpdateAxisInputs()
             // Update camera target
              mightyCam->camToUse->target = Vector3Add( mightyCam->camToUse->position, forward);
         }
-        else if(Rightx != 0)
+         if(Rightx != 0)
         {
                mightyCam->camToUse->target = Vector3Add( mightyCam->camToUse->target, Vector3Scale(Vector3Normalize(Vector3CrossProduct( mightyCam->camToUse->up, Vector3Subtract( mightyCam->camToUse->target,  mightyCam->camToUse->position))), Rightx * 5.0f * GetFrameTime()));
 

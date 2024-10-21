@@ -25,32 +25,9 @@ struct Plane
 };
 struct MightyBoundingBox 
 {
-  
-    Vector3 corners[8];
-    float GetDepth() {
-        return corners[2].z - corners[0].z;
-    }
-    float GetWidth() {
-        return corners[6].x - corners[0].x;
-    }
-    float GetHeight() {
-        return corners[7].y - corners[0].y;
-    }
-    Vector3 GetClosestPoint(MightyBoundingBox other) {
-        Vector3 closestPoint;
-        float closestDistance = FLT_MAX;
-        for (int i = 0; i < 8; i++) {
-            Vector3 point = corners[i];
-            Vector3 otherCenter = other.GetCenter();
-            Vector3 diff = Vector3Subtract(point, otherCenter);
-            float distance = Vector3Length(diff);
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestPoint = point;
-            }
-        }
-        return closestPoint;
-    }
+    Color boxColor = RED;
+    Vector3 corners[8];//udpate to vector
+    int cornersCount = 8;
     void UpdateCorners(Vector3 parentPos, Vector3 size)
     {
     
@@ -62,70 +39,33 @@ struct MightyBoundingBox
             };
         }
     }
-    
-bool IsColliding(const MightyBoundingBox& box1, const MightyBoundingBox& box2) {
-    // Check if there is a separating plane between the two OOBBs
-    Vector3 axes[15];
-    for (int i = 0; i < 3; i++) {
-        axes[i] = Vector3Subtract(box1.corners[i + 1], box1.corners[i]);
-        axes[i + 3] = Vector3Subtract(box2.corners[i + 1], box2.corners[i]);
-    }
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            axes[6 + i * 3 + j] = Vector3CrossProduct(axes[i], axes[3 + j]);
-        }
-    }
-    
-    for (int i = 0; i < 15; i++) {
-        float min1, max1, min2, max2;
-        ProjectOntoAxis(box1, axes[i], min1, max1);
-        ProjectOntoAxis(box2, axes[i], min2, max2);
-
-        if (max1 < min2 || max2 < min1) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void ProjectOntoAxis(const MightyBoundingBox& box, Vector3 axis, float& min, float& max) {
-    min = max = Vector3DotProduct(box.corners[0], axis);
-    for (int i = 1; i < 8; i++) {
-        float projection = Vector3DotProduct(box.corners[i], axis);
-        if (projection < min) min = projection;
-        if (projection > max) max = projection;
-    }
-}
     void DrawBoundingBox(Color color) 
-{
-    // Draw bounding box lines
-    DrawLine3D(corners[0], corners[1], color);
-    DrawLine3D(corners[1], corners[3], color);
-    DrawLine3D(corners[3], corners[2], color);
-    DrawLine3D(corners[2], corners[0], color);
+    {
+        // Draw bounding box lines
+        DrawLine3D(corners[0], corners[1], color);
+        DrawLine3D(corners[1], corners[3], color);
+        DrawLine3D(corners[3], corners[2], color);
+        DrawLine3D(corners[2], corners[0], color);
 
-    DrawLine3D(corners[4], corners[5], color);
-    DrawLine3D(corners[5], corners[7], color);
-    DrawLine3D(corners[7], corners[6], color);
-    DrawLine3D(corners[6], corners[4], color);
+        DrawLine3D(corners[4], corners[5], color);
+        DrawLine3D(corners[5], corners[7], color);
+        DrawLine3D(corners[7], corners[6], color);
+        DrawLine3D(corners[6], corners[4], color);
 
-    DrawLine3D(corners[0], corners[4], color);
-    DrawLine3D(corners[1], corners[5], color);
-    DrawLine3D(corners[2], corners[6], color);
-    DrawLine3D(corners[3], corners[7], color);
-}
+        DrawLine3D(corners[0], corners[4], color);
+        DrawLine3D(corners[1], corners[5], color);
+        DrawLine3D(corners[2], corners[6], color);
+        DrawLine3D(corners[3], corners[7], color);
+    }
 
-    BoundingBox GetBoundingBox() {
+    BoundingBox GetBoundingBox() 
+    {
         Vector3 min = GetMinVector3(corners, 8);
         Vector3 max = GetMaxVector3(corners, 8);
         return {min, max};
     }
     Vector3 GetCorner(int index)
     {
-        // Define the corners of the bounding box
-       
-        // Return the corner at the specified index
         return corners[index];
     }
     Vector3 GetMaxVector3(Vector3* vectors, int count)
@@ -154,24 +94,20 @@ void ProjectOntoAxis(const MightyBoundingBox& box, Vector3 axis, float& min, flo
         return Vector3Add(Vector3Scale(min, 0.5f), Vector3Scale(max, 0.5f));
     }
     
-    void Rotate(Matrix *parentTransform) {
-    // Define the rotation matrices
-
-    // Get the corners of the OBB after rotation
-    GetBoundingBoxCorners(*parentTransform, corners);
-
-    // Update the bounding box with the new corners
-}
+    void Rotate(Matrix *parentTransform)
+    {
+        GetBoundingBoxCorners(*parentTransform, corners);
+    }
     void GetBoundingBoxCorners(Matrix rotationMat, Vector3* corners)
-     {
+    {
         // Calculate the corners of the rotated bounding box
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) 
+        {
             Vector3 corner = Vector3Transform(GetCorner(i), rotationMat);
             corners[i] = corner;
-    }
+        }
  
-    
-}
+    }
 
     MightyBoundingBox(){};
 };

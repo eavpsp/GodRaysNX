@@ -89,6 +89,7 @@ class PhysicsComponent : public GameComponent
             triggerEvents.clear();
             collisionEvents.clear();
         };
+        void SetAngularVelocity(float angularVelocity, Vector3 axis);
         void OnUpdate();
         void onCollision(PhysicsComponent *other);
         void onTrigger(PhysicsComponent *other);

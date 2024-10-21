@@ -11,6 +11,7 @@ struct GR_Mesh : ObjectDrawable
     GR_Mesh(Model model) : model(model) {};
     void draw() override
     {
+        model.transform = MatrixRotateXYZ(QuaternionToEuler(componentParent->parentObject->rotation));
         DrawModel(model, componentParent->parentObject->position, 1.0f, WHITE);
     }
 };

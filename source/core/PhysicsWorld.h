@@ -16,6 +16,7 @@ class PhysicsWorld
         static void Shutdown();
         static void Update();
         static void AddForce(PhysicsComponent *obj, Vector3 force);
+
         static RayCollision ShootRayCollision(Vector3 pos, Vector3 dir, BoundingBox box)
         {
             Ray ray = {pos, dir};

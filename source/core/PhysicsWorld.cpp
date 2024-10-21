@@ -43,38 +43,25 @@ void PhysicsWorld::Update()
     {
         if(!PhysicsObjects->at(i)->isKinematic)
         {
-           if(PhysicsObjects->at(i)->parentObject->position.y > PhysicsWorld::GetGroundPosition().y)
-           {
-                PhysicsObjects->at(i)->isGrounded = false;  
-           }
-              if(PhysicsObjects->at(i)->parentObject->position.y == PhysicsWorld::GetGroundPosition().y && useGround)
-            {
-                
-                PhysicsObjects->at(i)->isGrounded = true;
-               
-            }
-            if(PhysicsObjects->at(i)->parentObject->position.y < PhysicsWorld::GetGroundPosition().y && useGround)
+            if(PhysicsObjects->at(i)->parentObject->position.y < PhysicsWorld::GetGroundPosition().y)
             {
                 PhysicsObjects->at(i)->parentObject->position = Vector3{PhysicsObjects->at(i)->parentObject->position.x, PhysicsWorld::GetGroundPosition().y, PhysicsObjects->at(i)->parentObject->position.z}; 
                 PhysicsObjects->at(i)->velocity.y = 0; // Implement dampening to reduce speed
-                PhysicsObjects->at(i)->isGrounded = true;
-
                
             }
 
             float gravityEffect = PhysicsWorld::GetGravity() * GetFrameTime();
-            PhysicsObjects->at(i)->velocity.y += gravityEffect; // Make the velocity influence the object
-            
-            //check if the object is accelerating up
+            PhysicsObjects->at(i)->velocity.y += gravityEffect; // gravity
+          
             if(PhysicsObjects->at(i)->velocity.y < 0)
             {
                 PhysicsObjects->at(i)->parentObject->position.y += PhysicsObjects->at(i)->velocity.y + 0.5f * gravityEffect; // Make the velocity influence the object
             }
             if(PhysicsObjects->at(i)->velocity.x != 0 || PhysicsObjects->at(i)->velocity.y != 0 || PhysicsObjects->at(i)->velocity.z != 0) 
             {
-                PhysicsObjects->at(i)->velocity  = Vector3Add(PhysicsObjects->at(i)->velocity , Vector3Add(PhysicsObjects->at(i)->velocity, Vector3Scale(PhysicsObjects->at(i)->acceleration, GetFrameTime() / PhysicsObjects->at(i)->mass)));
-                PhysicsObjects->at(i)->parentObject->position = Vector3Add(PhysicsObjects->at(i)->parentObject->position, Vector3Scale(PhysicsObjects->at(i)->velocity, GetFrameTime()));
-                PhysicsObjects->at(i)->velocity = Vector3Scale(PhysicsObjects->at(i)->velocity,  -PhysicsObjects->at(i)->mass * 0.05f);
+                PhysicsObjects->at(i)->velocity  = Vector3Add(PhysicsObjects->at(i)->velocity , Vector3Add(PhysicsObjects->at(i)->velocity, Vector3Scale(PhysicsObjects->at(i)->acceleration, GetFrameTime())));//apply acceleration
+                PhysicsObjects->at(i)->parentObject->position = Vector3Add(PhysicsObjects->at(i)->parentObject->position, Vector3Scale(PhysicsObjects->at(i)->velocity, GetFrameTime()));//apply velocity
+                PhysicsObjects->at(i)->velocity = Vector3Scale(PhysicsObjects->at(i)->velocity,  -PhysicsObjects->at(i)->mass * 0.05f);//reduce velocity to simulate drag
 
             }
         }

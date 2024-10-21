@@ -8,7 +8,7 @@
 #include <PhysicsComponent.h>
 #include <AnimationComponent.h>
 #include <switch.h>
-#include <GR_Mesh.h>
+#include <GR_MeshComponent.h>
 // Holds Scene Gameobjects
 // Light Data
 // Camera Data
@@ -177,6 +177,7 @@ class GameSceneManager
                                             
                                             PhysicsComponentsData *physics = (PhysicsComponentsData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
                                             CurrentScene->objectsAndComponentsMap[i][52223] = (physics);
+                                            debugLog("isKinematic: %d", physics->_isKinematic);
                                             addon += sizeof(PhysicsComponentsData);
                                             debugLog("Physics Component Found");
                                         }
