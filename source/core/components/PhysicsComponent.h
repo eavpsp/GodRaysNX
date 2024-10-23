@@ -59,6 +59,8 @@ class PhysicsComponent : public GameComponent
         Vector3 size = {1,1,1};
         Vector3 velocity = {0,0,0};
         Vector3 acceleration = {0,0,0};
+        bool useGravity = true;
+        float angularVelocity = 0;
         float mass = 1.0f;
         MightyBoundingBox _bounds;
         std::vector<TriggerEvents *> triggerEvents;

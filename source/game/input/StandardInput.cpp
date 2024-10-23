@@ -2,6 +2,7 @@
 #include <raymath.h>
 #include <GameObject.h>
 #include <PhysicsComponent.h>
+#include <GR_MeshComponent.h>
 
 GameObject *player;
 bool playerActive = false;
@@ -15,8 +16,10 @@ void StandardController::UpdateButtonInputs()
         Model mod = LoadModel("romfs:/models/prim/cube.obj");
         comp->_bounds.SetupColliderMesh(mod.meshes[0]);
         player->AddComponent(comp);
+
+
     }
-    player->position = mightyCam->camToUse->position;
+    player->position = Vector3Subtract(mightyCam->camToUse->position, Vector3{0.0f, 2.0f, 0.0f});
     Vector3 forward = Vector3Normalize(Vector3Subtract( mightyCam->camToUse->target,  mightyCam->camToUse->position));
     //button presed -- can be extended to all button positions
      switch (GetGamepadButtonPressed())
@@ -39,7 +42,7 @@ void StandardController::UpdateButtonInputs()
         case GAMEPAD_BUTTON_RIGHT_TRIGGER_1:
              mightyCam->SetCamPosition(Vector3Add(mightyCam->camToUse->position , Vector3{0.0f, +modifiedSpeed* GetFrameTime(), 0.0f}));
              mightyCam->camToUse->target = forward;
-            mightyCam->UpdateViewFrustum();
+                mightyCam->UpdateViewFrustum();
 
             break;
         case GAMEPAD_BUTTON_RIGHT_TRIGGER_2:

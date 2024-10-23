@@ -72,52 +72,27 @@ void PhysicsComponent::OnUpdate()
         {
             continue;
         }
-        if(PhysicsObjects->at(i)->shape == SPHERE)
+
+        if(_bounds.CheckCollision(this->_bounds.collider, PhysicsObjects->at(i)->_bounds.collider, &this->_bounds.normal))
+        //if(CheckCollisionBoxSphere(_bounds.GetBoundingBox(),PhysicsObjects->at(i)->parentObject->position, PhysicsObjects->at(i)->radius)) 
         {
-             if(_bounds.CheckCollision(this->_bounds.collider, PhysicsObjects->at(i)->_bounds.collider, &this->_bounds.normal))
-              //if(CheckCollisionBoxSphere(_bounds.GetBoundingBox(),PhysicsObjects->at(i)->parentObject->position, PhysicsObjects->at(i)->radius)) 
-              {
-              
-               
-                if(isTrigger)
-                {
-                        onTrigger(PhysicsObjects->at(i));
-                }
-                else
-                {
-                        onCollision(PhysicsObjects->at(i));
-
-                }
-            }
-             else{
-                 _bounds.boxColor = RED;
-
-            }
+        
+        
+        if(isTrigger)
+        {
+                onTrigger(PhysicsObjects->at(i));
         }
         else
         {
-            if(_bounds.CheckCollision(this->_bounds.collider, PhysicsObjects->at(i)->_bounds.collider, &this->_bounds.normal))
-            // if(CheckCollisionBoxes(_bounds.GetBoundingBox(), PhysicsObjects->at(i)->_bounds.GetBoundingBox())) 
-            {
-                 //
-               
-                if(isTrigger)
-                {
-                        onTrigger(PhysicsObjects->at(i));
-                }
-                else
-                {
-                        onCollision(PhysicsObjects->at(i));
-                }
-            }
-            else
-            {
-                 _bounds.boxColor = RED;
+                onCollision(PhysicsObjects->at(i));
 
-            }
-           
         }
-       
+    }
+        else
+        {
+            _bounds.boxColor = RED;
+        }
+
     }
 
 
@@ -131,14 +106,15 @@ void PhysicsComponent::onCollision(PhysicsComponent *other)//update to get angul
     {
         if(other->isKinematic)
         {
-            parentObject->position = Vector3Add(parentObject->position, this->_bounds.normal);
+            velocity = Vector3Add(velocity, this->_bounds.normal);
            _bounds.boxColor = BLUE;
         }
         else
         {
-        
-            parentObject->position = Vector3Add(parentObject->position, this->_bounds.normal);
+
+            parentObject->position = (Vector3Add(parentObject->position, this->_bounds.normal));//scale new pos with impulse based on velocity and mass
             _bounds.boxColor = GREEN;
+
 
         }
         

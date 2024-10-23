@@ -23,7 +23,7 @@ Loading Scene System - Done
 Physics system - Done
 Input System - Done
 Animation System - Done
-ESC System for Static Objects - Done
+ESC System - Done
 View Frustrum - Done
 Particle system (Dynamic Batched Software Particles)- Done
 Audio Component - Done;
@@ -32,18 +32,21 @@ Raycasting - Done
 Menu Controller - Done
     TODO: Default Controller and Main Menu(Scene Selection)
 Texture2D component - Mesh Component - Done
+Lights - Done
 -------------------------
 *WIP
 ___________________________
 **Current
+
+Shaders - WIP
+Post Processing - WIP
 Angular Physics - WIP
     Spring and Joints
     Friction
     Inertia
     Torque
-Lights - WIP
-Shaders - WIP
-Post Processing - WIP
+    Momentum
+    Acceleration
 LOD - WIP
 Update Editor Components - WIP
 ---------------------------
@@ -64,6 +67,8 @@ File Archive System -
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
 Lightmaps - Shadow Maps - 
+Networking - 
+    Multiplayer -
 */
 //Heap 256MB
 #include <switch.h>
@@ -218,7 +223,7 @@ void TestPhysicsSAT()
 
 for(int i = 0; i < 5 ; i++)
 {
-        GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 3,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
         GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
         GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
         meshObject2->AddComponent(mesh2);
@@ -313,7 +318,7 @@ void EngineMain()
 
             BeginDrawing();//Create Render System with View Frustrum //Move to render system
             BeginMode3D(*mainCamera.camToUse);
-                ClearBackground(RAYWHITE);
+                ClearBackground(DARKBLUE);
                 gameManager->renderLoop();
                 
                 //Entity, Octree, Frustum

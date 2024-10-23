@@ -55,10 +55,11 @@ struct GameObject : public EngineObject
                 //add callback
                 //newObject->material = mat;
                 newObject->transform = Matrix();
-                newObject->position = Vector3{_position.x, _position.y, _position.z};//flip Y 
+                newObject->position = Vector3{_position.x, _position.y, _position.z};
                 newObject->rotation = Quaternion{_rotation.x, _rotation.y, _rotation.z, _rotation.w};
+                newObject->scale = Vector3 { _scale.x, _scale.y, _scale.z };
                 newObject->transform = MatrixMultiply(MatrixRotateXYZ(QuaternionToEuler (newObject->rotation)), MatrixTranslate(newObject->position.x, newObject->position.y, newObject->position.z));
-                newObject->scale = Vector3 { _scale.x, _scale.y, _scale.z };;
+                newObject->transform = MatrixMultiply(newObject->transform, MatrixScale(newObject->scale.x, newObject->scale.y, newObject->scale.z));
                 newObject->name = _name;
                 newObject->onInit();
                 return newObject;
