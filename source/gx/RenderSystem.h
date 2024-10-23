@@ -1006,17 +1006,11 @@ struct RenderSystem
     MightyCam mainCamera;
     RenderTexture2D post_process_target;
     Shader postProcessingShaders[2];
-    PostProcessingFX currentFX = BLUR;
-    Shader defaultShader;
+    PostProcessingFX currentFX = BLOOM;
+    Shader *defaultShader;
     Light defaultLight;
     RenderSystem()
     {
-        defaultShader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
-        defaultShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(defaultShader, "viewPos");
-        int ambientLoc = GetShaderLocation(defaultShader, "ambient");
-        SetShaderValue(defaultShader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
-        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0}, Vector3Zero(), RED, defaultShader);
-        defaultLight.enabled = true;
         postProcessing = true;
         post_process_target = LoadRenderTexture(screenWidth, screenHeight);
         //load shaders
@@ -1025,8 +1019,10 @@ struct RenderSystem
         postProcessingShaders[1] = LoadShader(0,ShaderPaths.at(PostProcessingFX::BLUR).c_str());
 
     };
-    void SetLights(){
-
+    void SetLights()
+    {
+        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0}, Vector3Zero(), WHITE, *defaultShader);
+        defaultLight.enabled = true;
     }
     ~RenderSystem() = default;
       

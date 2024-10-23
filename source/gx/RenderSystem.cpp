@@ -7,22 +7,13 @@ void RenderSystem::RenderScene()
  {
     if(postProcessing)
     {
-        if(!IsShaderReady(defaultShader))
-        {
-            defaultShader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
-            defaultShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(defaultShader, "viewPos");
-            int ambientLoc = GetShaderLocation(defaultShader, "ambient");
-            SetShaderValue(defaultShader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
-            defaultLight = CreateLight(LIGHT_POINT, Vector3Zero(), Vector3Zero(), RED, defaultShader);
-            defaultLight.enabled = true;
-        }
+        
         float camPos[3] = { mainCamera.camToUse->position.x, mainCamera.camToUse->position.y, mainCamera.camToUse->position.z };
-        SetShaderValue(defaultShader, defaultShader.locs[SHADER_LOC_VECTOR_VIEW], camPos, SHADER_UNIFORM_VEC3);
-        UpdateLightValues(defaultShader, defaultLight);
+        SetShaderValue(*defaultShader, defaultShader->locs[SHADER_LOC_VECTOR_VIEW], camPos, SHADER_UNIFORM_VEC3);
+        UpdateLightValues(*defaultShader, defaultLight);
         BeginTextureMode(post_process_target);       // Enable drawing to texture
             ClearBackground(BLACK);//get scene color
             BeginMode3D(*mainCamera.camToUse);
-                BeginShaderMode(defaultShader);
                     for (size_t i = 0; i < GameObjects->size(); i++)
                     {
                         /* code */
@@ -33,7 +24,6 @@ void RenderSystem::RenderScene()
                     {
                         DrawGrid(10, 1.0f);
                     }
-                EndShaderMode();
             EndMode3D();                // End 3d mode drawing, returns to orthographic 2d mode
         EndTextureMode();               // End drawing to texture (now we have a texture available for next passes)
         

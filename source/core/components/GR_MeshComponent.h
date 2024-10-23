@@ -12,8 +12,12 @@ struct GR_Mesh : ObjectDrawable
     GR_Mesh(Model model) : model(model) {};
     void draw() override
     {
-        model.transform = MatrixRotateXYZ(QuaternionToEuler(componentParent->parentObject->rotation));
-        DrawModel(model, componentParent->parentObject->position, 1.0f, WHITE);
+        if(IsShaderReady(model.materials[0].shader))
+        {
+            model.transform = MatrixRotateXYZ(QuaternionToEuler(componentParent->parentObject->rotation));
+            DrawModel(model, componentParent->parentObject->position, 1.0f, WHITE);
+        }
+        
     }
 };
 enum ShaderType
@@ -29,11 +33,11 @@ struct GR_MeshComponent : GameComponent
     {
         
     }
-    void SetShader(Shader shader )
+    void SetShader(Shader *shader )
     {
-        mesh->model.materials[0].shader = shader;// Set shader effect to 3d model
+        mesh->model.materials[0].shader = *shader;// Set shader effect to 3d model
     }
-    void SetTexture(Texture2D texture)
+    void SetTexture(const Texture2D& texture)
     {
         mesh->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture; // Bind texture to model
     }

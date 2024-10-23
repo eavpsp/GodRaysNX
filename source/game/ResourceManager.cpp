@@ -43,7 +43,7 @@ std::map<int, std::string> RES_AudioFiles =
 //GAME SHADERS
 std::map<int, std::pair<std::string, std::string>> RES_Shaders = 
 {
-  {_RES::ShaderFiles::LIGHT, {"romfs:/shaders/glsl330/lighting.vs", "romfs:/shaders/glsl330/lighting.fs"}},
+  {_RES::ShaderFiles::LIGHT, {"romfs:/shaders/glsl100/lighting.vs", "romfs:/shaders/glsl100/lighting.fs"}},
 };
 
 // Loads and returns a lighting shader with predefined settings.

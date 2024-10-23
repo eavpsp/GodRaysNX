@@ -205,12 +205,17 @@ void DrawPhysicsObjects()
 
 void TestPhysicsSAT()
 {
+    Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
+    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    int ambientLoc = GetShaderLocation(shader, "ambient");
+    SetShaderValue(shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+
     //spawn slop and a mesh
-   
+    Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
     GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
-    //slopeMesh->SetShader(renderSystem->defaultShader);
+    slopeMesh->SetShader(&shader);
     slope->AddComponent(slopeMesh);
     PhysicsComponent *slopeBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
     slopeBody->_bounds.SetupColliderMesh(slopeData->model.meshes[0]);
@@ -219,26 +224,27 @@ void TestPhysicsSAT()
     GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
-   // mesh->SetShader(renderSystem->defaultShader);
-
+    mesh->SetShader(&shader);
     meshObject->AddComponent(mesh);
     PhysicsComponent *meshBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
     meshBody->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
     meshObject->AddComponent(meshBody);
+    
 
-for(int i = 0; i < 5 ; i++)
-{
+    for(int i = 0; i < 5 ; i++)
+    {
         GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
         GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
         GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
-      //  mesh2->SetShader(renderSystem->defaultShader);
+        mesh2->SetShader(&shader);
         meshObject2->AddComponent(mesh2);
         PhysicsComponent *meshBody2 = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, false);
         meshBody2->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
         meshObject2->AddComponent(meshBody2);
-}
+    }
   
-
+    renderSystem->defaultShader = &shader;
+    renderSystem->SetLights();
 
 }   
 
