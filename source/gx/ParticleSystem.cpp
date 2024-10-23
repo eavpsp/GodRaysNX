@@ -1,6 +1,8 @@
 #include <ParticleSystem.h>
 #include <raymath.h>
 #include <mwmath.h>
+#include <RenderSystem.h>
+extern RenderSystem *renderSystem;
 
 void ParticleSystem::AddComponent(Entity entity, ParticleType particleType)
 {
@@ -22,6 +24,24 @@ void ParticleSystem::RemoveComponent(Entity entity)
 ParticleComponent ParticleSystem::GetComponent(Entity entity)
 {
     return particles[entity];
+}
+BurstParticleSystem::BurstParticleSystem(int particleCount, Vector3 position, int maxDistance)
+{
+            //USED TO SET RENDER PROC FOR CUSTOM SHADERS
+            //RENDER_PROC renderProc = RENDER_PROC();
+            //renderSystem->AddRenderProc(&renderProc);
+            this->position = position;
+            this->maxDistance = maxDistance;
+            numberOfParticles = particleCount;
+            for (size_t i = 0; i < numberOfParticles; i++)
+            {
+                //create entities and store them
+                size_t entity = EntityManager::AddEntity();
+                Entity entity_data = EntityManager::GetEntity(entity);
+                AddComponent(entity_data, P_SPHERE);
+            }
+            
+         
 }
 
 void BurstParticleSystem::Draw()

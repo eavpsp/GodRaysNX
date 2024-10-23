@@ -2,6 +2,7 @@
 #include <raymath.h>    
 #include <vector>
 #include "ScriptCallbacks.h"
+#include <btBulletDynamicsCommon.h>
 extern std::vector<PhysicsComponent *> *PhysicsObjects;
 static float gravity;
 static bool _initialized;
@@ -22,19 +23,67 @@ void PhysicsWorld::SetGravity(float value)
     gravity = value;
 }
 
-void PhysicsWorld::Init(float gravity, bool ground)
+void PhysicsWorld::InitBasic(float gravity, bool ground)
 {
     useGround = ground;    
     PhysicsWorld::SetGravity(gravity);
     _initialized = true;
 }
+void PhysicsWorld::InitBullet()
+{
+    
+        ///-----initialization_start-----
+        ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
+        collisionConfiguration = new btDefaultCollisionConfiguration();
 
-void PhysicsWorld::Shutdown()
+        ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
+        dispatcher = new btCollisionDispatcher(collisionConfiguration);
+
+        ///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
+       overlappingPairCache = new btDbvtBroadphase();
+
+        ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
+        solver = new btSequentialImpulseConstraintSolver;
+
+        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+        dynamicsWorld->setGravity(btVector3(0, -10, 0));
+
+        btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(50.), btScalar(50.)));
+
+        btTransform groundTransform;
+        groundTransform.setIdentity();
+        groundTransform.setOrigin(btVector3(0, -56, 0));
+
+        btScalar mass(0.);
+
+        //rigidbody is dynamic if and only if mass is non zero, otherwise static
+        bool isDynamic = (mass != 0.f);
+
+        btVector3 localInertia(0, 0, 0);
+        if (isDynamic)
+            groundShape->calculateLocalInertia(mass, localInertia);
+
+        //using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
+        btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
+        btRigidBody* body = new btRigidBody(rbInfo);
+
+        //add the body to the dynamics world
+        dynamicsWorld->addRigidBody(body);
+        _initialized = true;
+}
+
+void PhysicsWorld::ShutdownPhysicsWorld()
 {
     _initialized = false;
 }
+void PhysicsWorld::UpdateBullet()
+{
+    dynamicsWorld->stepSimulation(1.f / 120.f, 10);
 
-void PhysicsWorld::Update()
+}
+void PhysicsWorld::UpdateBasic()
 {
     if(PhysicsObjects->size() == 0)
     {

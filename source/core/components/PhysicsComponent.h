@@ -5,6 +5,7 @@
 #include <GameObject.h> 
 #include <vector>
 #include <RenderSystem.h>
+#include <btBulletDynamicsCommon.h>
 /*************************** 
 Physics System
 ------------------
@@ -101,6 +102,54 @@ class PhysicsComponent : public GameComponent
         
 
 
+};
+
+
+class BulletPhysicsComponent : public GameComponent
+{
+    btAlignedObjectArray<btCollisionShape*> collisionShapes;//Bullet Shapes Vector
+    btTransform *transform;
+    btScalar mass;
+    btVector3 localInertia;
+    btDefaultMotionState* myMotionState;
+    btRigidBody* body;
+    void ComponentAddedCallback() override
+    {
+        return;
+    }
+    //ref to gameobject
+   
+   
+    void BindMatrix()
+    {       
+
+        myMotionState->getWorldTransform(*transform); 
+
+        //bullet and open gl postions are inverted, might fix in shader
+        parentObject->position = Vector3{transform->getOrigin().x(), transform->getOrigin().y(), transform->getOrigin().z()};//fine
+        parentObject->rotation = Quaternion{transform->getRotation().getW(), transform->getRotation().getX(), transform->getRotation().getZ(), transform->getRotation().getY()};
+    }
+    public:
+/**
+ * Constructor for BulletPhysicsComponent.
+ * @param pos The initial position of the rigid body.
+ * @param rot The initial rotation of the rigid body.
+ * @param mass The mass of the rigid body (0 for static, non-zero for dynamic).
+ * @param localInertia The local inertia of the rigid body.
+ * @param shape The collision shape of the rigid body.
+ */
+        BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape* shape);
+       
+        ~BulletPhysicsComponent(){};
+
+        void OnUpdate() override
+        {
+            if(!parentObject->isActive || !isActive)
+            {
+                return;
+            }
+            BindMatrix();
+        }
 };
 
 #endif // PHYSICSCOMPONENT_H

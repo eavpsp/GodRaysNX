@@ -81,7 +81,8 @@
                 "${workspaceFolder}\\source\\ext\\**",
                 "C:/devkitPro/libnx/include/switch",
                 "${workspaceFolder}/source/core/components",
-                "${workspaceFolder}/source/game/input"
+                "${workspaceFolder}/source/game/input",
+                "C:/devkitPro/portlibs/switch/include/bullet"
             ],
             "defines": [
                 "\"__SWITCH__\"",

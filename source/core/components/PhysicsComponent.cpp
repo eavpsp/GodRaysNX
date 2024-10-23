@@ -4,6 +4,8 @@
 #include <PhysicsWorld.h>
 #include <RenderSystem.h>   
 extern std::vector<PhysicsComponent *> *PhysicsObjects;
+extern PhysicsWorld *physicsWorld;
+
 /*
 
 First, calculate the projection of the gravity vector onto the plane normal:
@@ -152,3 +154,18 @@ void PhysicsComponent::ComponentAddedCallback()
     debugLog("Added physics object");
         
 }
+
+BulletPhysicsComponent::BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape *shape)
+ {
+    
+            transform = new btTransform(btQuaternion(btScalar(rot.z), btScalar(rot.y), btScalar(rot.x)));
+            transform->setOrigin(btVector3(pos.x, pos.y, pos.z));
+            this->mass = btScalar(mass);
+            this->localInertia = btVector3(0, 0, 0);
+            this->myMotionState = new btDefaultMotionState(*transform);
+            collisionShapes.push_back(shape);
+            btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
+            btRigidBody* body = new btRigidBody(rbInfo);
+            body->setWorldTransform(*transform);
+            physicsWorld->dynamicsWorld->addRigidBody(body);
+};

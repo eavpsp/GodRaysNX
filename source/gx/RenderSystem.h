@@ -636,7 +636,6 @@ class DynamicOctreeContainer
        
 };
 
-
 template <typename T>
 class OctreeContainer
 {
@@ -721,22 +720,6 @@ class OctreeContainer
        }
        
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 template <typename OBJECT_TYPE>
@@ -994,7 +977,15 @@ public:
 	}
 
 };
-
+struct RENDER_PROC//begin shader process
+{
+    void (*draw)();
+    RENDER_PROC(void (*draw)()):draw(draw){};
+    bool operator==(const RENDER_PROC& other) const
+    {
+        return draw == other.draw;
+    }
+};
 extern const int screenWidth;
 extern const int screenHeight;
 extern std::vector<std::string> ShaderPaths;
@@ -1009,6 +1000,7 @@ struct RenderSystem
     PostProcessingFX currentFX = BLOOM;
     Shader *defaultShader;
     Light defaultLight;
+    std::vector<RENDER_PROC> renderProcs;
     RenderSystem()
     {
         postProcessing = true;
@@ -1019,6 +1011,14 @@ struct RenderSystem
         postProcessingShaders[1] = LoadShader(0,ShaderPaths.at(PostProcessingFX::BLUR).c_str());
 
     };
+    void AddRenderProc(RENDER_PROC *proc)
+    {
+        renderProcs.push_back(*proc);
+    }
+    void RemoveRenderProc(RENDER_PROC *proc)
+    {
+        renderProcs.erase(std::remove(renderProcs.begin(), renderProcs.end(), *proc), renderProcs.end());
+    }
     void SetLights()
     {
         defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0}, Vector3Zero(), WHITE, *defaultShader);
@@ -1027,7 +1027,7 @@ struct RenderSystem
     ~RenderSystem() = default;
       
     void RenderScene();
-static RenderSystem& getRenderSystem();
+    static RenderSystem& getRenderSystem();
 
 
 };

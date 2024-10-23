@@ -1,22 +1,37 @@
 #ifndef PHYSICSWORLD_H
 #define PHYSICSWORLD_H
 #include <PhysicsComponent.h>
+#include <btBulletDynamicsCommon.h>
 
 class PhysicsWorld
 {   
-   
-    //add functions for adding forces and other stuff
-    public:
-    //ground game object
-    //Raycast for ground
-        static Vector3 GetGroundPosition();
-        static float GetGravity();
-        static void SetGravity(float value);
-        static void Init(float gravity = -9.8f, bool ground = true);
-        static void Shutdown();
-        static void Update();
-        static void AddForce(PhysicsComponent *obj, Vector3 force);
 
+    public:
+    //BASIC
+         Vector3 GetGroundPosition();
+         float GetGravity();
+         void SetGravity(float value);
+         void InitBasic(float gravity = -9.8f, bool ground = true);
+         void UpdateBasic();
+         void AddForce(PhysicsComponent *obj, Vector3 force);
+    ///BULLET
+        btDiscreteDynamicsWorld*  dynamicsWorld;
+        btSequentialImpulseConstraintSolver* solver;
+        btBroadphaseInterface* overlappingPairCache;
+        btDefaultCollisionConfiguration* collisionConfiguration;
+        btCollisionDispatcher* dispatcher;
+        void DoPhysicsSimulation();
+        void AddForceBullet(BulletPhysicsComponent *obj, Vector3 force);
+        void InitBullet();
+        void UpdateBullet();
+    //BOTH
+        void ShutdownPhysicsWorld();
+    PhysicsWorld()
+    {};
+};
+
+namespace PhysicsUtil
+{
         static RayCollision ShootRayCollision(Vector3 pos, Vector3 dir, BoundingBox box)
         {
             Ray ray = {pos, dir};
@@ -33,8 +48,7 @@ class PhysicsWorld
             Ray ray = {pos, dir};
             DrawRay(ray, color);
         }
-};
-
+}
 
 
 

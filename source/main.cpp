@@ -35,17 +35,12 @@ Texture2D component - Mesh Component - Done
 Lights - Done
 Shaders - Done
 Post Processing - Done
+Bullet Physics - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-Angular Physics - WIP
-    Spring and Joints
-    Friction
-    Inertia
-    Torque
-    Momentum
-    Acceleration
+
 LOD - WIP
 Update Editor Components - WIP
 ---------------------------
@@ -110,6 +105,7 @@ extern TransformSystemECS transformSystem;
 StaticQuadTreeContainer<Entity> *quadTreeContainer;
 BurstParticleSystem* burstParticleSystem;
 extern RenderSystem *renderSystem;
+PhysicsWorld *physicsWorld;
 //vector of menu controllers
 
 /////////////TEST
@@ -202,7 +198,6 @@ void DrawPhysicsObjects()
            }
            
 }
-
 void TestPhysicsSAT()
 {
     Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
@@ -248,6 +243,49 @@ void TestPhysicsSAT()
 
 }   
 
+
+void TestPhysicsBullet()
+{
+    Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
+    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    int ambientLoc = GetShaderLocation(shader, "ambient");
+    SetShaderValue(shader, ambientLoc, (float[4]){ 0.4f, 0.4f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+
+    //spawn slop and a mesh
+    Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
+    GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
+    slopeMesh->SetShader(&shader);
+    slope->AddComponent(slopeMesh);
+    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(slope->scale.x, slope->scale.y, slope->scale.z)));      
+    slope->AddComponent(slopeBody);
+  
+    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{15,0,0,0}, Vector3{1,1,1});
+    GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
+    GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
+    mesh->SetShader(&shader);
+    meshObject->AddComponent(mesh);
+    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 0.0f, new btBoxShape(btVector3(meshObject->scale.x, meshObject->scale.y, meshObject->scale.z)));      
+    meshObject->AddComponent(meshBody);
+    
+
+    for(int i = 0; i < 5 ; i++)
+    {
+        GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
+        GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
+        mesh2->SetShader(&shader);
+        meshObject2->AddComponent(mesh2);
+        BulletPhysicsComponent *meshBody2 = new BulletPhysicsComponent(meshObject2->position, meshObject2->rotation, 1.0f, new btBoxShape(btVector3(meshObject2->scale.x, meshObject2->scale.y, meshObject2->scale.z)));
+        meshObject2->AddComponent(meshBody2);
+    }
+  
+    renderSystem->defaultShader = &shader;
+    renderSystem->SetLights();
+
+}   
+
 ////////////END TEST--------------------
 
 
@@ -269,7 +307,9 @@ void initSystem()
     //init callbacks 
     GameObjects = new std::vector<GameObject *>();
     engineCallBacks = new EngineCallBacks();
-    PhysicsWorld::Init();
+    physicsWorld = new PhysicsWorld();
+    physicsWorld->InitBasic();
+    physicsWorld->InitBullet();
     PhysicsObjects = new std::vector<PhysicsComponent *>();
     ecs.InitSystem();
     debugLog("Engine Callbacks Init");
@@ -280,7 +320,7 @@ void initSystem()
 }
 
 
-void BOOT()
+void BOOT()//Move to render system
 {
       BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -294,12 +334,12 @@ void BOOT()
         timer = 0;
         ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
 
-        TestPhysicsSAT();
+        TestPhysicsBullet();
 
     }
 
 }
-void Wait()
+void Wait()//move to render system
 {
 
     BeginDrawing();
@@ -320,6 +360,7 @@ void EngineMain()
     gameManager = &GameManager::getGameManager();
     //Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);     //LoadModel("romfs:/models/robot.glb");
     while (!WindowShouldClose() && gameManager->Running())      // Detect window close button or ESC key
+    //move states to game manager
     {
         
         if(ENGINE_STATES::GetState() == ENGINE_STATES::IN_GAME)
@@ -343,7 +384,7 @@ void EngineMain()
         {
           
           //Video Playback Here
-            if(!Player::playbackLoop())
+            if(!Player::playbackLoop())//update to use framebuffer
             {
                 ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
             }
@@ -387,7 +428,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     initSystem();
     EngineMain();
-    PhysicsWorld::Shutdown();
+    physicsWorld->ShutdownPhysicsWorld();
     debugLog("Game Stopped....");
 
     debugLogCleanup();

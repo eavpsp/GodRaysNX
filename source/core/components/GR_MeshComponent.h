@@ -3,7 +3,7 @@
 
 #include <raylib.h>
 #include <GameObject.h>
-
+#include <raymath.h>
 struct GR_Mesh : ObjectDrawable
 {
     Model model;
@@ -27,11 +27,14 @@ enum ShaderType
 };
 struct GR_MeshComponent : GameComponent
 {
+    GR_Mesh *activeMesh;
     GR_Mesh *mesh;
+    GR_Mesh *LOD_Meshes;
+    //LOD vector
     ShaderType shaderType = LIGHTING;
     void OnUpdate() override
     {
-        
+        mesh->model.transform =  QuaternionToMatrix(parentObject->rotation);
     }
     void SetShader(Shader *shader )
     {

@@ -11,7 +11,7 @@ constexpr double UPDATE_TICK_DELAY = 1.0 / TARGET_FPS;
 #include "PhysicsWorld.h"
 extern std::vector<GameObject *> *GameObjects;
 extern std::vector<EngineObject *> *GraphicsObjects;
-
+extern PhysicsWorld *physicsWorld;
 
 class EngineCallBacks
 {
@@ -50,7 +50,8 @@ class EngineCallBacks
                 updateTicks -= UPDATE_TICK_DELAY;
                    
                
-                PhysicsWorld::Update();
+                physicsWorld->UpdateBasic();
+                physicsWorld->UpdateBullet();
             
             }
             
