@@ -995,17 +995,24 @@ public:
 
 extern const int screenWidth;
 extern const int screenHeight;
+extern std::vector<std::string> ShaderPaths;
 //handles all renderable data outside of ecs
 struct RenderSystem
 {
     bool postProcessing, debugMode;
     MightyCam mainCamera;
     RenderTexture2D post_process_target;
-    Shader *postProcessingShaders;
+    Shader postProcessingShaders[2];
     PostProcessingFX currentFX = BLUR;
     RenderSystem()
     {
+        postProcessing = true;
         post_process_target = LoadRenderTexture(screenWidth, screenHeight);
+        //load shaders
+        postProcessingShaders[ShaderPaths.size()] =  {0};
+        postProcessingShaders[0] = LoadShader(0,ShaderPaths.at(PostProcessingFX::BLOOM).c_str());
+        postProcessingShaders[1] = LoadShader(0,"romfs:/shaders/glsl100/blur.fs");
+
     };
     ~RenderSystem() = default;
       
