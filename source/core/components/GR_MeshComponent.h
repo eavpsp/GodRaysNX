@@ -3,6 +3,7 @@
 
 #include <raylib.h>
 #include <GameObject.h>
+
 struct GR_Mesh : ObjectDrawable
 {
     Model model;
@@ -15,24 +16,26 @@ struct GR_Mesh : ObjectDrawable
         DrawModel(model, componentParent->parentObject->position, 1.0f, WHITE);
     }
 };
-
+enum ShaderType
+{
+    LIGHTING,
+    UNLIT
+};
 struct GR_MeshComponent : GameComponent
 {
     GR_Mesh *mesh;
-    
+    ShaderType shaderType = LIGHTING;
     void OnUpdate() override
     {
         
     }
     void SetShader(Shader shader )
     {
-            shader = LoadShader(0, TextFormat("resources/shaders/glsl%i/grayscale.fs", 330));
-            mesh->model.materials[0].shader = shader;                     // Set shader effect to 3d model
-          
+        mesh->model.materials[0].shader = shader;// Set shader effect to 3d model
     }
     void SetTexture(Texture2D texture)
     {
-          mesh->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture; // Bind texture to model
+        mesh->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture; // Bind texture to model
     }
     void ComponentAddedCallback() override
     {

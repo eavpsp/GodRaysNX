@@ -13,6 +13,7 @@
 #include <RenderSystem.h>
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Fonts;
+RenderSystem *renderSystem;
 Font guiFont;
     // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
 Texture2D texture;        // Texture loading
@@ -20,7 +21,7 @@ const int screenWidth = 1280;
 const int screenHeight = 720;
 GamePads gamePads;
 StandardController controller;
-extern RenderSystem *renderSystem;
+
 //MenuController menuController;
 GameManager::GameManager(bool running) : _running{running}
 {
@@ -44,7 +45,7 @@ GameManager& GameManager::getGameManager()
             debugLog("\x1b[16;25HError Creating Window!");
         }
         SetTargetFPS(60);
-        
+        renderSystem = &RenderSystem::getRenderSystem();
         //set up controller
         controller = StandardController(&renderSystem->mainCamera);
         gamePads.Init(&controller);

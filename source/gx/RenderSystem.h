@@ -11,6 +11,8 @@
 #include "../debug/debug.h"
 #include <cfloat>   
 #include <PostProcessing.h>
+#include <ResourceManager.h>    
+#include <rlights.h>
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
@@ -996,6 +998,7 @@ public:
 extern const int screenWidth;
 extern const int screenHeight;
 extern std::vector<std::string> ShaderPaths;
+extern std::map<int, std::pair<std::string, std::string>> RES_Shaders;
 //handles all renderable data outside of ecs
 struct RenderSystem
 {
@@ -1004,20 +1007,34 @@ struct RenderSystem
     RenderTexture2D post_process_target;
     Shader postProcessingShaders[2];
     PostProcessingFX currentFX = BLUR;
+    Shader defaultShader;
+    Light defaultLight;
     RenderSystem()
     {
+        defaultShader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
+        defaultShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(defaultShader, "viewPos");
+        int ambientLoc = GetShaderLocation(defaultShader, "ambient");
+        SetShaderValue(defaultShader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0}, Vector3Zero(), RED, defaultShader);
+        defaultLight.enabled = true;
         postProcessing = true;
         post_process_target = LoadRenderTexture(screenWidth, screenHeight);
         //load shaders
         postProcessingShaders[ShaderPaths.size()] =  {0};
         postProcessingShaders[0] = LoadShader(0,ShaderPaths.at(PostProcessingFX::BLOOM).c_str());
-        postProcessingShaders[1] = LoadShader(0,"romfs:/shaders/glsl100/blur.fs");
+        postProcessingShaders[1] = LoadShader(0,ShaderPaths.at(PostProcessingFX::BLUR).c_str());
 
     };
+    void SetLights(){
+
+    }
     ~RenderSystem() = default;
       
     void RenderScene();
-   
+static RenderSystem& getRenderSystem();
+
+
 };
+
 
 #endif // RENDER_SYSTEM_H

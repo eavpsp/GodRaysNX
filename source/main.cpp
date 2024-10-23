@@ -33,13 +33,12 @@ Menu Controller - Done
     TODO: Default Controller and Main Menu(Scene Selection)
 Texture2D component - Mesh Component - Done
 Lights - Done
+Shaders - Done
+Post Processing - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-
-Shaders - WIP
-Post Processing - WIP
 Angular Physics - WIP
     Spring and Joints
     Friction
@@ -58,6 +57,7 @@ More Overlays(Implement System to Send overlays to GM for own render calls)
 _____________________________
 Object Pool -
 Multithreading -
+    Thread Pool
 ComputeShader Pathfinding -
 Skeletal Animation -
 IK -
@@ -94,6 +94,7 @@ Networking -
 #include <RenderSystem.h>
 #include <ParticleSystem.h>
 #include <ResourceManager.h>
+//move res stuff to scene manager
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
@@ -101,7 +102,6 @@ EngineCallBacks *engineCallBacks;
 std::vector<GameObject *> *GameObjects;
 std::vector<PhysicsComponent *> *PhysicsObjects;
 GameManager *gameManager;
-RenderSystem *renderSystem;
 static float timer = 0;
 EntityComponentSystem ecs;
 extern RenderSystemECS renderSystemECS;
@@ -109,6 +109,7 @@ extern TransformSystemECS transformSystem;
 //QuadTrr
 StaticQuadTreeContainer<Entity> *quadTreeContainer;
 BurstParticleSystem* burstParticleSystem;
+extern RenderSystem *renderSystem;
 //vector of menu controllers
 
 /////////////TEST
@@ -205,9 +206,11 @@ void DrawPhysicsObjects()
 void TestPhysicsSAT()
 {
     //spawn slop and a mesh
+   
     GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
+    //slopeMesh->SetShader(renderSystem->defaultShader);
     slope->AddComponent(slopeMesh);
     PhysicsComponent *slopeBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
     slopeBody->_bounds.SetupColliderMesh(slopeData->model.meshes[0]);
@@ -216,6 +219,8 @@ void TestPhysicsSAT()
     GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
+   // mesh->SetShader(renderSystem->defaultShader);
+
     meshObject->AddComponent(mesh);
     PhysicsComponent *meshBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
     meshBody->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
@@ -226,6 +231,7 @@ for(int i = 0; i < 5 ; i++)
         GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
         GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
         GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
+      //  mesh2->SetShader(renderSystem->defaultShader);
         meshObject2->AddComponent(mesh2);
         PhysicsComponent *meshBody2 = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, false);
         meshBody2->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
@@ -255,7 +261,6 @@ void initSystem()
     debugLog("romFS Init");
     debugLog("System Starting...");
     //init callbacks 
-    renderSystem = new RenderSystem();
     GameObjects = new std::vector<GameObject *>();
     engineCallBacks = new EngineCallBacks();
     PhysicsWorld::Init();

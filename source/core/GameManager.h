@@ -4,6 +4,9 @@
 #include <time.h>
 #include <GameStates.h>
 #include <ResourceManager.h>
+#include <RenderSystem.h>
+
+
 class GameManager
 {
     private:
@@ -11,8 +14,7 @@ class GameManager
         GameManager(bool running);
         ~GameManager();
     public:
-    void renderLoop();
-    void runGameLoop();
+    void runGameLoop();//add states for pause and other menus
     void SceneInit();
     void GameLoop();
     bool Running();
@@ -20,6 +22,7 @@ class GameManager
     // ResourceManager *_resourceManager;
     static GameManager& getGameManager();
     static void destroyGameManager();
+
 
 };
 

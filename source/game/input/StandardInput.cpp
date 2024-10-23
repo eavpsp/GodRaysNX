@@ -19,7 +19,7 @@ void StandardController::UpdateButtonInputs()
 
 
     }
-    player->position = Vector3Subtract(mightyCam->camToUse->position, Vector3{0.0f, 2.0f, 0.0f});
+    player->position = mightyCam->camToUse->position;
     Vector3 forward = Vector3Normalize(Vector3Subtract( mightyCam->camToUse->target,  mightyCam->camToUse->position));
     //button presed -- can be extended to all button positions
      switch (GetGamepadButtonPressed())

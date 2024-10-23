@@ -11,13 +11,16 @@ extern std::map<int, std::string> RES_Models;
 namespace _RES
 {
     static Model GetModel(int id);
-
+    static Shader GetLightShader(); 
     enum Scenes_Types
     {
         ROBOT_SCENE = 0,
         TEST_SCENE
     };
-
+    enum ShaderFiles
+    {
+        LIGHT = 0,
+    };
     enum Model_ID
     {
         ROBOT_ID = 0,

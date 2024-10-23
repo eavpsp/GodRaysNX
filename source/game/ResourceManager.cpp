@@ -40,8 +40,24 @@ std::map<int, std::string> RES_AudioFiles =
 {
   {0, "romfs:/audio/test.wav"},
 };
+//GAME SHADERS
+std::map<int, std::pair<std::string, std::string>> RES_Shaders = 
+{
+  {_RES::ShaderFiles::LIGHT, {"romfs:/shaders/glsl330/lighting.vs", "romfs:/shaders/glsl330/lighting.fs"}},
+};
 
-
+// Loads and returns a lighting shader with predefined settings.
+// This function initializes a shader using the vertex and fragment shader files specified in the RES_Shaders map.
+// It sets the shader's "viewPos" and "ambient" uniform locations and assigns an ambient light value.
+// Returns the configured Shader object.
+Shader _RES::GetLightShader()
+{
+    Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
+    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    int ambientLoc = GetShaderLocation(shader, "ambient");
+    SetShaderValue(shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+    return shader;
+}
 Model _RES::GetModel(int id)
 {
    if(id == -1)
