@@ -53,6 +53,7 @@ More Overlays(Implement System to Send overlays to GM for own render calls)
 ----------------------------
 *FUTURE IMPLEMENTATIONS
 _____________________________
+Object Pool -
 Multithreading -
 ComputeShader Pathfinding -
 Skeletal Animation -
@@ -62,6 +63,7 @@ Animation Events -
 File Archive System -
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
+Lightmaps - Shadow Maps - 
 */
 //Heap 256MB
 #include <switch.h>
@@ -86,6 +88,7 @@ Add Smart Pointers -
 #include <RenderSystem.h>
 #include <RenderSystem.h>
 #include <ParticleSystem.h>
+#include <ResourceManager.h>
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
@@ -194,6 +197,39 @@ void DrawPhysicsObjects()
            
 }
 
+void TestPhysicsSAT()
+{
+    //spawn slop and a mesh
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
+    GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
+    slope->AddComponent(slopeMesh);
+    PhysicsComponent *slopeBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
+    slopeBody->_bounds.SetupColliderMesh(slopeData->model.meshes[0]);
+    slope->AddComponent(slopeBody);
+  
+    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
+    GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
+    meshObject->AddComponent(mesh);
+    PhysicsComponent *meshBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
+    meshBody->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
+    meshObject->AddComponent(meshBody);
+
+for(int i = 0; i < 5 ; i++)
+{
+        GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 3,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
+        GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
+        meshObject2->AddComponent(mesh2);
+        PhysicsComponent *meshBody2 = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, false);
+        meshBody2->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
+        meshObject2->AddComponent(meshBody2);
+}
+  
+
+
+}   
 
 ////////////END TEST--------------------
 
@@ -239,9 +275,9 @@ void BOOT()
     if (timer > 5)
     {
         timer = 0;
-        ENGINE_STATES::ChangeState(ENGINE_STATES::LOADING);
+        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
 
-        TestLoadSceneFromEditor();
+        TestPhysicsSAT();
 
     }
 

@@ -12,6 +12,8 @@ void StandardController::UpdateButtonInputs()
         playerActive = true;
         player = GameObject::InstantiateGameObject<GameObject>(mightyCam->camToUse->position, Quaternion{0.0f, 0.0f, 0.0f, 0.0f}, Vector3{1.0f, 1.0f, 1.0f});
         PhysicsComponent *comp = new PhysicsComponent(1.0f, Vector3{1.0f, 1.0f, 1.0f}, false, false);
+        Model mod = LoadModel("romfs:/models/prim/cube.obj");
+        comp->_bounds.SetupColliderMesh(mod.meshes[0]);
         player->AddComponent(comp);
     }
     player->position = mightyCam->camToUse->position;

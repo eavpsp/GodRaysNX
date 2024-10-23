@@ -53,6 +53,8 @@ class EngineCallBacks
                 PhysicsWorld::Update();
             
             }
+            
+
         }
         
         
@@ -69,7 +71,6 @@ class EngineCallBacks
             
             }
 
-            _deltaTime = get_detla_time();
         }
                
        

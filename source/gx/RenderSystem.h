@@ -23,11 +23,23 @@ struct Plane
     Vector3 GetNormal() { return normal; }
     Vector3 GetPoint() { return point; }
 };
+struct Collider
+{
+    Vector3 *transformedPoints;// Array of points definig the transofrmed collider
+    Vector3 *notTransformed;// Array of points defining the collider
+    int numPoints;      // Number of points in the array
+    Vector3 *normals; //Normal array, helps with detection
+    int numNormals; //Number of normals
+};
+
 struct MightyBoundingBox 
 {
     Color boxColor = RED;
     Vector3 corners[8];//udpate to vector
     int cornersCount = 8;
+    Collider collider;
+    Vector3 normal = { 0, 0, 0 };
+    bool init = false;
     void UpdateCorners(Vector3 parentPos, Vector3 size)
     {
     
@@ -39,8 +51,36 @@ struct MightyBoundingBox
             };
         }
     }
+  
+    Vector3 GetMin()
+    {
+        Vector3 minVector = corners[0];
+        for (int i = 1; i < 8; i++) {
+            if (corners[i].x < minVector.x) minVector.x = corners[i].x;
+            if (corners[i].y < minVector.y) minVector.y = corners[i].y;
+            if (corners[i].z < minVector.z) minVector.z = corners[i].z;
+        }
+        return minVector;
+    }
+   
+    Vector3 GetMax()
+        {
+            Vector3 maxVector = corners[0];
+            for (int i = 1; i < 8; i++) {
+                if (corners[i].x > maxVector.x) maxVector.x = corners[i].x;
+                if (corners[i].y > maxVector.y) maxVector.y = corners[i].y;
+                if (corners[i].z > maxVector.z) maxVector.z = corners[i].z;
+            }
+            return maxVector;
+        }
+    Vector3 GetCenter() {
+        Vector3 min = GetMin();
+        Vector3 max = GetMax();
+        return Vector3Add(Vector3Scale(min, 0.5f), Vector3Scale(max, 0.5f));
+    }
     void DrawBoundingBox(Color color) 
     {
+        
         // Draw bounding box lines
         DrawLine3D(corners[0], corners[1], color);
         DrawLine3D(corners[1], corners[3], color);
@@ -57,13 +97,24 @@ struct MightyBoundingBox
         DrawLine3D(corners[2], corners[6], color);
         DrawLine3D(corners[3], corners[7], color);
     }
-
     BoundingBox GetBoundingBox() 
     {
         Vector3 min = GetMinVector3(corners, 8);
         Vector3 max = GetMaxVector3(corners, 8);
         return {min, max};
     }
+    
+    void GetBoundingBoxCorners(Matrix rotationMat, Vector3* corners)
+    {
+        // Calculate the corners of the rotated bounding box
+        for (int i = 0; i < 8; i++) 
+        {
+            Vector3 corner = Vector3Transform(GetCorner(i), rotationMat);
+            corners[i] = corner;
+        }
+ 
+    }
+
     Vector3 GetCorner(int index)
     {
         return corners[index];
@@ -88,145 +139,128 @@ struct MightyBoundingBox
         }
         return minVector;
     }
-    Vector3 GetCenter() {
-        Vector3 min = GetMinVector3(corners, 8);
-        Vector3 max = GetMaxVector3(corners, 8);
-        return Vector3Add(Vector3Scale(min, 0.5f), Vector3Scale(max, 0.5f));
+    void Rotate(Quaternion *q)
+    {
+        GetBoundingBoxCorners(QuaternionToMatrix(*q), corners);
     }
-    bool CheckSATCollision( MightyBoundingBox& box1,  MightyBoundingBox& box2) {
-        // List of axes to test
-        Vector3 axes[6] = {
-            Vector3Subtract(box1.GetCorner(1), box1.GetCorner(0)),
-            Vector3Subtract(box1.GetCorner(3), box1.GetCorner(0)),
-            Vector3Subtract(box1.GetCorner(4), box1.GetCorner(0)),
-            Vector3Subtract(box2.GetCorner(1), box2.GetCorner(0)),
-            Vector3Subtract(box2.GetCorner(3), box2.GetCorner(0)),
-            Vector3Subtract(box2.GetCorner(4), box2.GetCorner(0))
-        };
+    void GetNormals(Mesh mesh,Vector3 * normals) {
+        for (int i = 0; i < mesh.vertexCount; i+=3) {//Loop trough the normals and add them to the array
+            normals[i/3] = (Vector3){mesh.normals[i],mesh.normals[i+1],mesh.normals[i+2]};
+        }
+    }
 
-        for (int i = 0; i < 6; i++) {
-            Vector3 axis = Vector3Normalize(axes[i]);
+    //Fogot to add a check to check if the mesh inst empty :P
+    void SetupColliderMesh(Mesh mesh) {
+        init = true;
+        collider.numPoints = mesh.vertexCount; //Set the numPoints as num vertices
+        collider.notTransformed = (Vector3 *)RL_MALLOC(mesh.vertexCount * sizeof(Vector3));//Init the non transofrmed array
+        collider.transformedPoints = (Vector3 *)RL_MALLOC(mesh.vertexCount * sizeof(Vector3));//Init the transofrmed array
+        int vertex = 0; //Init vertex counter
+        for (int i = 0; i < collider.numPoints; i++) {
+            collider.notTransformed[i] = (Vector3){mesh.vertices[vertex], mesh.vertices[vertex + 1], mesh.vertices[vertex + 2]}; // Create the vertex position using mesh data
+            vertex += 3; // Add 3 since raylib uses a float array for vertices instead of Vector3, each float is either x, y or z 
+        }
+    
+        /*The tirangle and normal count are the same, for this case, otherwise when using smoothshading
+        i recommend to use sizeof function on the normals array*/
+        collider.numNormals = mesh.triangleCount; 
+        collider.normals = (Vector3 *)RL_MALLOC(mesh.triangleCount * sizeof(Vector3)); //Init normal array
+        GetNormals(mesh,*&collider.normals);//Set the normal data
+    }
 
-            float min1 = FLT_MAX, max1 = -FLT_MAX;
-            float min2 = FLT_MAX, max2 = -FLT_MAX;
 
-            for (int j = 0; j < 8; j++) {
-                float projection1 = Vector3DotProduct(box1.GetCorner((j + 0) % 8), axis);
-                min1 = fmin(min1, projection1);
-                max1 = fmax(max1, projection1);
+    void GetMinMax(Collider b, Vector3 axis, float *min, float *max) {
+        *min = Vector3DotProduct(b.transformedPoints[0], axis); //Initialize min as the first vertex
+        *max = *min;  // Initialize max with the same value as min
 
-                float projection2 = Vector3DotProduct(box2.GetCorner((j + 0) % 8), axis);
-                min2 = fmin(min2, projection2);
-                max2 = fmax(max2, projection2);
+        for (int i = 1; i < b.numPoints; i++) { //Loop trough the vertices
+            //Find the dot product between the vertex and the axis
+            float dot = Vector3DotProduct(b.transformedPoints[i], axis);
+            //Check if the dot is smaller then min, if it is set the new min
+            if (dot < *min) {
+                *min = dot;
             }
+            //Check if the dot is bigger then max, if it is set the new max
+            if (dot > *max) {
+                *max = dot;
+            }
+        }
+    }
+
+    Vector3 GetMiddlePoint(Vector3 *vertices,int numVertices){
+        float x=0,y=0,z=0;//Init variables
+        for(int i = 0; i < numVertices;i++){//Iterate trought the vertices and get the sum
+        //Add all the vertex values togerher
+        x+= vertices[i].x; 
+        y+= vertices[i].y;
+        z+= vertices[i].z;
+        }
+        return(Vector3){x/numVertices,y/numVertices,z/numVertices}; //Divide the values to get the average(Middle)
+    } 
+
+    bool CheckCollision(Collider a, Collider b, Vector3 *normal) {
+        *normal = (Vector3){0, 0, 0}; //Init normal vector
+        float depth = FLT_MAX; //Init depth as the max value it can be
+
+        for (int i = 0; i < a.numNormals; i++) {
+            float min1, max1, min2, max2;
+        GetMinMax(a, a.normals[i], &min2, &max2);
+        GetMinMax(b, a.normals[i], &min1, &max1);
 
             if (max1 < min2 || max2 < min1) {
-                return false; // Separating axis found
+                return false;  // No collision on this axis
+            } else {
+                float axisDepth = fminf(max2 - min1, max1 - min2);
+                if (axisDepth < depth) {
+                    depth = axisDepth;
+                    *normal = a.normals[i];
+                }
             }
         }
 
-        return true; // No separating axis found, collision detected
-    }
-    RayCollision GetSATCollision( MightyBoundingBox& box1,  MightyBoundingBox& box2, Ray ray) {
-        // List of axes to test
-        Vector3 axes[6] = {
-            Vector3Subtract(box1.GetCorner(1), box1.GetCorner(0)),
-            Vector3Subtract(box1.GetCorner(3), box1.GetCorner(0)),
-            Vector3Subtract(box1.GetCorner(4), box1.GetCorner(0)),
-            Vector3Subtract(box2.GetCorner(1), box2.GetCorner(0)),
-            Vector3Subtract(box2.GetCorner(3), box2.GetCorner(0)),
-            Vector3Subtract(box2.GetCorner(4), box2.GetCorner(0))
-        };
+        for (int i = 0; i < b.numNormals; i++) {
+            float min1, max1, min2, max2;
+            GetMinMax(a, b.normals[i], &min2, &max2);
+            GetMinMax(b, b.normals[i], &min1, &max1);
 
-        for (int i = 0; i < 6; i++) {
-            Vector3 axis = Vector3Normalize(axes[i]);
-
-            float min1 = FLT_MAX, max1 = -FLT_MAX;
-            float min2 = FLT_MAX, max2 = -FLT_MAX;
-
-            for (int j = 0; j < 8; j++) {
-                float projection1 = Vector3DotProduct(box1.GetCorner((j + 0) % 8), axis);
-                min1 = fmin(min1, projection1);
-                max1 = fmax(max1, projection1);
-
-                float projection2 = Vector3DotProduct(box2.GetCorner((j + 0) % 8), axis);
-                min2 = fmin(min2, projection2);
-                max2 = fmax(max2, projection2);
+            if (max1 < min2 || max2 < min1) {
+                return false;  // No collision on this axis
+            } else {
+                float axisDepth = fminf(max2 - min1, max1 - min2);
+                if (axisDepth < depth) {
+                    depth = axisDepth;
+                    *normal = b.normals[i];
+                }
             }
         }
 
-        // No separating axis found, collision detected
-        // Calculate the normal of the collision
+        // Simplify direction calculation
+        Vector3 direction = Vector3Subtract(GetMiddlePoint(a.transformedPoints, a.numPoints), GetMiddlePoint(b.transformedPoints,b.numPoints));
 
-        RayCollision collision;
-        float t[11] = { 0 };
-
-        t[8] = 1.0f/ray.direction.x;
-        t[9] = 1.0f/ray.direction.y;
-        t[10] = 1.0f/ray.direction.z;
-
-        t[0] = (box1.GetCorner(0).x - ray.position.x)*t[8];
-        t[1] = (box1.GetCorner(1).x - ray.position.x)*t[8];
-        t[2] = (box1.GetCorner(0).y - ray.position.y)*t[9];
-        t[3] = (box1.GetCorner(3).y - ray.position.y)*t[9];
-        t[4] = (box1.GetCorner(0).z - ray.position.z)*t[10];
-        t[5] = (box1.GetCorner(4).z - ray.position.z)*t[10];
-        t[6] = (float)fmax(fmax(fmin(t[0], t[1]), fmin(t[2], t[3])), fmin(t[4], t[5]));
-        t[7] = (float)fmin(fmin(fmax(t[0], t[1]), fmax(t[2], t[3])), fmax(t[4], t[5]));
-
-        collision.hit = !((t[7] < 0) || (t[6] > t[7]));
-        collision.distance = t[6];
-        collision.point = Vector3Add(ray.position, Vector3Scale(ray.direction, collision.distance));
-        collision.normal = Vector3Lerp(box1.GetMin(), box1.GetMax(), 0.5f);
-        collision.normal = Vector3Subtract(collision.point, collision.normal);
-        collision.normal = Vector3Scale(collision.normal, 2.01f);
-        collision.normal = Vector3Divide(collision.normal, Vector3Subtract(box1.GetMax(), box1.GetMin()));
-        collision.normal.x = (float)((int)collision.normal.x);
-        collision.normal.y = (float)((int)collision.normal.y);
-        collision.normal.z = (float)((int)collision.normal.z);
-
-        collision.normal = Vector3Normalize(collision.normal);
-
-        return collision; // Collision detected
-    }
-    Vector3 GetMin()
-    {
-        Vector3 minVector = corners[0];
-        for (int i = 1; i < 8; i++) {
-            if (corners[i].x < minVector.x) minVector.x = corners[i].x;
-            if (corners[i].y < minVector.y) minVector.y = corners[i].y;
-            if (corners[i].z < minVector.z) minVector.z = corners[i].z;
+        if (Vector3DotProduct(direction, *normal) < 0.0f) {
+            *normal = Vector3Negate(*normal);
         }
-        return minVector;
-    }
-   
-        Vector3 GetMax()
-        {
-            Vector3 maxVector = corners[0];
-            for (int i = 1; i < 8; i++) {
-                if (corners[i].x > maxVector.x) maxVector.x = corners[i].x;
-                if (corners[i].y > maxVector.y) maxVector.y = corners[i].y;
-                if (corners[i].z > maxVector.z) maxVector.z = corners[i].z;
-            }
-            return maxVector;
-        }
-            
-    void Rotate(Matrix *parentTransform)
-    {
-        GetBoundingBoxCorners(*parentTransform, corners);
-    }
-    void GetBoundingBoxCorners(Matrix rotationMat, Vector3* corners)
-    {
-        // Calculate the corners of the rotated bounding box
-        for (int i = 0; i < 8; i++) 
-        {
-            Vector3 corner = Vector3Transform(GetCorner(i), rotationMat);
-            corners[i] = corner;
-        }
- 
+        *normal = Vector3Scale(*normal, depth);
+        return true;
     }
 
-    MightyBoundingBox(){};
+    //Not optimal, doesn't include rotation and scaling, it's a simple demo
+    void UpdateCollider(Vector3 parent){
+        if(!init){
+            return;
+        }
+        //Loop trough the points and add them to the 
+        for(int i = 0; i < collider.numPoints;i++){
+            collider.transformedPoints[i] = Vector3Add( collider.notTransformed[i],parent);
+        }
+    }
+
+    void UnloadCollider(Collider *collider)
+    {
+    free(collider->normals);
+    free(collider->transformedPoints);
+    free(collider->notTransformed);
+}
 };
 struct Frustum
 {

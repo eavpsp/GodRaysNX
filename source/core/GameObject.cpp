@@ -72,7 +72,7 @@ void GameObject::onUpdate()
         animComp->animationController->OnUpdate();
     }
    UpdateComponents();//NEDED TO UPDATE COMPONENT DATA
-
+    
 }
 
 void GameObject::onDraw()

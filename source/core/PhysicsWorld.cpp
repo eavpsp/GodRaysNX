@@ -1,11 +1,13 @@
 #include <PhysicsWorld.h>
 #include <raymath.h>    
 #include <vector>
+#include "ScriptCallbacks.h"
 extern std::vector<PhysicsComponent *> *PhysicsObjects;
 static float gravity;
 static bool _initialized;
 static Vector3 groundPosition = {0,0,0};
 static bool useGround = false;
+extern EngineCallBacks *engineCallBacks;
 Vector3 PhysicsWorld::GetGroundPosition()
 {
     return groundPosition;
@@ -38,14 +40,16 @@ void PhysicsWorld::Update()
     {
         return;
     }
+    SetTargetFPS(120);
+
     //gravity
     for (int i = 0; i < PhysicsObjects->size(); i++)
     {
         if(!PhysicsObjects->at(i)->isKinematic)
         {
-            if(PhysicsObjects->at(i)->parentObject->position.y < PhysicsWorld::GetGroundPosition().y)
+            if(PhysicsObjects->at(i)->parentObject->position.y <= PhysicsWorld::GetGroundPosition().y)
             {
-                PhysicsObjects->at(i)->parentObject->position = Vector3{PhysicsObjects->at(i)->parentObject->position.x, PhysicsWorld::GetGroundPosition().y, PhysicsObjects->at(i)->parentObject->position.z}; 
+                PhysicsObjects->at(i)->parentObject->position.y = PhysicsWorld::GetGroundPosition().y; 
                 PhysicsObjects->at(i)->velocity.y = 0; // Implement dampening to reduce speed
                 PhysicsObjects->at(i)->groundedYPos = PhysicsObjects->at(i)->parentObject->position.y;
                 PhysicsObjects->at(i)->isGrounded = true;
@@ -72,6 +76,8 @@ void PhysicsWorld::Update()
             }
         }
     }
+    SetTargetFPS(60);
+
 }
 
 void PhysicsWorld::AddForce(PhysicsComponent *obj, Vector3 force)
