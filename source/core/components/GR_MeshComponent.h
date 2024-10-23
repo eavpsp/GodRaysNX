@@ -19,9 +19,20 @@ struct GR_Mesh : ObjectDrawable
 struct GR_MeshComponent : GameComponent
 {
     GR_Mesh *mesh;
+    
     void OnUpdate() override
     {
         
+    }
+    void SetShader(Shader shader )
+    {
+            shader = LoadShader(0, TextFormat("resources/shaders/glsl%i/grayscale.fs", 330));
+            mesh->model.materials[0].shader = shader;                     // Set shader effect to 3d model
+          
+    }
+    void SetTexture(Texture2D texture)
+    {
+          mesh->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture; // Bind texture to model
     }
     void ComponentAddedCallback() override
     {

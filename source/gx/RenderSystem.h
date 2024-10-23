@@ -10,6 +10,7 @@
 #include<algorithm>
 #include "../debug/debug.h"
 #include <cfloat>   
+#include <PostProcessing.h>
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
@@ -990,6 +991,26 @@ public:
 		return listItemPointers;
 	}
 
+};
+
+extern const int screenWidth;
+extern const int screenHeight;
+//handles all renderable data outside of ecs
+struct RenderSystem
+{
+    bool postProcessing, debugMode;
+    MightyCam mainCamera;
+    RenderTexture2D post_process_target;
+    Shader *postProcessingShaders;
+    PostProcessingFX currentFX = BLUR;
+    RenderSystem()
+    {
+        post_process_target = LoadRenderTexture(screenWidth, screenHeight);
+    };
+    ~RenderSystem() = default;
+      
+    void RenderScene();
+   
 };
 
 #endif // RENDER_SYSTEM_H

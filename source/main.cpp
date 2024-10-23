@@ -101,7 +101,7 @@ EngineCallBacks *engineCallBacks;
 std::vector<GameObject *> *GameObjects;
 std::vector<PhysicsComponent *> *PhysicsObjects;
 GameManager *gameManager;
-extern MightyCam mainCamera;
+RenderSystem *renderSystem;
 static float timer = 0;
 EntityComponentSystem ecs;
 extern RenderSystemECS renderSystemECS;
@@ -255,6 +255,7 @@ void initSystem()
     debugLog("romFS Init");
     debugLog("System Starting...");
     //init callbacks 
+    renderSystem = new RenderSystem();
     GameObjects = new std::vector<GameObject *>();
     engineCallBacks = new EngineCallBacks();
     PhysicsWorld::Init();
@@ -314,56 +315,11 @@ void EngineMain()
         {
             //ecs.UpdateSystem();
             gameManager->runGameLoop();
-            mainCamera.UpdateCamera();
-
-            BeginDrawing();//Create Render System with View Frustrum //Move to render system
-            BeginMode3D(*mainCamera.camToUse);
-                ClearBackground(DARKBLUE);
-                gameManager->renderLoop();
-                
-                //Entity, Octree, Frustum
-            /*   MightyBoundingBox cameraBox = mainCamera.frustum.GetFrustumBoundingBox();
-               for (const auto& entity : quadTreeContainer->search(cameraBox.GetBoundingBox()))
-               {
-                    TransformComponent transform = transformSystem.GetComponent(*entity);
-                    //make bounds
-                    BoundingBox bounds = {
-                                (Vector3){transform.position.x -transform.scale, 
-                                            transform.position.y -transform.scale,
-                                            transform.position.z -transform.scale },
-                                (Vector3){transform.position.x +transform.scale,
-                                            transform.position.y +transform.scale,
-                                            transform.position.z +transform.scale }};
-                    //check if in view
-                     //check if in frustr
-                        MightyBoundingBox box = MightyBoundingBox(bounds);
-                        
-                        cameraBox.DrawBoundingBox(BLUE);
-                      if (CheckCollisionBoxes(cameraBox.GetBoundingBox(), box.GetBoundingBox()) && !mainCamera.IsObjectBehindCamera(box))
-                     {
-                           renderSystemECS.DrawEntities(model, *entity);
-                        box.DrawBoundingBox(GREEN);
-
-                      }
-                      else{
-                        box.DrawBoundingBox(RED);
-                      }
-                            
-                     
-               }
-               
-            */
-           //draw physics obj colliders//
-
-            DrawPhysicsObjects();
-           ////
-            EndMode3D();
-            EndDrawing();
-
+            renderSystem->mainCamera.UpdateCamera();
+            renderSystem->RenderScene();
             //Run Update Callbacks//
             engineCallBacks->PhysicsUpdate();
             engineCallBacks->RunUpdateCallbacks();
-
             // Get and process input
             if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
                 gameManager->destroyGameManager();
@@ -396,7 +352,7 @@ void EngineMain()
             Wait();
             
         }
-        else if(ENGINE_STATES::GetState() == ENGINE_STATES::LOADING)
+        else if(ENGINE_STATES::GetState() == ENGINE_STATES::LOADING)//move to render system
         {
             BeginDrawing();
             ClearBackground(RAYWHITE);
