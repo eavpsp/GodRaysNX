@@ -990,27 +990,45 @@ extern const int screenWidth;
 extern const int screenHeight;
 extern std::vector<std::string> ShaderPaths;
 extern std::map<int, std::pair<std::string, std::string>> RES_Shaders;
+struct PostProcessingFXConfig
+{
+    bool post_processing = true;
+    bool bloom = true;
+    bool blur = true;
+
+};
 //handles all renderable data outside of ecs
 struct RenderSystem
 {
-    bool postProcessing, debugMode;
+    bool debugMode;
     MightyCam mainCamera;
     RenderTexture2D post_process_target;
-    Shader postProcessingShaders[2];
-    PostProcessingFX currentFX = BLOOM;
-    Shader *defaultShader;
+    Shader postProcessingShaders;
+    PostProcessingFXConfig ppfxConfig;
+    Shader defaultShader;
     Light defaultLight;
     std::vector<RENDER_PROC> renderProcs;
     RenderSystem()
     {
-        postProcessing = true;
+       
+        Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
+        shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+        int ambientLoc = GetShaderLocation(shader, "ambient");
+        SetShaderValue(shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
+        SetDefaultShader(shader);
+        SetLights();
         post_process_target = LoadRenderTexture(screenWidth, screenHeight);
-        //load shaders
-        postProcessingShaders[ShaderPaths.size()] =  {0};
-        postProcessingShaders[0] = LoadShader(0,ShaderPaths.at(PostProcessingFX::BLOOM).c_str());
-        postProcessingShaders[1] = LoadShader(0,ShaderPaths.at(PostProcessingFX::BLUR).c_str());
+        postProcessingShaders = LoadShader(0, "romfs:/shaders/ppfx.fs");
+        int bloomFX = GetShaderLocation(postProcessingShaders, "bloomFX");
+        int blurFX = GetShaderLocation(postProcessingShaders, "blurFX");
+        SetShaderValue(postProcessingShaders, bloomFX, (float[1]){ ppfxConfig.bloom ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);
+        SetShaderValue(postProcessingShaders, blurFX, (float[1]){ ppfxConfig.blur ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);
 
     };
+    void SetDefaultShader(Shader shader)
+    {
+        defaultShader = shader;
+    }
     void AddRenderProc(RENDER_PROC *proc)
     {
         renderProcs.push_back(*proc);
@@ -1021,7 +1039,7 @@ struct RenderSystem
     }
     void SetLights()
     {
-        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0}, Vector3Zero(), WHITE, *defaultShader);
+        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 6.0f,14.0f,3.0f}, Vector3Zero(), WHITE, defaultShader);
         defaultLight.enabled = true;
     }
     ~RenderSystem() = default;

@@ -20,6 +20,7 @@ namespace _RES
     enum ShaderFiles
     {
         LIGHT = 0,
+        LIGHT_SHADOW
     };
     enum Model_ID
     {

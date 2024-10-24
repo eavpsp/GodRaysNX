@@ -2,15 +2,7 @@
 /Things
 
 
-
-                            custom z-lib compression for grb data
-
-
-                            -Demo Levels
-                            Plane and Sphere
-
-                            add animation events
-                            cache data
+                            cache data in scopes!
 
 Todo:
 ----------------------------
@@ -29,43 +21,58 @@ Particle system (Dynamic Batched Software Particles)- Done
 Audio Component - Done;
 Level Editor - Done
 Raycasting - Done
-Menu Controller - Done
+Menu Controller - Implemented Not Tested
     TODO: Default Controller and Main Menu(Scene Selection)
 Texture2D component - Mesh Component - Done
 Lights - Done
 Shaders - Done
 Post Processing - Done
 Bullet Physics - Done
+LOD - Implemented Not Tested
 -------------------------
 *WIP
 ___________________________
 **Current
-
-LOD - WIP
-Update Editor Components - WIP
+Lightmaps - Shadow Maps - 
+More Overlays(Implement System to Send overlays to RenderSystem for own render calls)  
+Update Editor Components For Scene Loading- WIP
+        Loader - 
+        Editor -
+Object Pool -
+    Base Class to be used universally for template type objects-
+Stress Test?
+    Swarm 
+    Animations
+    Physics
+Multithreading -
+    Thread Pool-
+    Task Scheduler-
+    Physics Thread -
+    Audio/Video Processing Thread -
+    Asset Loading Thread -
+        Game Scene Loader
+ComputeShader Pathfinding -
 ---------------------------
 *NOT STARTED
 __________________________
-More Overlays(Implement System to Send overlays to GM for own render calls)  
 ----------------------------
 *FUTURE IMPLEMENTATIONS
 _____________________________
-Object Pool -
-Multithreading -
-    Thread Pool
-ComputeShader Pathfinding -
-Skeletal Animation -
+Skeletal Animation - M3D
 IK -
 Procedural Animation -
 Animation Events -
 File Archive System -
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
-Lightmaps - Shadow Maps - 
 Networking - 
     Multiplayer -
 */
 //Heap 256MB
+//4GB Ram 
+#define TOTAL_RAM (4ULL * 1024ULL * 1024ULL * 1024ULL)
+#define MAX_LEVEL_RAM (TOTAL_RAM / 3ULL) // 4GB / 3 so 1 third of ram MAX is used for levels
+#define MAX_GRB_FILE_SIZE (TOTAL_RAM / 4ULL) // ~1.2 GB //may pre load scenes in ram
 #include <switch.h>
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
@@ -101,7 +108,6 @@ static float timer = 0;
 EntityComponentSystem ecs;
 extern RenderSystemECS renderSystemECS;
 extern TransformSystemECS transformSystem;
-//QuadTrr
 StaticQuadTreeContainer<Entity> *quadTreeContainer;
 BurstParticleSystem* burstParticleSystem;
 extern RenderSystem *renderSystem;
@@ -150,7 +156,6 @@ void TestAnimations()
         AnimationController *anim = new AnimationController(animComp, data);
         obj->AddComponent(animComp);
 }
-
 
 void TestDOTS()
 {
@@ -210,7 +215,7 @@ void TestPhysicsSAT()
     GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
-    slopeMesh->SetShader(&shader);
+    slopeMesh->SetShader(shader);
     slope->AddComponent(slopeMesh);
     PhysicsComponent *slopeBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
     slopeBody->_bounds.SetupColliderMesh(slopeData->model.meshes[0]);
@@ -219,7 +224,7 @@ void TestPhysicsSAT()
     GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
-    mesh->SetShader(&shader);
+    mesh->SetShader(shader);
     meshObject->AddComponent(mesh);
     PhysicsComponent *meshBody = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, true);
     meshBody->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
@@ -231,14 +236,14 @@ void TestPhysicsSAT()
         GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
         GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
         GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
-        mesh2->SetShader(&shader);
+        mesh2->SetShader(shader);
         meshObject2->AddComponent(mesh2);
         PhysicsComponent *meshBody2 = new PhysicsComponent(1.0f, Vector3{1,1,1}, false, false);
         meshBody2->_bounds.SetupColliderMesh(mesh->mesh->model.meshes[0]);
         meshObject2->AddComponent(meshBody2);
     }
   
-    renderSystem->defaultShader = &shader;
+    renderSystem->defaultShader = shader;
     renderSystem->SetLights();
 
 }   
@@ -246,45 +251,27 @@ void TestPhysicsSAT()
 
 void TestPhysicsBullet()
 {
-    Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
-    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-    int ambientLoc = GetShaderLocation(shader, "ambient");
-    SetShaderValue(shader, ambientLoc, (float[4]){ 0.4f, 0.4f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
-
+    
     //spawn slop and a mesh
-    Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
-    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,180,0,0}, Vector3{10,1,10});
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
-    slopeMesh->SetShader(&shader);
+    slopeMesh->SetShader(renderSystem->defaultShader);
     slope->AddComponent(slopeMesh);
     BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(slope->scale.x, slope->scale.y, slope->scale.z)));      
     slope->AddComponent(slopeBody);
   
-    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{15,0,0,0}, Vector3{1,1,1});
-    GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
+    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/sphere.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
-    mesh->SetShader(&shader);
+    mesh->SetShader(renderSystem->defaultShader);
     meshObject->AddComponent(mesh);
-    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 0.0f, new btBoxShape(btVector3(meshObject->scale.x, meshObject->scale.y, meshObject->scale.z)));      
+    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(1.0f));      
     meshObject->AddComponent(meshBody);
-    
 
-    for(int i = 0; i < 5 ; i++)
-    {
-        GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
-        GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
-        GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
-        mesh2->SetShader(&shader);
-        meshObject2->AddComponent(mesh2);
-        BulletPhysicsComponent *meshBody2 = new BulletPhysicsComponent(meshObject2->position, meshObject2->rotation, 1.0f, new btBoxShape(btVector3(meshObject2->scale.x, meshObject2->scale.y, meshObject2->scale.z)));
-        meshObject2->AddComponent(meshBody2);
-    }
-  
-    renderSystem->defaultShader = &shader;
-    renderSystem->SetLights();
 
 }   
+
 
 ////////////END TEST--------------------
 
@@ -356,10 +343,9 @@ void Wait()//move to render system
 void EngineMain()
 {
     debugLog("Engine Starting...");
-      //init GM
+    //init GM
     gameManager = &GameManager::getGameManager();
-    //Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);     //LoadModel("romfs:/models/robot.glb");
-    while (!WindowShouldClose() && gameManager->Running())      // Detect window close button or ESC key
+    while (!WindowShouldClose() && gameManager->Running())      // Detect window close button
     //move states to game manager
     {
         
@@ -413,9 +399,7 @@ void EngineMain()
         }
          else if(ENGINE_STATES::GetState() == ENGINE_STATES::TEST)
         {
-            BeginDrawing();
-             //   
-            EndDrawing();
+          
         }
         
         

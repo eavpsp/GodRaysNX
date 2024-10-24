@@ -50,7 +50,7 @@ public:
     std::vector<Entity> GetEntities();
 };
 
-struct RenderSystemECS
+struct RenderSystemECS//each system uses unique model
 {
 public:
     void Init();

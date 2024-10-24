@@ -80,7 +80,9 @@ void PhysicsWorld::ShutdownPhysicsWorld()
 }
 void PhysicsWorld::UpdateBullet()
 {
+    SetTargetFPS(120);
     dynamicsWorld->stepSimulation(1.f / 120.f, 10);
+    SetTargetFPS(60);
 
 }
 void PhysicsWorld::UpdateBasic()

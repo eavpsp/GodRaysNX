@@ -9,9 +9,11 @@
 #include <AnimationComponent.h>
 #include <switch.h>
 #include <GR_MeshComponent.h>
-// Holds Scene Gameobjects
-// Light Data
-// Camera Data
+//TODO:
+//Loading Overlays /Overlay exporter
+//Add loading for new components
+//add functionality for cameras
+//prepare the resource table
 
 extern LoadingOverlay *loadingOverlay;
 extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
@@ -20,10 +22,13 @@ extern std::map<int, std::string> RES_ModelAnimations;
 extern std::map<int, std::string> RES_AudioFiles;
 extern std::map<int, std::string> RES_Models;
 static float sceneTimer = 0;
-
+enum ComponentType : u8
+{
+    ANIMATION = 0x11, PHYSICS = 0x12, AUDIO = 0x13, BULLET = 0x14, TEXTURE = 0x15, MESH = 0x16, 
+};
 enum GameObjectType//Add custom object types for implementation
 {
-    BASE_OBJ, LIGHT
+    BASEOBJ, PLIGHT, DLIGHT, SLIGHT, OCAMERA, PCAMERA
 };
 enum CameraType
 {
@@ -34,7 +39,22 @@ struct __attribute__((packed)) ComponentDataBase
 {
  
 };
+struct __attribute__((packed)) BulletComponent : ComponentDataBase//Header for bullet 0xC000
+{
+    //mass , shape, size, 
+    float mass;
+    int shapeType;
+    Vector3 _size;
+};
 //If components exist add them with the data in the GRB otherwise just use default data in Gameobject loaded
+struct __attribute__((packed)) TextureComponentData : ComponentDataBase //Header for animations 0xCA00
+{
+    int textureID;
+};
+struct __attribute__((packed)) MeshComponentData : ComponentDataBase //Header for animations 0xCA00
+{
+    int meshID;
+};
 struct __attribute__((packed)) AnimationComponentData : ComponentDataBase //Header for animations 0xCA00
 {
     int animationID;
@@ -59,7 +79,7 @@ struct __attribute__((packed)) SceneObjectData//add data for children and parent
     Vector3 position; //float 3
     Quaternion rotation; //float 4
     Vector3 scale; //float 3
-    int modelID;//int
+   //int
     int parentIndex;//use this to add any children to parent
     int numOfComponents;//int
 
@@ -149,7 +169,7 @@ class GameSceneManager
                     debugLog("Object ID: %d",objectLoaded->objID);
                     switch (objectLoaded->objType)
                     {
-                            case LIGHT:
+                            case SLIGHT:
                            
                             break;
                         
@@ -208,8 +228,6 @@ class GameSceneManager
                 
 
                 GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale);
-                Model model = LoadModelData(CurrentScene->objectsInScene[i]->modelID);
-                obj->AddComponent(new GR_MeshComponent(new GR_Mesh(model)));
                 debugLog("Number of Components: %d", CurrentScene->objectsInScene[i]->numOfComponents);
                 if (CurrentScene->objectsInScene[i]->numOfComponents > 0)
                 {
@@ -237,6 +255,7 @@ class GameSceneManager
                                     AudioComponent *audioComp = new AudioComponent(RES_AudioFiles[audio->audioID].c_str());
                                     obj->AddComponent(audioComp);
                             }
+                            //Texture Mesh
                             else
                             {
                                 debugLog("Unknown Component Found %c", objComps.first);

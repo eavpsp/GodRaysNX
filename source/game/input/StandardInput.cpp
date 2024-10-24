@@ -8,19 +8,8 @@ GameObject *player;
 bool playerActive = false;
 void StandardController::UpdateButtonInputs()
 {
-    if(!playerActive)//physics component for camera
-    {
-        playerActive = true;
-        player = GameObject::InstantiateGameObject<GameObject>(mightyCam->camToUse->position, Quaternion{0.0f, 0.0f, 0.0f, 0.0f}, Vector3{1.0f, 1.0f, 1.0f});
-        PhysicsComponent *comp = new PhysicsComponent(1.0f, Vector3{1.0f, 1.0f, 1.0f}, false, false);
-        Model mod = LoadModel("romfs:/models/prim/cube.obj");
-        comp->_bounds.SetupColliderMesh(mod.meshes[0]);
-        player->AddComponent(comp);
-
-
-    }
-    player->position = mightyCam->camToUse->position;
     Vector3 forward = Vector3Normalize(Vector3Subtract( mightyCam->camToUse->target,  mightyCam->camToUse->position));
+    
     //button presed -- can be extended to all button positions
      switch (GetGamepadButtonPressed())
      {
