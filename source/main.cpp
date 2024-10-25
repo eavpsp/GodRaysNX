@@ -33,8 +33,10 @@ LOD - Implemented Not Tested
 *WIP
 ___________________________
 **Current
-Lightmaps - Shadow Maps - 
-More Overlays(Implement System to Send overlays to RenderSystem for own render calls)  
+Lightmaps - 
+    Shadow Maps Arent supported, needs baked lights 
+More Overlays(Implement System to Send overlays to RenderSystem for own render calls) 
+    Screen Touch Controls
 Update Editor Components For Scene Loading- WIP
         Loader - 
         Editor -
@@ -52,6 +54,7 @@ Multithreading -
     Asset Loading Thread -
         Game Scene Loader
 ComputeShader Pathfinding -
+On Screen Debugger -
 ---------------------------
 *NOT STARTED
 __________________________
@@ -253,20 +256,21 @@ void TestPhysicsBullet()
 {
     
     //spawn slop and a mesh
-    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,180,0,0}, Vector3{10,1,10});
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{0,1,0});
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
     slopeMesh->SetShader(renderSystem->defaultShader);
     slope->AddComponent(slopeMesh);
-    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(slope->scale.x, slope->scale.y, slope->scale.z)));      
+    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(1.0f,1.0f,1.0f)));      
     slope->AddComponent(slopeBody);
-  
+    Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
     GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/sphere.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
     mesh->SetShader(renderSystem->defaultShader);
+    mesh->SetTexture(texture);
     meshObject->AddComponent(mesh);
-    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(1.0f));      
+    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(0.3f));      
     meshObject->AddComponent(meshBody);
 
 
@@ -291,6 +295,10 @@ void initSystem()
     debugLogInit();
     debugLog("romFS Init");
     debugLog("System Starting...");
+    SDL_Init(SDL_INIT_AUDIO);
+    // Load support for the MP3 format
+    Mix_Init(MIX_INIT_MP3);
+    debugLog("SDL Mixer Init");
     //init callbacks 
     GameObjects = new std::vector<GameObject *>();
     engineCallBacks = new EngineCallBacks();
@@ -424,3 +432,24 @@ int main(void)
     return EXIT_SUCCESS;
 
 }
+
+/*
+
+BoundingBox GetBoundingBox(Model model) {
+    BoundingBox bbox;
+    bbox.min = (Vector3){FLT_MAX, FLT_MAX, FLT_MAX};
+    bbox.max = (Vector3){FLT_MIN, FLT_MIN, FLT_MIN};
+
+    // Iterate over the mesh vertices
+    for (int i = 0; i < model.mesh.vertexCount; i++) {
+        Vector3 vertex = model.mesh.vertices[i];
+        if (vertex.x < bbox.min.x) bbox.min.x = vertex.x;
+        if (vertex.y < bbox.min.y) bbox.min.y = vertex.y;
+        if (vertex.z < bbox.min.z) bbox.min.z = vertex.z;
+        if (vertex.x > bbox.max.x) bbox.max.x = vertex.x;
+        if (vertex.y > bbox.max.y) bbox.max.y = vertex.y;
+        if (vertex.z > bbox.max.z) bbox.max.z = vertex.z;
+    }
+
+    return bbox;
+}*/

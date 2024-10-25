@@ -1002,22 +1002,33 @@ struct RenderSystem
 {
     bool debugMode;
     MightyCam mainCamera;
-    RenderTexture2D post_process_target;
-    Shader postProcessingShaders;
+    Camera3D lightCam;
+    RenderTexture2D post_process_target , shadowMap;
+    Shader postProcessingShaders, shadow_shader;
     PostProcessingFXConfig ppfxConfig;
     Shader defaultShader;
     Light defaultLight;
     std::vector<RENDER_PROC> renderProcs;
+
     RenderSystem()
     {
-       
-        Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
-        shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-        int ambientLoc = GetShaderLocation(shader, "ambient");
-        SetShaderValue(shader, ambientLoc, (float[4]){ 0.2f, 0.2f, 0.2f, 1.0f }, SHADER_UNIFORM_VEC4);
-        SetDefaultShader(shader);
+        Vector3 lightDir = (Vector3){ 6.0f,14.0f,3.0f};
+        lightCam = (Camera3D){ 0 };
+        lightCam.position = Vector3Scale(lightDir, -15.0f);
+        lightCam.target = Vector3Zero();
+        // Use an orthographic projection for directional lights
+        lightCam.projection = CAMERA_ORTHOGRAPHIC;
+        lightCam.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+        lightCam.fovy = 20.0f;
+        shadow_shader = LoadShader("romfs:/shaders/shadow.vs", "romfs:/shaders/shadow.fs");
+        defaultShader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
+        defaultShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(defaultShader, "viewPos");
+        int ambientLoc = GetShaderLocation(defaultShader, "ambient");
+        SetShaderValue(defaultShader, ambientLoc, (float[4]){ 0.12f, 0.12f, 0.12f, 1.0f }, SHADER_UNIFORM_VEC4);
         SetLights();
+        shadow_shader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shadow_shader, "mvp");
         post_process_target = LoadRenderTexture(screenWidth, screenHeight);
+        shadowMap = LoadRenderTexture(1024 , 1024);
         postProcessingShaders = LoadShader(0, "romfs:/shaders/ppfx.fs");
         int bloomFX = GetShaderLocation(postProcessingShaders, "bloomFX");
         int blurFX = GetShaderLocation(postProcessingShaders, "blurFX");
@@ -1039,7 +1050,7 @@ struct RenderSystem
     }
     void SetLights()
     {
-        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 6.0f,14.0f,3.0f}, Vector3Zero(), WHITE, defaultShader);
+        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 6.0f,14.0f,3.0f}, Vector3Zero(), YELLOW, defaultShader);
         defaultLight.enabled = true;
     }
     ~RenderSystem() = default;
@@ -1052,3 +1063,14 @@ struct RenderSystem
 
 
 #endif // RENDER_SYSTEM_H
+/*
+Shadows
+Gradient-based Shadows: This technique uses gradients to simulate shadows. It involves creating a gradient map that represents the shadow intensity and then applying it to the scene.
+Fake Shadow Projections: This technique involves projecting a simplified shadow shape onto the screen, such as a circle or a rectangle. This can be used to create a fake shadow effect for objects that are not too complex.
+Ambient Occlusion: This technique uses the ambient occlusion value to simulate shadows. Ambient occlusion is a measure of how much a point is occluded by surrounding objects.
+Screen Space Ambient Occlusion (SSAO): This technique uses the screen space to estimate ambient occlusion, which is a measure of how much a point is occluded by surrounding objects. This can be used to create a fake shadow effect.
+Baked Shadows: This technique involves pre-calculating the shadows for a scene and storing them in a texture. This can be used for static scenes where the lighting doesn't change.
+Shadow Approximations: This technique involves using simplified shadow models, such as a sphere or a cylinder, to approximate the shadow of an object.
+Distance-based Shadows: This technique involves using the distance from the light source to the object to simulate shadows. Objects that are closer to the light source will have a lighter shadow, while objects that are farther away will have a darker shadow.
+
+*/

@@ -127,7 +127,15 @@ class BulletPhysicsComponent : public GameComponent
 
         //bullet and open gl postions are inverted, might fix in shader
         parentObject->position = Vector3{transform->getOrigin().x(), transform->getOrigin().y(), transform->getOrigin().z()};//fine
-        parentObject->rotation = Quaternion{transform->getRotation().getW(), transform->getRotation().getX(), transform->getRotation().getZ(), transform->getRotation().getY()};
+        btQuaternion rot = transform->getRotation();
+         Vector3 axis = {
+            rot.getAxis().getX(),
+            rot.getAxis().getY(),
+            rot.getAxis().getZ()
+        };
+        float angle = rot.getAngle() * RAD2DEG;
+
+        parentObject->rotation = QuaternionFromAxisAngle(axis, angle);//fine
     }
     public:
 /**

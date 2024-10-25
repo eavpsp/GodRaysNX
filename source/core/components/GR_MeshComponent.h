@@ -7,29 +7,27 @@
 struct GR_Mesh : ObjectDrawable
 {
     Model model;
-    Model *activeMesh;
+    Model activeMesh;
     Model *LOD_Meshes;
     GR_Mesh() = default;
     GR_Mesh(Model model) : model(model) {
-        activeMesh = &model;
+        activeMesh = model;
        
     };
     void DrawLODMesh(int index)
     {
-        activeMesh = &LOD_Meshes[index];
+        activeMesh = LOD_Meshes[index];
     }
     void DrawBaseMesh()
     {
-        activeMesh = &model;
+        activeMesh = model;
     }
     void SetLOD(Model *LOD_Meshes) { this->LOD_Meshes = LOD_Meshes; }
     void draw() override
     {
-        if(IsShaderReady(model.materials[0].shader))
-        {
-            activeMesh->transform = MatrixRotateXYZ((Vector3){ DEG2RAD*componentParent->parentObject->rotation.x, DEG2RAD*componentParent->parentObject->rotation.y, DEG2RAD*componentParent->parentObject->rotation.z });
-            DrawModelEx(model, componentParent->parentObject->position, (Vector3){0.0f, 1.0f, 0.0f}, 0.0f, componentParent->parentObject->scale, WHITE);//update to draw ex
-        }
+        
+        DrawModel(activeMesh, componentParent->parentObject->position, componentParent->parentObject->scale.y, WHITE);//update to draw ex
+    
         
     }
 };
@@ -47,15 +45,15 @@ struct GR_MeshComponent : GameComponent
     ShaderType shaderType = LIGHTING;
     void OnUpdate() override
     {
-      
-      // 
+           mesh->activeMesh.transform = MatrixMultiply(MatrixIdentity(), MatrixRotateXYZ((Vector3){ DEG2RAD*parentObject->rotation.x, DEG2RAD*parentObject->rotation.y, DEG2RAD*parentObject->rotation.z }));
+
     }
    
     void SetShader(Shader shader )
     {
-        for (size_t i = 0; i < mesh->model.materialCount; i++)
+        for (size_t i = 0; i < mesh->activeMesh.materialCount; i++)
         {
-            mesh->model.materials[i].shader = shader;// Set shader effect to 3d model
+            mesh->activeMesh.materials[i].shader = shader;// Set shader effect to 3d model
         }
         
       
@@ -63,7 +61,7 @@ struct GR_MeshComponent : GameComponent
    
     void SetTexture(const Texture2D& texture)
     {
-        mesh->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture; // Bind texture to model
+        mesh->activeMesh.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture; // Bind texture to model
     }
    
     void ComponentAddedCallback() override
@@ -71,7 +69,12 @@ struct GR_MeshComponent : GameComponent
         parentObject->objectDrawables.push_back(mesh); 
         mesh->componentParent = this;  
     }
-    GR_MeshComponent(GR_Mesh *mesh) : mesh(mesh) {};
+    GR_MeshComponent(GR_Mesh *mesh) : mesh(mesh) 
+    {
+
+        Matrix rotMatrix = MatrixRotateXYZ({parentObject->rotation.x, parentObject->rotation.y, parentObject->rotation.z});
+        mesh->activeMesh.transform = rotMatrix;
+    };
 
 };
 //Raylib Model Container
