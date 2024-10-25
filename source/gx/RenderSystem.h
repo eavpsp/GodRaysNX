@@ -995,6 +995,8 @@ struct PostProcessingFXConfig
     bool post_processing = true;
     bool bloom = true;
     bool blur = true;
+    bool shadows = true;
+    bool anti_aliasing = true;
 
 };
 //handles all renderable data outside of ecs
@@ -1032,7 +1034,7 @@ struct RenderSystem
         postProcessingShaders = LoadShader(0, "romfs:/shaders/ppfx.fs");
         int bloomFX = GetShaderLocation(postProcessingShaders, "bloomFX");
         int blurFX = GetShaderLocation(postProcessingShaders, "blurFX");
-        SetShaderValue(postProcessingShaders, bloomFX, (float[1]){ ppfxConfig.bloom ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);
+        SetShaderValue(postProcessingShaders, bloomFX, (float[1]){ ppfxConfig.bloom ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);//
         SetShaderValue(postProcessingShaders, blurFX, (float[1]){ ppfxConfig.blur ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);
 
     };
@@ -1063,14 +1065,3 @@ struct RenderSystem
 
 
 #endif // RENDER_SYSTEM_H
-/*
-Shadows
-Gradient-based Shadows: This technique uses gradients to simulate shadows. It involves creating a gradient map that represents the shadow intensity and then applying it to the scene.
-Fake Shadow Projections: This technique involves projecting a simplified shadow shape onto the screen, such as a circle or a rectangle. This can be used to create a fake shadow effect for objects that are not too complex.
-Ambient Occlusion: This technique uses the ambient occlusion value to simulate shadows. Ambient occlusion is a measure of how much a point is occluded by surrounding objects.
-Screen Space Ambient Occlusion (SSAO): This technique uses the screen space to estimate ambient occlusion, which is a measure of how much a point is occluded by surrounding objects. This can be used to create a fake shadow effect.
-Baked Shadows: This technique involves pre-calculating the shadows for a scene and storing them in a texture. This can be used for static scenes where the lighting doesn't change.
-Shadow Approximations: This technique involves using simplified shadow models, such as a sphere or a cylinder, to approximate the shadow of an object.
-Distance-based Shadows: This technique involves using the distance from the light source to the object to simulate shadows. Objects that are closer to the light source will have a lighter shadow, while objects that are farther away will have a darker shadow.
-
-*/

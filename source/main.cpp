@@ -99,7 +99,9 @@ Networking -
 #include <RenderSystem.h>
 #include <ParticleSystem.h>
 #include <ResourceManager.h>
-//move res stuff to scene manager
+#include <ShaderInterface.h>
+#include <glad/glad.h>  // glad library (OpenGL loader)
+//move res stuff to scene manager//
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
@@ -272,8 +274,10 @@ void TestPhysicsBullet()
     meshObject->AddComponent(mesh);
     BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(0.3f));      
     meshObject->AddComponent(meshBody);
-
-  
+    gladLoadGL();
+    debugLog("Loading Shaders");
+    ShaderInterface *shaderLoader = new ShaderInterface("romfs:/shaders/ShadowMap.vs", "romfs:/shaders/ppfx.fs");
+////
 }   
 
 
@@ -377,7 +381,7 @@ void EngineMain()
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::VIDEO)
         {
           
-          //Video Playback Here
+          //Video Playback Here//
             if(!Player::playbackLoop())//update to use framebuffer
             {
                 ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
