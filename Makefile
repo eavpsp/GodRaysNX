@@ -62,7 +62,7 @@ CXXFLAGS	:= $(CFLAGS) -frtti -fno-exceptions -g
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lass -ltheora -lvorbis -logg -lraylib -lglfw3 -lEGL -lGLESv2 -lglapi -lglad -ldrm_nouveau -lnx -lm -lz `$(PREFIX)pkg-config --libs SDL2_mixer`
+LIBS	:= -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lass -ltheora -lvorbis -logg -lraylib -lglfw3 -lEGL -lglad -lGLESv2 -lglapi -ldrm_nouveau -lnx -lm -lz `$(PREFIX)pkg-config --libs SDL2_mixer`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

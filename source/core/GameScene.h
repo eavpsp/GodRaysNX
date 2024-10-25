@@ -78,7 +78,7 @@ struct __attribute__((packed)) SceneObjectData//add data for children and parent
     int objID;//int unique id
     Vector3 position; //float 3
     Quaternion rotation; //float 4
-    Vector3 scale; //float 3
+    float scale; //float 1
    //int
     int parentIndex;//use this to add any children to parent
     int numOfComponents;//int

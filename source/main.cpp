@@ -33,8 +33,9 @@ LOD - Implemented Not Tested
 *WIP
 ___________________________
 **Current
-Lightmaps - 
+Shadow Maps!!!!! - 
     Shadow Maps Arent supported, needs baked lights 
+    Or find how to support shadow maps
 More Overlays(Implement System to Send overlays to RenderSystem for own render calls) 
     Screen Touch Controls
 Update Editor Components For Scene Loading- WIP
@@ -85,7 +86,6 @@ Networking -
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <switch.h>
 #include <ScriptCallbacks.h>
 #include <map>
 #include <VideoPlayer.h>
@@ -99,6 +99,7 @@ Networking -
 #include <RenderSystem.h>
 #include <ParticleSystem.h>
 #include <ResourceManager.h>
+#include <ShaderLoader.h>
 //move res stuff to scene manager
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
@@ -138,7 +139,7 @@ void TestPhysics()
     for (size_t i = 0; i < 2; i++)
     {
         Vector3 pos = Vector3{0, 10 * i, 0};
-        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, 1.0f);
         Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);
         obj->AddComponent(new GR_MeshComponent(new GR_Mesh(model)));
         PhysicsComponent *comp = new PhysicsComponent(1.0f, 2.0f,false,  i == 0 ? false : true);
@@ -152,7 +153,7 @@ void TestAnimations()
 {
         Vector3 pos = Vector3{0, 0, 0};
         Model model = _RES::GetModel(_RES::Model_ID::ROBOT_ID);
-        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        GameObject *obj = GameObject::InstantiateGameObject<GameObject>(pos, Quaternion{0,0,0,0}, 1.0f);
         obj->AddComponent(new GR_MeshComponent(new GR_Mesh(model)));
         AnimationComponent *animComp = new AnimationComponent(RES_ModelAnimations[_RES::Model_ID::ROBOT_ID].c_str());
         AnimationControllerData *data = new AnimationControllerData();
@@ -215,7 +216,7 @@ void TestPhysicsSAT()
 
     //spawn slop and a mesh
     Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
-    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, 1.0f);
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
     slopeMesh->SetShader(shader);
@@ -224,7 +225,7 @@ void TestPhysicsSAT()
     slopeBody->_bounds.SetupColliderMesh(slopeData->model.meshes[0]);
     slope->AddComponent(slopeBody);
   
-    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, 1.0f);
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
     mesh->SetShader(shader);
@@ -236,7 +237,7 @@ void TestPhysicsSAT()
 
     for(int i = 0; i < 5 ; i++)
     {
-        GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+        GameObject *meshObject2 = GameObject::InstantiateGameObject<GameObject>(Vector3{0,15 + i * 15,0}, Quaternion{0,0,0,0}, 1.0f);
         GR_Mesh* meshData2 = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
         GR_MeshComponent *mesh2 = new GR_MeshComponent(meshData2);
         mesh2->SetShader(shader);
@@ -256,15 +257,15 @@ void TestPhysicsBullet()
 {
     
     //spawn slop and a mesh
-    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, Vector3{0,1,0});
-    GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,180,0,0}, 1.0f);
+    GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
     slopeMesh->SetShader(renderSystem->defaultShader);
     slope->AddComponent(slopeMesh);
     BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(1.0f,1.0f,1.0f)));      
     slope->AddComponent(slopeBody);
     Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
-    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, Vector3{1,1,1});
+    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, 1.0f);
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/sphere.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
     mesh->SetShader(renderSystem->defaultShader);
@@ -273,7 +274,7 @@ void TestPhysicsBullet()
     BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(0.3f));      
     meshObject->AddComponent(meshBody);
 
-
+  
 }   
 
 

@@ -11,7 +11,6 @@ void RenderSystem::RenderScene()
         float camPos[3] = { mainCamera.camToUse->position.x, mainCamera.camToUse->position.y, mainCamera.camToUse->position.z };
         SetShaderValue(defaultShader, defaultShader.locs[SHADER_LOC_VECTOR_VIEW], camPos, SHADER_UNIFORM_VEC3);
         UpdateLightValues(defaultShader, defaultLight);
-  
         BeginTextureMode(post_process_target);
         ClearBackground(GRAY);
         BeginMode3D(*mainCamera.camToUse);

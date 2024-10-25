@@ -95,6 +95,7 @@
         "raygui.h": "c",
         "*.m": "cpp",
         "unordered_set": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "glad.h": "c"
     }
 }

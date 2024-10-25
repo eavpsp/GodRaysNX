@@ -18,6 +18,7 @@ struct GR_Mesh : ObjectDrawable
     {
         activeMesh = LOD_Meshes[index];
     }
+
     void DrawBaseMesh()
     {
         activeMesh = model;
@@ -26,7 +27,7 @@ struct GR_Mesh : ObjectDrawable
     void draw() override
     {
         
-        DrawModel(activeMesh, componentParent->parentObject->position, componentParent->parentObject->scale.y, WHITE);//update to draw ex
+        DrawModel(activeMesh, componentParent->parentObject->position, componentParent->parentObject->scale, WHITE);//update to draw ex
     
         
     }
@@ -45,7 +46,7 @@ struct GR_MeshComponent : GameComponent
     ShaderType shaderType = LIGHTING;
     void OnUpdate() override
     {
-           mesh->activeMesh.transform = MatrixMultiply(MatrixIdentity(), MatrixRotateXYZ((Vector3){ DEG2RAD*parentObject->rotation.x, DEG2RAD*parentObject->rotation.y, DEG2RAD*parentObject->rotation.z }));
+           mesh->activeMesh.transform = MatrixMultiply(MatrixIdentity(),QuaternionToMatrix(parentObject->rotation));
 
     }
    
@@ -72,7 +73,7 @@ struct GR_MeshComponent : GameComponent
     GR_MeshComponent(GR_Mesh *mesh) : mesh(mesh) 
     {
 
-        Matrix rotMatrix = MatrixRotateXYZ({parentObject->rotation.x, parentObject->rotation.y, parentObject->rotation.z});
+        Matrix rotMatrix =  MatrixMultiply(MatrixIdentity(),QuaternionToMatrix(parentObject->rotation));
         mesh->activeMesh.transform = rotMatrix;
     };
 

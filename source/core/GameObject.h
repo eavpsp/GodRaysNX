@@ -45,7 +45,7 @@ struct GameObject : public EngineObject
         int gameObjectID;
         void Draw();
         template <typename T>
-        static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, Vector3 _scale, const char* _name = "GameObject")
+        static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, float _scale, const char* _name = "GameObject")
         {
             if (!std::is_base_of<EngineObject, T>::value) {
                 // Error: T is not a derived class of EngineObject
@@ -57,7 +57,7 @@ struct GameObject : public EngineObject
                 newObject->transform = Matrix();
                 newObject->position = Vector3{_position.x, _position.y, _position.z};
                 newObject->rotation = Quaternion{_rotation.x, _rotation.y, _rotation.z, _rotation.w};
-                newObject->scale = Vector3 { _scale.x, _scale.y, _scale.z };
+                newObject->scale = _scale;
                 newObject->name = _name;
                 newObject->onInit();
                 return newObject;
