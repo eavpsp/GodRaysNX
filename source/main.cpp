@@ -99,7 +99,6 @@ Networking -
 #include <RenderSystem.h>
 #include <ParticleSystem.h>
 #include <ResourceManager.h>
-#include <ShaderLoader.h>
 //move res stuff to scene manager
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
