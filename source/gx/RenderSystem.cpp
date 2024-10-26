@@ -14,6 +14,10 @@ void RenderSystem::DrawOverlays()
     {
         overlays.at(i)->Draw();
     }
+    for (size_t i = 0; i < drawable2D.size(); i++)
+    {
+        drawable2D.at(i)->draw();
+    }
     
 }
 

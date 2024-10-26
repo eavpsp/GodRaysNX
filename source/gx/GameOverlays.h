@@ -6,7 +6,6 @@
 #include<string>
 #include<raylib.h>
 #include<ResourceManager.h>
-#include <raygui.h>
 //RAYGUI for ELEMENTS
 extern Font guiFont;
 extern std::map<int, std::string> RES_UI_Textures;

@@ -1030,6 +1030,7 @@ struct RenderSystem
     std::vector<RENDER_PROC> renderProcs;
     int lightVPLoc, shadowMapLoc,lightDirLoc;
     std::vector<Overlay*> overlays;
+    std::vector<ObjectDrawable*> drawable2D;
     void DrawOverlays();
     void DrawOverlay(Overlay* overlay);
     void AddOverlay(Overlay* overlay);
