@@ -1023,6 +1023,7 @@ struct RenderSystem
     bool debugMode;
     MightyCam mainCamera;
     Camera3D lightCam;
+
     RenderTexture2D post_process_target , shadowMap;
     Shader postProcessingShaders, shadow_shader;
     PostProcessingFXConfig ppfxConfig;
@@ -1038,6 +1039,7 @@ struct RenderSystem
     void RemoveOverlay(Overlay* overlay);
     RenderSystem()
     {
+       
         if(ppfxConfig.anti_aliasing )
         {
             SetConfigFlags(FLAG_MSAA_4X_HINT);

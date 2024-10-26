@@ -1,7 +1,6 @@
 #include <GameManager.h>
 #include "../debug/debug.h"
 #include <raylib.h>
-#include <raygui.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -11,18 +10,13 @@
 #include <StandardInput.h>
 #include <GamePad.h>
 #include <RenderSystem.h>
-extern std::map<std::string, std::string> RES_Textures;
 extern std::map<std::string, std::string> RES_Fonts;
 RenderSystem *renderSystem;
 Font guiFont;
-    // NOTE: Textures MUST be loaded after Window initialization (OpenGL context is required)
-Texture2D texture;        // Texture loading
 const int screenWidth = 1280;
 const int screenHeight = 720;
 GamePads gamePads;
 StandardController controller;
-
-//MenuController menuController;
 GameManager::GameManager(bool running) : _running{running}
 {
 
@@ -30,7 +24,7 @@ GameManager::GameManager(bool running) : _running{running}
 
 GameManager::~GameManager()
 {
-      UnloadTexture(texture); 
+      UnloadFont(guiFont);
 }
 GameManager& GameManager::getGameManager()
 {
@@ -39,7 +33,7 @@ GameManager& GameManager::getGameManager()
     {
 
         gameManager = new GameManager(true);
-        InitWindow(screenWidth, screenHeight, "raylib [textures] example - texture loading and drawing");
+        InitWindow(screenWidth, screenHeight, "GodRays NX GAME"); 
         if (!IsWindowReady())
         {
             debugLog("\x1b[16;25HError Creating Window!");
@@ -69,7 +63,6 @@ void GameManager::destroyGameManager()
 
 void GameManager::runGameLoop()
 {
-   // UpdateCamera(&mainCamera, CAMERA_FREE);
    controller.UpdateInputs();
 }
  

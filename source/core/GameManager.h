@@ -4,7 +4,6 @@
 #include <time.h>
 #include <GameStates.h>
 #include <ResourceManager.h>
-#include <RenderSystem.h>
 
 
 class GameManager
@@ -16,10 +15,8 @@ class GameManager
     public:
     void runGameLoop();//add states for pause and other menus
     void SceneInit();
-    void GameLoop();
+    void wGameLoop();
     bool Running();
-    // RenderSystem *_renderSystem;
-    // ResourceManager *_resourceManager;
     static GameManager& getGameManager();
     static void destroyGameManager();
 

@@ -3,6 +3,7 @@
 
 
                             cache data in scopes!
+                            && Smart PTRS
 
 Todo:
 ----------------------------
@@ -44,7 +45,7 @@ More Overlays(Implement System to Send overlays to RenderSystem for own render c
 Update Editor Components For Scene Loading- WIP
         Loader - 
         Editor -
-        
+
 Stress Test?
     Swarm 
     Animations

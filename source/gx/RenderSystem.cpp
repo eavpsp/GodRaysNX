@@ -71,7 +71,6 @@ void RenderSystem::RenderScene()
         EndTextureMode();
         Matrix lightViewProj = MatrixMultiply(lightView, lightProj);
        //Light Pass wit Post Processing
-       
         BeginTextureMode(post_process_target);
         ClearBackground(GRAY);
         SetShaderValueMatrix(defaultShader, lightVPLoc, lightViewProj);
@@ -84,16 +83,18 @@ void RenderSystem::RenderScene()
         for (size_t i = 0; i < GameObjects->size(); i++)
         {
             if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
-               
-                GameObjects->at(i)->Draw();
-                
+                GameObjects->at(i)->Draw();    
         }   
         if(debugMode)
         {
             DrawGrid(10, 1.0f);
         }    
-        EndMode3D();       
-          EndTextureMode();        
+        EndMode3D();    
+        for (size_t i = 0; i < renderProcs.size(); i++)
+        {
+            renderProcs.at(i).draw();
+        }   
+        EndTextureMode();        
 
         
         ClearBackground(GRAY);
@@ -108,10 +109,6 @@ void RenderSystem::RenderScene()
         DrawTextureRec(post_process_target.texture, (Rectangle){ 0, 0, (float)post_process_target.texture.width, (float)-post_process_target.texture.height }, (Vector2){ 0, 0 }, WHITE);
         EndShaderMode();
      
-        for (size_t i = 0; i < renderProcs.size(); i++)
-        {
-            renderProcs.at(i).draw();
-        }
         DrawOverlays();
         EndDrawing();
     }
@@ -127,6 +124,10 @@ void RenderSystem::RenderScene()
             if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
                 GameObjects->at(i)->Draw();
         }   
+            for (size_t i = 0; i < renderProcs.size(); i++)
+        {
+            renderProcs.at(i).draw();
+        }
         if(debugMode)
         {
             DrawGrid(10, 1.0f);
