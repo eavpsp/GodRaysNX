@@ -15,7 +15,7 @@ class GameManager
     public:
     void runGameLoop();//add states for pause and other menus
     void SceneInit();
-    void wGameLoop();
+    void GameLoop();
     bool Running();
     static GameManager& getGameManager();
     static void destroyGameManager();

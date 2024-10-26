@@ -62,7 +62,7 @@ void RenderSystemECS::Init()
 
 }
 
-void RenderSystemECS::DrawEntities(Model model, Entity entity)
+void RenderSystemECS::DrawEntities(Model model, Entity entity)//needs camera
 {
    
         TransformComponent transform = transformSystem.GetComponent(entity);

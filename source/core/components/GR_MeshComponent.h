@@ -26,10 +26,7 @@ struct GR_Mesh : ObjectDrawable
     void SetLOD(Model *LOD_Meshes) { this->LOD_Meshes = LOD_Meshes; }
     void draw() override
     {
-        
         DrawModel(activeMesh, componentParent->parentObject->position, componentParent->parentObject->scale, tint);//update to draw ex
-    
-        
     }
 };
 enum ShaderType
@@ -47,8 +44,7 @@ struct GR_MeshComponent : GameComponent
     ShaderType shaderType = LIGHTING;
     void OnUpdate() override
     {
-           mesh->activeMesh.transform = MatrixMultiply(MatrixIdentity(),QuaternionToMatrix(parentObject->rotation));
-
+        mesh->activeMesh.transform = MatrixMultiply(MatrixIdentity(),QuaternionToMatrix(parentObject->rotation));
     }
    
     void SetShader(Shader shader )
@@ -58,7 +54,6 @@ struct GR_MeshComponent : GameComponent
             mesh->activeMesh.materials[i].shader = shader;// Set shader effect to 3d model
         }
         
-      
     }
    
     void SetTexture(const Texture2D& texture)
@@ -72,11 +67,7 @@ struct GR_MeshComponent : GameComponent
         mesh->componentParent = this;  
     }
     GR_MeshComponent(GR_Mesh *mesh) : mesh(mesh) 
-    {
-
-        Matrix rotMatrix =  MatrixMultiply(MatrixIdentity(),QuaternionToMatrix(parentObject->rotation));
-        mesh->activeMesh.transform = rotMatrix;
-    };
+    {};
 
 };
 //Raylib Model Container

@@ -994,7 +994,7 @@ public:
 	}
 
 };
-struct RENDER_PROC//begin shader process
+struct RENDER_PROC//begin shader process //custom func for running in the render loop
 {
     void (*draw)();
     RENDER_PROC(void (*draw)()):draw(draw){};

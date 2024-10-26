@@ -3,7 +3,7 @@
 
 
                             cache data in scopes!
-                            && Smart PTRS
+                          
 
 Todo:
 ----------------------------
@@ -122,7 +122,7 @@ BurstParticleSystem* burstParticleSystem;
 extern RenderSystem *renderSystem;
 PhysicsWorld *physicsWorld;
 BootOverlay *bootOverlay;
-//vector of menu controllers
+//vector of menu controllers//
 
 /////////////TEST
 void TestVideo()
@@ -191,7 +191,7 @@ void TestDOTS()
     debugLog("DOTS Init");
     debugLog("Number of QuadTreeNodes: %d", quadTreeContainer->size());
 }
-void DotsUPDATE()
+void DotsUPDATE()//revamp for new testing
 {
             ecs.UpdateSystem();
          //Entity, Octree, Frustum
@@ -295,14 +295,15 @@ void TestPhysicsSAT()
 void TestPhysicsBullet()
 {
     Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
-    GameObject *plane = GameObject::InstantiateGameObject<GameObject>(Vector3{0,-10,0}, Quaternion{0,0,0,0},10.0f);
+    GameObject *plane = GameObject::InstantiateGameObject<GameObject>(Vector3{0,-5,0}, Quaternion{0,0,0,0},20.0f);
     GR_Mesh* planeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
     GR_MeshComponent *planeMesh = new GR_MeshComponent(planeData);
     planeMesh->SetShader(renderSystem->defaultShader);
-    planeMesh->SetTint(GREEN);
+    planeMesh->SetTint(RED);
     plane->AddComponent(planeMesh);
     BulletPhysicsComponent *planeBody = new BulletPhysicsComponent(plane->position, plane->rotation, 0.0f, new btBoxShape(btVector3(20.0f,0.5f,20.0f)));      
     plane->AddComponent(planeBody);
+    
     GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,180,0,0}, 2.0f);
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
@@ -358,18 +359,19 @@ void initSystem()
     BoundingBox stageBounds = {Vector3{-1000,-1000,-1000}, Vector3{1000,1000,1000}};
     quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
     loadingOverlay = new LoadingOverlay();
+    
 }
 
 
 void BOOT()//Move to render system
 {
     if(bootOverlay == nullptr)
-    {
+    {   
         bootOverlay = new BootOverlay();
     }
-      BeginDrawing();
-            ClearBackground(BLACK);
-            bootOverlay->Draw();
+    BeginDrawing();
+    ClearBackground(BLACK);
+    bootOverlay->Draw();
     EndDrawing();
     
     timer += GetFrameTime();
@@ -378,7 +380,7 @@ void BOOT()//Move to render system
         timer = 0;
         ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
 
-        TestPhysicsBullet();
+        TestPhysicsBullet();//Convert this to Proccess System with manager
 
     }
 
@@ -394,7 +396,7 @@ void Wait()//move to render system
     if (timer > 2)
     {
         timer = 0;
-        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+        ENGINE_STATES::ChangeState(ENGINE_STATES::IDLE);
     }
 }
 void EngineMain()
@@ -469,13 +471,12 @@ int main(void)
     //--------------------------------------------------------------------------------------
     initSystem();
     EngineMain();
+    //--------------------------------------------------------------------------------------
     physicsWorld->ShutdownPhysicsWorld();
     debugLog("Game Stopped....");
-
     debugLogCleanup();
     romfsExit();
-    CloseWindow();                // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    CloseWindow();
     debugLog("Exiting....");
     appletExit();
     return EXIT_SUCCESS;

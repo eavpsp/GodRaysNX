@@ -42,6 +42,14 @@ void RenderSystem::RemoveOverlay(Overlay *overlay)
         }
     }
 }
+void DrawScene()
+{
+      for (size_t i = 0; i < GameObjects->size(); i++)
+        {
+            if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
+                GameObjects->at(i)->Draw();    
+        }   
+}
 
 void RenderSystem::RenderScene()
 {
@@ -60,13 +68,7 @@ void RenderSystem::RenderScene()
         BeginMode3D(lightCam);
             lightView = rlGetMatrixModelview();
             lightProj = rlGetMatrixProjection();
-            for (size_t i = 0; i < GameObjects->size(); i++)
-            {
-            if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
-               
-                GameObjects->at(i)->Draw();
-                
-            }   
+            DrawScene();
         EndMode3D();
         EndTextureMode();
         Matrix lightViewProj = MatrixMultiply(lightView, lightProj);
@@ -80,11 +82,7 @@ void RenderSystem::RenderScene()
         rlEnableTexture(shadowMap.depth.id);
         rlSetUniform(shadowMapLoc, &slot, SHADER_UNIFORM_INT, 1);
         BeginMode3D(*mainCamera.camToUse);
-        for (size_t i = 0; i < GameObjects->size(); i++)
-        {
-            if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
-                GameObjects->at(i)->Draw();    
-        }   
+        DrawScene();
         if(debugMode)
         {
             DrawGrid(10, 1.0f);
@@ -95,8 +93,6 @@ void RenderSystem::RenderScene()
             renderProcs.at(i).draw();
         }   
         EndTextureMode();        
-
-        
         ClearBackground(GRAY);
         if(!IsShaderReady(postProcessingShaders))
         {
@@ -108,23 +104,16 @@ void RenderSystem::RenderScene()
         BeginShaderMode(postProcessingShaders);
         DrawTextureRec(post_process_target.texture, (Rectangle){ 0, 0, (float)post_process_target.texture.width, (float)-post_process_target.texture.height }, (Vector2){ 0, 0 }, WHITE);
         EndShaderMode();
-     
         DrawOverlays();
         EndDrawing();
     }
-    else
+    else//No post processing FX
     {
         BeginDrawing();//Create Render System with View Frustrum //Move to render system
         BeginMode3D(*mainCamera.camToUse);
         ClearBackground(GRAY);//get scene color
-
-        for (size_t i = 0; i < GameObjects->size(); i++)
-        {
-            /* code */
-            if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
-                GameObjects->at(i)->Draw();
-        }   
-            for (size_t i = 0; i < renderProcs.size(); i++)
+        DrawScene();
+        for (size_t i = 0; i < renderProcs.size(); i++)
         {
             renderProcs.at(i).draw();
         }
@@ -133,12 +122,7 @@ void RenderSystem::RenderScene()
             DrawGrid(10, 1.0f);
         }
         EndMode3D();
-        for (size_t i = 0; i < renderProcs.size(); i++)
-        {
-            renderProcs.at(i).draw();
-        }
         DrawOverlays();
-
         EndDrawing();
     }
         
