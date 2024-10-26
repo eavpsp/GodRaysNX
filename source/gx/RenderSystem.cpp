@@ -3,10 +3,43 @@
 #include <ScriptCallbacks.h>
 #include <GR_MeshComponent.h>
 #include <rlgl.h>
+#include "GameOverlays.h"
+#include <raygui.h>
 extern std::vector<GameObject *> *GameObjects;
+//RAYGUI for ELEMENTS
+void RenderSystem::DrawOverlays()
+{
+    for (size_t i = 0; i < overlays.size(); i++)
+    {
+        overlays.at(i)->Draw();
+    }
+    
+}
+
+void RenderSystem::DrawOverlay(Overlay *overlay)
+{
+    overlay->Draw();
+}
+
+void RenderSystem::AddOverlay(Overlay *overlay)
+{
+    overlays.push_back(overlay);
+}
+
+void RenderSystem::RemoveOverlay(Overlay *overlay)
+{
+    for (size_t i = 0; i < overlays.size(); i++)
+    {
+        if (overlays.at(i) == overlay)
+        {
+            overlays.erase(overlays.begin() + i);
+            break;
+        }
+    }
+}
 
 void RenderSystem::RenderScene()
- {
+{
     if(ppfxConfig.post_processing)
     {
         Vector3 cameraPos = mainCamera.camToUse->position;
@@ -74,6 +107,7 @@ void RenderSystem::RenderScene()
         {
             renderProcs.at(i).draw();
         }
+        DrawOverlays();
         EndDrawing();
     }
     else
@@ -97,6 +131,8 @@ void RenderSystem::RenderScene()
         {
             renderProcs.at(i).draw();
         }
+        DrawOverlays();
+
         EndDrawing();
     }
         

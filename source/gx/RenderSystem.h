@@ -14,6 +14,7 @@
 #include <ResourceManager.h>    
 #include <rlights.h>
 #include "rlgl.h"
+#include <GameOverlays.h>
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
@@ -258,6 +259,20 @@ struct MightyBoundingBox
             collider.transformedPoints[i] = Vector3Add( collider.notTransformed[i],parent);
         }
     }
+
+   
+   MightyBoundingBox(BoundingBox boundingBox)
+   {
+       corners[0] = boundingBox.min;
+       corners[1] = Vector3{boundingBox.max.x, boundingBox.min.y, boundingBox.min.z};
+       corners[2] = Vector3{boundingBox.max.x, boundingBox.min.y, boundingBox.max.z};
+       corners[3] = Vector3{boundingBox.min.x, boundingBox.min.y, boundingBox.max.z};
+       corners[4] = Vector3{boundingBox.min.x, boundingBox.max.y, boundingBox.min.z};
+       corners[5] = Vector3{boundingBox.max.x, boundingBox.max.y, boundingBox.min.z};
+       corners[6] = Vector3{boundingBox.max.x, boundingBox.max.y, boundingBox.max.z};
+       corners[7] = boundingBox.max;
+   }
+   MightyBoundingBox(){};
 
     void UnloadCollider(Collider *collider)
     {
@@ -1014,7 +1029,11 @@ struct RenderSystem
     Light defaultLight;
     std::vector<RENDER_PROC> renderProcs;
     int lightVPLoc, shadowMapLoc,lightDirLoc;
-
+    std::vector<Overlay*> overlays;
+    void DrawOverlays();
+    void DrawOverlay(Overlay* overlay);
+    void AddOverlay(Overlay* overlay);
+    void RemoveOverlay(Overlay* overlay);
     RenderSystem()
     {
         if(ppfxConfig.anti_aliasing )

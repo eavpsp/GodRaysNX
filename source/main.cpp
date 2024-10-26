@@ -30,6 +30,7 @@ Post Processing - Done
 Bullet Physics - Done
 LOD - Implemented Not Tested
 Shadow Maps - Done Thank God
+Object Pool - Implemented not tested
 -------------------------
 *WIP
 ___________________________
@@ -41,8 +42,6 @@ Texture2D Animator - WIP
 Update Editor Components For Scene Loading- WIP
         Loader - 
         Editor -
-Object Pool -
-    Base Class to be used universally for template type objects-
 Stress Test?
     Swarm 
     Animations
@@ -56,6 +55,7 @@ Multithreading -
         Game Scene Loader
 ComputeShader Pathfinding -
 On Screen Debugger -
+PBR as Shader Option -
 ---------------------------
 *NOT STARTED
 __________________________
@@ -117,6 +117,7 @@ StaticQuadTreeContainer<Entity> *quadTreeContainer;
 BurstParticleSystem* burstParticleSystem;
 extern RenderSystem *renderSystem;
 PhysicsWorld *physicsWorld;
+BootOverlay *bootOverlay;
 //vector of menu controllers
 
 /////////////TEST
@@ -186,7 +187,40 @@ void TestDOTS()
     debugLog("DOTS Init");
     debugLog("Number of QuadTreeNodes: %d", quadTreeContainer->size());
 }
+void DotsUPDATE()
+{
+            ecs.UpdateSystem();
+         //Entity, Octree, Frustum
+               MightyBoundingBox cameraBox = renderSystem->mainCamera.frustum.GetFrustumBoundingBox();
+               for (const auto& entity : quadTreeContainer->search(cameraBox.GetBoundingBox()))
+               {
+                    TransformComponent transform = transformSystem.GetComponent(*entity);
+                    //make bounds
+                    BoundingBox bounds = {
+                                (Vector3){transform.position.x -transform.scale, 
+                                            transform.position.y -transform.scale,
+                                            transform.position.z -transform.scale },
+                                (Vector3){transform.position.x +transform.scale,
+                                            transform.position.y +transform.scale,
+                                            transform.position.z +transform.scale }};
+                    //check if in view
+                     //check if in frustr
+                        MightyBoundingBox box = MightyBoundingBox(bounds);
+                        
+                        cameraBox.DrawBoundingBox(BLUE);
+                      if (CheckCollisionBoxes(cameraBox.GetBoundingBox(), box.GetBoundingBox()) && !renderSystem->mainCamera.IsObjectBehindCamera(box))
+                     {
+                          // renderSystemECS.DrawEntities(model, *entity); //must load a model first
+                        box.DrawBoundingBox(GREEN);
 
+                      }
+                      else{
+                        box.DrawBoundingBox(RED);
+                      }
+                            
+                     
+               }
+}
 void TestParticles()
 {
     burstParticleSystem = new BurstParticleSystem(10, Vector3{0,0,0});
@@ -256,23 +290,30 @@ void TestPhysicsSAT()
 
 void TestPhysicsBullet()
 {
-    
-    //spawn slop and a mesh
-    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, 2.0f);
+    Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
+    GameObject *plane = GameObject::InstantiateGameObject<GameObject>(Vector3{0,-10,0}, Quaternion{0,0,0,0},10.0f);
+    GR_Mesh* planeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
+    GR_MeshComponent *planeMesh = new GR_MeshComponent(planeData);
+    planeMesh->SetShader(renderSystem->defaultShader);
+    planeMesh->SetTint(GREEN);
+    plane->AddComponent(planeMesh);
+    BulletPhysicsComponent *planeBody = new BulletPhysicsComponent(plane->position, plane->rotation, 0.0f, new btBoxShape(btVector3(20.0f,0.5f,20.0f)));      
+    plane->AddComponent(planeBody);
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,180,0,0}, 2.0f);
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
     slopeMesh->SetShader(renderSystem->defaultShader);
+    slopeMesh->SetTint(GREEN);
     slope->AddComponent(slopeMesh);
-    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(2.0f,2.0f,2.0f)));      
+    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(10.0f,2.0f,10.0f)));      
     slope->AddComponent(slopeBody);
-    Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
-    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, 1.0f);
+    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, 2.0f);
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/sphere.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
     mesh->SetShader(renderSystem->defaultShader);
     mesh->SetTexture(texture);
     meshObject->AddComponent(mesh);
-    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(0.3f));      
+    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(1.2f));      
     meshObject->AddComponent(meshBody);
 
 }   
@@ -318,10 +359,13 @@ void initSystem()
 
 void BOOT()//Move to render system
 {
+    if(bootOverlay == nullptr)
+    {
+        bootOverlay = new BootOverlay();
+    }
       BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("Welcome to GodRays Game Engine", 420, 260, 20, BLACK);
-            DrawText("Booting Up...", 440, 300, 20, BLACK);
+            ClearBackground(BLACK);
+            bootOverlay->Draw();
     EndDrawing();
     
     timer += GetFrameTime();
@@ -408,7 +452,7 @@ void EngineMain()
         }
          else if(ENGINE_STATES::GetState() == ENGINE_STATES::TEST)
         {
-          
+          //DotsUPDATE();
         }
         
         
@@ -434,23 +478,5 @@ int main(void)
 
 }
 
-/*
 
-BoundingBox GetBoundingBox(Model model) {
-    BoundingBox bbox;
-    bbox.min = (Vector3){FLT_MAX, FLT_MAX, FLT_MAX};
-    bbox.max = (Vector3){FLT_MIN, FLT_MIN, FLT_MIN};
 
-    // Iterate over the mesh vertices
-    for (int i = 0; i < model.mesh.vertexCount; i++) {
-        Vector3 vertex = model.mesh.vertices[i];
-        if (vertex.x < bbox.min.x) bbox.min.x = vertex.x;
-        if (vertex.y < bbox.min.y) bbox.min.y = vertex.y;
-        if (vertex.z < bbox.min.z) bbox.min.z = vertex.z;
-        if (vertex.x > bbox.max.x) bbox.max.x = vertex.x;
-        if (vertex.y > bbox.max.y) bbox.max.y = vertex.y;
-        if (vertex.z > bbox.max.z) bbox.max.z = vertex.z;
-    }
-
-    return bbox;
-}*/

@@ -9,6 +9,7 @@ struct GR_Mesh : ObjectDrawable
     Model model;
     Model activeMesh;
     Model *LOD_Meshes;
+    Color tint = WHITE;
     GR_Mesh() = default;
     GR_Mesh(Model model) : model(model) {
         activeMesh = model;
@@ -18,7 +19,6 @@ struct GR_Mesh : ObjectDrawable
     {
         activeMesh = LOD_Meshes[index];
     }
-
     void DrawBaseMesh()
     {
         activeMesh = model;
@@ -27,7 +27,7 @@ struct GR_Mesh : ObjectDrawable
     void draw() override
     {
         
-        DrawModel(activeMesh, componentParent->parentObject->position, componentParent->parentObject->scale, WHITE);//update to draw ex
+        DrawModel(activeMesh, componentParent->parentObject->position, componentParent->parentObject->scale, tint);//update to draw ex
     
         
     }
@@ -41,8 +41,9 @@ struct GR_MeshComponent : GameComponent
 {
     
     GR_Mesh *mesh;
-
     //LOD vector
+    void SetTint(Color tint) { this->mesh->tint = tint; }
+
     ShaderType shaderType = LIGHTING;
     void OnUpdate() override
     {

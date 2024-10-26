@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "GamePad.h"
+#include "GameOverlays.h"
 //Gets Menu Items
 //takes input from controller
 //renders menu items
@@ -39,7 +40,7 @@ struct MenuController//add to vector of menus when active
 {
     private:
     ControllerMap *controllerMap;//how the menu is controlled
-    ControllerMap *currentControllerMap;//controll map before menu was opened
+    ControllerMap *currentControllerMap;//control map before menu was opened
     public:
     Menu menu;
     bool isActive;

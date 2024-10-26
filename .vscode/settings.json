@@ -96,6 +96,8 @@
         "*.m": "cpp",
         "unordered_set": "cpp",
         "typeindex": "cpp",
-        "glad.h": "c"
+        "glad.h": "c",
+        "semaphore": "cpp",
+        "stop_token": "cpp"
     }
 }

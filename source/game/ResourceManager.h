@@ -27,6 +27,10 @@ namespace _RES
         ROBOT_ID = 0,
         RAY_LIB_ID
     };
-
+    enum UI_ICONS
+    {
+        LOGO = 0,
+        
+    };
 }
 #endif

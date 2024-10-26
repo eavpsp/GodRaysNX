@@ -7,15 +7,20 @@
 
 
 //---------------------
+//TEXTURES-UI
+std::map<int, std::string> RES_UI_Textures = 
+{
+  {_RES::UI_ICONS::LOGO, "romfs:/ui/amw_icon.png"},
+};
 //TEXTURES
 std::map<std::string, std::string> RES_Textures = 
 {
-  {"ENGINE_LOGO", "romfs:/resources/amw_icon.png"},
+  {"ENGINE_LOGO", "romfs:/ui/amw_icon.png"},
 };
 //FONTS
 std::map<std::string, std::string> RES_Fonts = 
 {
-  {"DEFAULT", "romfs:/resources/mp1m.ttf"},
+  {"DEFAULT", "romfs:/font/mp1m.ttf"},
 };
 //MODELS
 std::map<int, std::string> RES_Models = 
