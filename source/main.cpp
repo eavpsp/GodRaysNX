@@ -31,6 +31,7 @@ Bullet Physics - Done
 LOD - Implemented Not Tested
 Shadow Maps - Done Thank God
 Object Pool - Implemented not tested
+Texture2D Animator - Implemented not tested
 -------------------------
 *WIP
 ___________________________
@@ -38,7 +39,8 @@ ___________________________
 More Overlays(Implement System to Send overlays to RenderSystem for own render calls) 
     Screen Touch Controls
     Unity UI Builder
-Texture2D Animator - WIP
+    Add elements from RAY GUI
+
 Update Editor Components For Scene Loading- WIP
         Loader - 
         Editor -

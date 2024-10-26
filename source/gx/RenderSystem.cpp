@@ -3,10 +3,11 @@
 #include <ScriptCallbacks.h>
 #include <GR_MeshComponent.h>
 #include <rlgl.h>
-#include "GameOverlays.h"
 #include <raygui.h>
+#include "GameOverlays.h"
+
 extern std::vector<GameObject *> *GameObjects;
-//RAYGUI for ELEMENTS
+
 void RenderSystem::DrawOverlays()
 {
     for (size_t i = 0; i < overlays.size(); i++)

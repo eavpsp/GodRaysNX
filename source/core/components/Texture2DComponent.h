@@ -15,6 +15,7 @@ struct TextureDrawable : public ObjectDrawable
 };
 struct Texture2DComponent : public GameComponent
 {
+    void SetTexture(Texture2D* _texture) { textureRenderer.texture = _texture; }
     TextureDrawable textureRenderer;
     Texture2DComponent() { }
     Texture2DComponent(Texture2D* _texture) { textureRenderer.texture = _texture; }
