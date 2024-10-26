@@ -29,15 +29,15 @@ Shaders - Done
 Post Processing - Done
 Bullet Physics - Done
 LOD - Implemented Not Tested
+Shadow Maps - Done Thank God
 -------------------------
 *WIP
 ___________________________
 **Current
-Shadow Maps!!!!! - 
-    Shadow Maps Arent supported, needs baked lights 
-    Or find how to support shadow maps
 More Overlays(Implement System to Send overlays to RenderSystem for own render calls) 
     Screen Touch Controls
+    Unity UI Builder
+Texture2D Animator - WIP
 Update Editor Components For Scene Loading- WIP
         Loader - 
         Editor -
@@ -258,7 +258,7 @@ void TestPhysicsBullet()
 {
     
     //spawn slop and a mesh
-    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,180,0,0}, 1.0f);
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, 5.0f);
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
     slopeMesh->SetShader(renderSystem->defaultShader);
@@ -274,10 +274,7 @@ void TestPhysicsBullet()
     meshObject->AddComponent(mesh);
     BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(0.3f));      
     meshObject->AddComponent(meshBody);
-    gladLoadGL();
-    debugLog("Loading Shaders");
-    ShaderInterface *shaderLoader = new ShaderInterface("romfs:/shaders/ShadowMap.vs", "romfs:/shaders/ppfx.fs");
-////
+
 }   
 
 

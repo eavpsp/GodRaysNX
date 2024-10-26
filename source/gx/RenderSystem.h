@@ -13,6 +13,7 @@
 #include <PostProcessing.h>
 #include <ResourceManager.h>    
 #include <rlights.h>
+#include "rlgl.h"
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
@@ -997,6 +998,7 @@ struct PostProcessingFXConfig
     bool blur = true;
     bool shadows = true;
     bool anti_aliasing = true;
+    int shadow_map_size = 1024;
 
 };
 //handles all renderable data outside of ecs
@@ -1011,10 +1013,15 @@ struct RenderSystem
     Shader defaultShader;
     Light defaultLight;
     std::vector<RENDER_PROC> renderProcs;
+    int lightVPLoc, shadowMapLoc,lightDirLoc;
 
     RenderSystem()
     {
-        Vector3 lightDir = (Vector3){ 6.0f,14.0f,3.0f};
+        if(ppfxConfig.anti_aliasing )
+        {
+            SetConfigFlags(FLAG_MSAA_4X_HINT);
+        }
+        Vector3 lightDir = (Vector3){ 0.35f, -1.0f, -0.35f };
         lightCam = (Camera3D){ 0 };
         lightCam.position = Vector3Scale(lightDir, -15.0f);
         lightCam.target = Vector3Zero();
@@ -1022,15 +1029,18 @@ struct RenderSystem
         lightCam.projection = CAMERA_ORTHOGRAPHIC;
         lightCam.up = (Vector3){ 0.0f, 1.0f, 0.0f };
         lightCam.fovy = 20.0f;
-        shadow_shader = LoadShader("romfs:/shaders/shadow.vs", "romfs:/shaders/shadow.fs");
-        defaultShader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
+        defaultShader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT_SHADOW].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT_SHADOW].second.c_str());
         defaultShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(defaultShader, "viewPos");
+        SetLights();
         int ambientLoc = GetShaderLocation(defaultShader, "ambient");
         SetShaderValue(defaultShader, ambientLoc, (float[4]){ 0.12f, 0.12f, 0.12f, 1.0f }, SHADER_UNIFORM_VEC4);
-        SetLights();
-        shadow_shader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shadow_shader, "mvp");
+        lightVPLoc = GetShaderLocation(defaultShader, "lightVP");
+        shadowMapLoc = GetShaderLocation(defaultShader, "shadowMap");
+        int shadowMapResolution = ppfxConfig.shadow_map_size;
+        SetShaderValue(defaultShader, GetShaderLocation(defaultShader, "shadowMapResolution"), &shadowMapResolution, SHADER_UNIFORM_INT);
+
         post_process_target = LoadRenderTexture(screenWidth, screenHeight);
-        shadowMap = LoadRenderTexture(1024 , 1024);
+        shadowMap = LoadShadowmapRenderTexture(1024 , 1024);
         postProcessingShaders = LoadShader(0, "romfs:/shaders/ppfx.fs");
         int bloomFX = GetShaderLocation(postProcessingShaders, "bloomFX");
         int blurFX = GetShaderLocation(postProcessingShaders, "blurFX");
@@ -1052,11 +1062,59 @@ struct RenderSystem
     }
     void SetLights()
     {
-        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 6.0f,14.0f,3.0f}, Vector3Zero(), YELLOW, defaultShader);
+        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0.35f, -1.0f, -0.35f }, Vector3Zero(), GRAY, defaultShader);
         defaultLight.enabled = true;
+        Vector4 lightColorNormalized = ColorNormalize(defaultLight.color);
+        lightDirLoc = GetShaderLocation(defaultShader, "lightDir");
+        int lightColLoc = GetShaderLocation(defaultShader, "lightColor");
+        SetShaderValue(defaultShader, lightDirLoc, &defaultLight.position, SHADER_UNIFORM_VEC3);
+        SetShaderValue(defaultShader, lightColLoc, &lightColorNormalized, SHADER_UNIFORM_VEC4);
+    
     }
     ~RenderSystem() = default;
-      
+      RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
+    {
+        RenderTexture2D target = { 0 };
+
+        target.id = rlLoadFramebuffer(); // Load an empty framebuffer
+        target.texture.width = width;
+        target.texture.height = height;
+
+        if (target.id > 0)
+        {
+            rlEnableFramebuffer(target.id);
+
+            // Create depth texture
+            // We don't need a color texture for the shadowmap
+            target.depth.id = rlLoadTextureDepth(width, height, false);
+            target.depth.width = width;
+            target.depth.height = height;
+            target.depth.format = 19;       //DEPTH_COMPONENT_24BIT?
+            target.depth.mipmaps = 1;
+
+            // Attach depth texture to FBO
+            rlFramebufferAttach(target.id, target.depth.id, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_TEXTURE2D, 0);
+
+            // Check if fbo is complete with attachments (valid)
+            if (rlFramebufferComplete(target.id)) debugLog("FBO: [ID %i] Framebuffer object created successfully", target.id);
+
+            rlDisableFramebuffer();
+        }
+        else debugLog("FBO: Framebuffer object can not be created");
+
+        return target;
+    }
+
+    // Unload shadowmap render texture from GPU memory (VRAM)
+    void UnloadShadowmapRenderTexture(RenderTexture2D target)
+    {
+        if (target.id > 0)
+        {
+            // NOTE: Depth texture/renderbuffer is automatically
+            // queried and deleted before deleting framebuffer
+            rlUnloadFramebuffer(target.id);
+        }
+    }
     void RenderScene();
     static RenderSystem& getRenderSystem();
 

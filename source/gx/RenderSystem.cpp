@@ -2,22 +2,51 @@
 #include <GameObject.h>
 #include <ScriptCallbacks.h>
 #include <GR_MeshComponent.h>
+#include <rlgl.h>
 extern std::vector<GameObject *> *GameObjects;
 
 void RenderSystem::RenderScene()
  {
     if(ppfxConfig.post_processing)
     {
-        float camPos[3] = { mainCamera.camToUse->position.x, mainCamera.camToUse->position.y, mainCamera.camToUse->position.z };
-        SetShaderValue(defaultShader, defaultShader.locs[SHADER_LOC_VECTOR_VIEW], camPos, SHADER_UNIFORM_VEC3);
+        Vector3 cameraPos = mainCamera.camToUse->position;
+        SetShaderValue(defaultShader, defaultShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
         UpdateLightValues(defaultShader, defaultLight);
+        BeginDrawing();
+       //Shadow Pass
+        Matrix lightView;
+        Matrix lightProj;
+        SetShaderValue(defaultShader, lightDirLoc, &defaultLight.position, SHADER_UNIFORM_VEC3);
+        BeginTextureMode(shadowMap);
+        ClearBackground(WHITE);
+        BeginMode3D(lightCam);
+            lightView = rlGetMatrixModelview();
+            lightProj = rlGetMatrixProjection();
+            for (size_t i = 0; i < GameObjects->size(); i++)
+            {
+            if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
+               
+                GameObjects->at(i)->Draw();
+                
+            }   
+        EndMode3D();
+        EndTextureMode();
+        Matrix lightViewProj = MatrixMultiply(lightView, lightProj);
+       //Light Pass wit Post Processing
+       
         BeginTextureMode(post_process_target);
         ClearBackground(GRAY);
+        SetShaderValueMatrix(defaultShader, lightVPLoc, lightViewProj);
+        rlEnableShader(defaultShader.id);
+        int slot = 10; // Can be anything 0 to 15, but 0 will probably be taken up
+        rlActiveTextureSlot(10);
+        rlEnableTexture(shadowMap.depth.id);
+        rlSetUniform(shadowMapLoc, &slot, SHADER_UNIFORM_INT, 1);
         BeginMode3D(*mainCamera.camToUse);
         for (size_t i = 0; i < GameObjects->size(); i++)
         {
             if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
-                GameObjects->at(i)->GetComponent<GR_MeshComponent>()->mesh->model.materials->maps[3].texture = shadowMap.texture; 
+               
                 GameObjects->at(i)->Draw();
                 
         }   
@@ -28,7 +57,7 @@ void RenderSystem::RenderScene()
         EndMode3D();       
           EndTextureMode();        
 
-        BeginDrawing();
+        
         ClearBackground(GRAY);
         if(!IsShaderReady(postProcessingShaders))
         {
