@@ -15,6 +15,7 @@
 #include <rlights.h>
 #include "rlgl.h"
 #include <GameOverlays.h>
+#include <GameObject.h>
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
