@@ -7,7 +7,7 @@
 #include<raylib.h>
 #include<ResourceManager.h>
 //RAYGUI for ELEMENTS
-extern Font guiFont;
+extern Font gameFont;
 extern std::map<int, std::string> RES_UI_Textures;
 struct Drawable //Objects that can be drawn (Text, Images, etc)
 {
@@ -55,7 +55,7 @@ struct TextDrawable : public Drawable
     TextDrawable(std::string t, Vector2 p, float fontSize = 20, Color c = BLACK) : text(t), position(p), color(c), fontSize(fontSize) {}    
     void draw() override
     {
-        DrawTextEx(guiFont, text.c_str(), position, fontSize, fontSize/2, color);
+        DrawTextEx(gameFont, text.c_str(), position, fontSize, fontSize/2, color);
     }
     ~TextDrawable()
     {}

@@ -12,7 +12,7 @@
 #include <RenderSystem.h>
 extern std::map<std::string, std::string> RES_Fonts;
 RenderSystem *renderSystem;
-Font guiFont;
+Font gameFont;
 const int screenWidth = 1280;
 const int screenHeight = 720;
 GamePads gamePads;
@@ -24,7 +24,7 @@ GameManager::GameManager(bool running) : _running{running}
 
 GameManager::~GameManager()
 {
-      UnloadFont(guiFont);
+      UnloadFont(gameFont);
 }
 GameManager& GameManager::getGameManager()
 {
@@ -43,7 +43,9 @@ GameManager& GameManager::getGameManager()
         //set up controller
         controller = StandardController(&renderSystem->mainCamera);
         gamePads.Init(&controller);
-        guiFont = LoadFont(RES_Fonts["DEFAULT"].c_str());//set var for game fonts
+        gameFont = LoadFont(RES_Fonts["DEFAULT"].c_str());//set var for game fonts
+        if(IsFontReady(gameFont))
+            debugLog("Made Font!");
         debugLog("Made Game Manager!");
     }
     return *gameManager;

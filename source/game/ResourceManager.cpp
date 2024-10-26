@@ -7,6 +7,11 @@
 
 
 //---------------------
+//SKYBOX TEXTURES
+std::map<int, std::string> RES_SkyBoxTextures = 
+{
+  {_RES::SkyBoxTextures::DEFAULT_SKYBOX, {"romfs:/textures/skybox/skybox.png"}},
+};
 //TEXTURES-UI
 std::map<int, std::string> RES_UI_Textures = 
 {
@@ -48,8 +53,12 @@ std::map<int, std::string> RES_AudioFiles =
 //GAME SHADERS
 std::map<int, std::pair<std::string, std::string>> RES_Shaders = 
 {
-  {_RES::ShaderFiles::LIGHT, {"romfs:/shaders/glsl330/lighting.vs", "romfs:/shaders/glsl330/lighting.fs"}},
+  {_RES::ShaderFiles::LIGHT, {"romfs:/shaders/basic_shaders/lighting.vs", "romfs:/shaders/basic_shaders/lighting.fs"}},
   {_RES::ShaderFiles::LIGHT_SHADOW, {"romfs:/shaders/shadow.vs", "romfs:/shaders/shadow.fs"}},
+  {_RES::ShaderFiles::PBR, {"romfs:/shaders/pbr.vs", "romfs:/shaders/pbr.fs"}},
+  {_RES::ShaderFiles::LIGHT_MAP, {"romfs:/shaders/lightmap.vs", "romfs:/shaders/lightmap.fs"}},
+  {_RES::ShaderFiles::SKYBOX, {"romfs:/shaders/skybox.vs", "romfs:/shaders/skybox.fs"}},
+  {_RES::ShaderFiles::CUBE_MAP, {"romfs:/shaders/basic_shaders/cubemap.vs", "romfs:/shaders/basic_shaders/cubemap.fs"}},
 };
 
 // Loads and returns a lighting shader with predefined settings.

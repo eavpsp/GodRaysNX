@@ -16,6 +16,7 @@
 #include "rlgl.h"
 #include <GameOverlays.h>
 #include <GameObject.h>
+#include <SkyBoxRenderer.h>
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
@@ -1023,7 +1024,7 @@ struct RenderSystem
     bool debugMode;
     MightyCam mainCamera;
     Camera3D lightCam;
-
+    SkyBox defaultSkyBox;
     RenderTexture2D post_process_target , shadowMap;
     Shader postProcessingShaders, shadow_shader;
     PostProcessingFXConfig ppfxConfig;

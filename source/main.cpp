@@ -37,6 +37,8 @@ Texture2D Animator - Implemented not tested
 *WIP
 ___________________________
 **Current
+SkyBox - WIP
+    Add Fog to PPFX
 More Overlays(Implement System to Send overlays to RenderSystem for own render calls) 
     Screen Touch Controls
     Unity UI Builder
@@ -104,7 +106,7 @@ Networking -
 #include <ParticleSystem.h>
 #include <ResourceManager.h>
 #include <ShaderInterface.h>
-#include <glad/glad.h>  // glad library (OpenGL loader)
+#include <glad/glad.h>  
 //move res stuff to scene manager//
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
@@ -117,7 +119,7 @@ static float timer = 0;
 EntityComponentSystem ecs;
 extern RenderSystemECS renderSystemECS;
 extern TransformSystemECS transformSystem;
-StaticQuadTreeContainer<Entity> *quadTreeContainer;
+StaticQuadTreeContainer<Entity> *quadTreeContainer;//move to RenderSystem ECS & make one for RenderSystem
 BurstParticleSystem* burstParticleSystem;
 extern RenderSystem *renderSystem;
 PhysicsWorld *physicsWorld;
@@ -312,6 +314,7 @@ void TestPhysicsBullet()
     slope->AddComponent(slopeMesh);
     BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(10.0f,2.0f,10.0f)));      
     slope->AddComponent(slopeBody);
+   
     GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, 2.0f);
     GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/sphere.obj"));
     GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
@@ -358,7 +361,7 @@ void initSystem()
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
     BoundingBox stageBounds = {Vector3{-1000,-1000,-1000}, Vector3{1000,1000,1000}};
     quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
-    loadingOverlay = new LoadingOverlay();
+
     
 }
 
@@ -387,7 +390,10 @@ void BOOT()//Move to render system
 }
 void Wait()//move to render system
 {
-
+    if(loadingOverlay == nullptr)
+    {
+        loadingOverlay = new LoadingOverlay();
+    }
     BeginDrawing();
     ClearBackground(RAYWHITE);
                 loadingOverlay->Draw();

@@ -20,7 +20,15 @@ namespace _RES
     enum ShaderFiles
     {
         LIGHT = 0,
-        LIGHT_SHADOW
+        LIGHT_SHADOW,
+        PBR,
+        LIGHT_MAP,
+        SKYBOX,
+        CUBE_MAP
+    };
+    enum SkyBoxTextures
+    {
+        DEFAULT_SKYBOX = 0
     };
     enum Model_ID
     {
