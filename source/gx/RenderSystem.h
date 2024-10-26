@@ -1062,7 +1062,7 @@ struct RenderSystem
     }
     void SetLights()
     {
-        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0.35f, -1.0f, -0.35f }, Vector3Zero(), GRAY, defaultShader);
+        defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0.35f, -1.0f, -0.35f }, Vector3Zero(), DARKGRAY, defaultShader);
         defaultLight.enabled = true;
         Vector4 lightColorNormalized = ColorNormalize(defaultLight.color);
         lightDirLoc = GetShaderLocation(defaultShader, "lightDir");
@@ -1071,7 +1071,13 @@ struct RenderSystem
         SetShaderValue(defaultShader, lightColLoc, &lightColorNormalized, SHADER_UNIFORM_VEC4);
     
     }
-    ~RenderSystem() = default;
+    ~RenderSystem()
+    {
+        UnloadRenderTexture(post_process_target);
+        UnloadRenderTexture(shadowMap);
+        UnloadShader(postProcessingShaders);
+        UnloadShader(defaultShader);
+    };
       RenderTexture2D LoadShadowmapRenderTexture(int width, int height)
     {
         RenderTexture2D target = { 0 };

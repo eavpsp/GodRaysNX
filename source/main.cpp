@@ -258,12 +258,12 @@ void TestPhysicsBullet()
 {
     
     //spawn slop and a mesh
-    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, 5.0f);
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, 2.0f);
     GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
     GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
     slopeMesh->SetShader(renderSystem->defaultShader);
     slope->AddComponent(slopeMesh);
-    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(1.0f,1.0f,1.0f)));      
+    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(2.0f,2.0f,2.0f)));      
     slope->AddComponent(slopeBody);
     Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
     GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, 1.0f);
