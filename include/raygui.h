@@ -906,6 +906,7 @@ typedef enum {
 #include <string.h>             // Required for: strlen() [GuiTextBox(), GuiValueBox()], memset(), memcpy()
 #include <stdarg.h>             // Required for: va_list, va_start(), vfprintf(), va_end() [TextFormat()]
 #include <math.h>               // Required for: roundf() [GuiColorPicker()]
+#include <switch.h>
 
 #ifdef __cplusplus
     #define RAYGUI_CLITERAL(name) name

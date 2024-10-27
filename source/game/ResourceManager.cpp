@@ -10,12 +10,12 @@
 //SKYBOX TEXTURES
 std::map<int, std::string> RES_SkyBoxTextures = 
 {
-  {_RES::SkyBoxTextures::DEFAULT_SKYBOX, {"romfs:/textures/skybox/skybox.png"}},
+  {_RES::SkyBoxTextures::DEFAULT_SKYBOX, "romfs:/textures/skybox/skybox.png"},
 };
 //TEXTURES-UI
 std::map<int, std::string> RES_UI_Textures = 
 {
-  {_RES::UI_ICONS::LOGO, "romfs:/ui/amw_icon.png"},
+  {_RES::UI_ICONS::LOGO, "romfs:/ui/LOGO.png"},
 };
 //TEXTURES
 std::map<std::string, std::string> RES_Textures = 

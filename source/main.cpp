@@ -1,9 +1,12 @@
 /*
-/Things
+/Random Things
 
 
                             cache data in scopes!
-                          
+Stress Test
+Swarm AI
+Animations Running all at once
+Physics Multiple simulations
 
 Todo:
 ----------------------------
@@ -33,35 +36,28 @@ LOD - Implemented Not Tested
 Shadow Maps - Done Thank God
 Object Pool - Implemented not tested
 Texture2D Animator - Implemented not tested
+~SkyBox - Added Not working
+~More Overlays - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-SkyBox - WIP
-    Add Fog to PPFX
-More Overlays(Implement System to Send overlays to RenderSystem for own render calls) 
-    Screen Touch Controls
-    Unity UI Builder
-    Add elements from RAY GUI
+~Add Fog to PPFX - WIP
+`UI Screen Touch Controls
+~Update Editor Components For Scene Loading- WIP
+    `Loader - 
+    `Editor -
+~Physics 2D Component - WIP
 
-Update Editor Components For Scene Loading- WIP
-        Loader - 
-        Editor -
-
-Stress Test?
-    Swarm 
-    Animations
-    Physics
+PBR as Shader Option -
 Multithreading -
     Thread Pool-
     Task Scheduler-
     Physics Thread -
     Audio/Video Processing Thread -
     Asset Loading Thread -
-        Game Scene Loader
-ComputeShader Pathfinding -
+        Game Scene Loader -
 On Screen Debugger -
-PBR as Shader Option -
 ---------------------------
 *NOT STARTED
 __________________________
@@ -85,8 +81,6 @@ Networking -
 #define MAX_GRB_FILE_SIZE (TOTAL_RAM / 4ULL) // ~1.2 GB //may pre load scenes in ram
 #include <switch.h>
 #include <raylib.h>
-#define RAYGUI_IMPLEMENTATION
-#include <raygui.h>
 #include "debug/debug.h"
 #include <GameManager.h>
 #include <stdio.h>
@@ -107,6 +101,9 @@ Networking -
 #include <ResourceManager.h>
 #include <ShaderInterface.h>
 #include <glad/glad.h>  
+#include <MenuController.h>
+#include <DefaultMenuController.h>
+#include "StandardInput.h"
 //move res stuff to scene manager//
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
@@ -124,7 +121,8 @@ BurstParticleSystem* burstParticleSystem;
 extern RenderSystem *renderSystem;
 PhysicsWorld *physicsWorld;
 BootOverlay *bootOverlay;
-//vector of menu controllers//
+MenuController *menuController;
+
 
 /////////////TEST
 void TestVideo()
@@ -325,7 +323,29 @@ void TestPhysicsBullet()
     meshObject->AddComponent(meshBody);
 
 }   
-
+void DebugTest()
+{
+    debugLog("Test");
+}
+void DebugTest2()
+{
+    debugLog("Test2");
+}
+extern StandardController controller;
+StandardMenuController* menuControlls;
+GR_Button *button1 = new GR_Button("#05#Button 1", DebugTest, Vector2{100,100}, Vector2{0,0});
+void TestMenu()
+{
+    menuControlls = new StandardMenuController();
+    Menu *menu1 = new Menu("Menu 1");
+    GR_Button *button2 = new GR_Button("#05#Button 2", DebugTest2, Vector2{100,100}, Vector2{0,100});
+    menu1->AddItem(*button1);
+    menu1->AddItem(*button2);
+    menuController = new MenuController(menuControlls);
+    menuController->AddMenu(menu1);
+    menuController->OpenMenuController(&controller);
+    
+}
 
 ////////////END TEST--------------------
 
@@ -373,7 +393,7 @@ void BOOT()//Move to render system
         bootOverlay = new BootOverlay();
     }
     BeginDrawing();
-    ClearBackground(BLACK);
+    ClearBackground(WHITE);
     bootOverlay->Draw();
     EndDrawing();
     
@@ -381,10 +401,9 @@ void BOOT()//Move to render system
     if (timer > 5)
     {
         timer = 0;
-        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
-
-        TestPhysicsBullet();//Convert this to Proccess System with manager
-
+      
+        ENGINE_STATES::ChangeState(ENGINE_STATES::MENU);
+        TestMenu();//Convert this to Proccess System with manager
     }
 
 }
@@ -448,7 +467,8 @@ void EngineMain()
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::MENU)
         {
-
+            renderSystem->activeMenus->UpdateInputs();
+            renderSystem->DrawMenusSolo();
         }
         else if (ENGINE_STATES::GetState() == ENGINE_STATES::IDLE)
         {
@@ -465,6 +485,11 @@ void EngineMain()
          else if(ENGINE_STATES::GetState() == ENGINE_STATES::TEST)
         {
           //DotsUPDATE();
+           BeginDrawing();
+            ClearBackground(BLACK);
+                button1->DisplayButton();
+            EndDrawing();
+          
         }
         
         

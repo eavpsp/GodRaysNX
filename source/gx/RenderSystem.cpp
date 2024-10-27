@@ -5,7 +5,7 @@
 #include <rlgl.h>
 #include <raygui.h>
 #include "GameOverlays.h"
-
+#include <GameStates.h>
 extern std::vector<GameObject *> *GameObjects;
 
 void RenderSystem::DrawOverlays()
@@ -42,6 +42,14 @@ void RenderSystem::RemoveOverlay(Overlay *overlay)
         }
     }
 }
+void RenderSystem::DrawMenus()
+{
+        if(activeMenus == nullptr) return;
+    
+        activeMenus->DrawMenu();
+    
+    
+}
 void DrawScene()
 {
       for (size_t i = 0; i < GameObjects->size(); i++)
@@ -53,6 +61,8 @@ void DrawScene()
 
 void RenderSystem::RenderScene()
 {
+    
+
     if(ppfxConfig.post_processing)
     {
         Vector3 cameraPos = mainCamera.camToUse->position;
@@ -82,12 +92,12 @@ void RenderSystem::RenderScene()
         rlEnableTexture(shadowMap.depth.id);
         rlSetUniform(shadowMapLoc, &slot, SHADER_UNIFORM_INT, 1);
         BeginMode3D(*mainCamera.camToUse);
-        defaultSkyBox.DrawSkyBox();
         DrawScene();
         if(debugMode)
         {
             DrawGrid(10, 1.0f);
         }    
+
         EndMode3D();    
         for (size_t i = 0; i < renderProcs.size(); i++)
         {
@@ -106,6 +116,7 @@ void RenderSystem::RenderScene()
         DrawTextureRec(post_process_target.texture, (Rectangle){ 0, 0, (float)post_process_target.texture.width, (float)-post_process_target.texture.height }, (Vector2){ 0, 0 }, WHITE);
         EndShaderMode();
         DrawOverlays();
+        DrawMenus();
         EndDrawing();
     }
     else//No post processing FX
@@ -113,7 +124,6 @@ void RenderSystem::RenderScene()
         BeginDrawing();//Create Render System with View Frustrum //Move to render system
         BeginMode3D(*mainCamera.camToUse);
         ClearBackground(GRAY);//get scene color
-        defaultSkyBox.DrawSkyBox();
         DrawScene();
         for (size_t i = 0; i < renderProcs.size(); i++)
         {
@@ -123,8 +133,10 @@ void RenderSystem::RenderScene()
         {
             DrawGrid(10, 1.0f);
         }
+        defaultSkyBox.DrawSkyBox();
         EndMode3D();
         DrawOverlays();
+        DrawMenus();
         EndDrawing();
     }
         

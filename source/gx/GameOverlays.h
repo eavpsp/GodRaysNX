@@ -119,8 +119,8 @@ struct LoadingOverlay : public Overlay
     };
     LoadingOverlay()
     {
-        drawables.push_back(new TextDrawable("Loading", { 10, 10 }));
-        drawables.push_back(new TextDrawable("Progress", { 10, 40 }));
+        drawables.push_back(new TextDrawable("Loading", { 100, 250 }));
+        drawables.push_back(new TextDrawable("Progress", { 100, 250 }));
     };
     ~LoadingOverlay() = default;
 };
@@ -128,8 +128,8 @@ struct BootOverlay : public Overlay
 {
     BootOverlay()
     {
-        drawables.push_back(new TextDrawable("Welcome to GodRays Game Engine",{ 400, 100}, 20, WHITE));
-        drawables.push_back(new TextDrawable("Booting Up...", {440, 150}, 20, WHITE));
+        drawables.push_back(new TextDrawable("Welcome to GodRays Game Engine",{ 300, 100}, 25, BLACK));
+        drawables.push_back(new TextDrawable("Booting Up...", {340, 150}, 25, BLACK));
         drawables.push_back(new Image2D((RES_UI_Textures[_RES::UI_ICONS::LOGO].c_str()), { 400, 205 }));
     };
     ~BootOverlay() = default;

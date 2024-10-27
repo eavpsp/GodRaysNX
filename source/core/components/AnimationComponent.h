@@ -3,6 +3,7 @@
 #include <GameObject.h>
 #include <string>
 #include <GameOverlays.h>
+#include "Texture2DComponent.h"
 class AnimationController;
 //controls animation playback
 class AnimationComponent : public GameComponent//hash table for animations, anim name -> anim index
@@ -36,7 +37,7 @@ struct SpriteAnimation
     Texture2D *animationFrames;
 };
 
-struct SpriteAnimationComponent : public GameComponent
+struct SpriteAnimationComponent : public GameComponent//Requires Texture2DComponent
 {
     int animsCount = 0;
     unsigned int animIndex = 0;
@@ -44,7 +45,6 @@ struct SpriteAnimationComponent : public GameComponent
     SpriteAnimation *spriteAnimations;
     SpriteAnimation currentAnimation;
     AnimationController *animationController;//to access functionality for animation
-    Image2D baseImage;//updated
     void Play();
     void Play(int index);
     void Play(const char* animName);

@@ -9,10 +9,12 @@
 #include <vector>
 extern std::map<int, std::string> RES_SkyBoxTextures;
 extern std::map<int, std::pair<std::string, std::string>> RES_Shaders;
-struct SkyBox
+struct SkyBox//not working
 {
     Model skyBoxModel;
     Shader cubeMapShader;
+    Mesh cube;
+    Image img;
     void DrawSkyBox()
     {
         rlDisableBackfaceCulling();
@@ -23,7 +25,7 @@ struct SkyBox
     }
     SkyBox(_RES::SkyBoxTextures skyboxTexture = _RES::SkyBoxTextures::DEFAULT_SKYBOX)
     {
-        Mesh cube = GenMeshCube(1.0f, 1.0f, 1.0f);
+        cube = GenMeshCube(1.0f, 1.0f, 1.0f);
         skyBoxModel = LoadModelFromMesh(cube);
         skyBoxModel.materials[0].shader = LoadShader(RES_Shaders[_RES::ShaderFiles::SKYBOX].first.c_str(), RES_Shaders[_RES::ShaderFiles::SKYBOX].second.c_str());
         SetShaderValue(skyBoxModel.materials[0].shader, GetShaderLocation(skyBoxModel.materials[0].shader, "environmentMap"), (int[1]){ MATERIAL_MAP_CUBEMAP }, SHADER_UNIFORM_INT);
@@ -31,15 +33,16 @@ struct SkyBox
         SetShaderValue(skyBoxModel.materials[0].shader, GetShaderLocation(skyBoxModel.materials[0].shader, "vflipped"), (int[1]){ false ? 1 : 0 }, SHADER_UNIFORM_INT);
         cubeMapShader = LoadShader(RES_Shaders[_RES::ShaderFiles::CUBE_MAP].first.c_str(), RES_Shaders[_RES::ShaderFiles::CUBE_MAP].second.c_str());
         SetShaderValue(cubeMapShader, GetShaderLocation(cubeMapShader, "equirectangularMap"), (int[1]){ 0 }, SHADER_UNIFORM_INT);
-        Image img = LoadImage(RES_SkyBoxTextures[skyboxTexture].c_str());
+        img = LoadImage(RES_SkyBoxTextures[skyboxTexture].c_str());
         skyBoxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);    // CUBEMAP_LAYOUT_PANORAMA
-        UnloadImage(img);
+        //UnloadImage(img);
     }
     ~SkyBox()
     {
         UnloadShader(skyBoxModel.materials[0].shader);
         UnloadTexture(skyBoxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture);
         UnloadModel(skyBoxModel);  
+        UnloadImage(img);
     }
     //set shader
     //cubemap shader

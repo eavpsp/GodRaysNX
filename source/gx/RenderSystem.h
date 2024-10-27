@@ -17,6 +17,7 @@
 #include <GameOverlays.h>
 #include <GameObject.h>
 #include <SkyBoxRenderer.h>
+#include <MenuController.h>
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
@@ -997,8 +998,9 @@ public:
 };
 struct RENDER_PROC//begin shader process //custom func for running in the render loop
 {
-    void (*draw)();
-    RENDER_PROC(void (*draw)()):draw(draw){};
+    using CustomDraw = void (*)();
+    CustomDraw draw;
+    RENDER_PROC(CustomDraw draw):draw(draw){};
     bool operator==(const RENDER_PROC& other) const
     {
         return draw == other.draw;
@@ -1034,13 +1036,14 @@ struct RenderSystem
     int lightVPLoc, shadowMapLoc,lightDirLoc;
     std::vector<Overlay*> overlays;
     std::vector<ObjectDrawable*> drawable2D;
+    MenuController *activeMenus = nullptr;
     void DrawOverlays();
     void DrawOverlay(Overlay* overlay);
     void AddOverlay(Overlay* overlay);
     void RemoveOverlay(Overlay* overlay);
     RenderSystem()
     {
-       
+        defaultSkyBox = SkyBox();
         if(ppfxConfig.anti_aliasing )
         {
             SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -1072,6 +1075,14 @@ struct RenderSystem
         SetShaderValue(postProcessingShaders, blurFX, (float[1]){ ppfxConfig.blur ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);
 
     };
+    void DrawMenusSolo(){
+        if(activeMenus == nullptr) return;
+        BeginDrawing();
+           ClearBackground(BLACK);
+           activeMenus->DrawMenu();
+        EndDrawing();
+    }
+    void DrawMenus();
     void SetDefaultShader(Shader shader)
     {
         defaultShader = shader;
