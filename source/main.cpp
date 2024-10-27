@@ -75,7 +75,7 @@ Networking -
     Multiplayer -
 */
 //Heap 256MB
-//4GB Ram 
+//4GB Ram  ~50% used for current levels and preloading levels
 #define TOTAL_RAM (4ULL * 1024ULL * 1024ULL * 1024ULL)
 #define MAX_LEVEL_RAM (TOTAL_RAM / 3ULL) // 4GB / 3 so 1 third of ram MAX is used for levels
 #define MAX_GRB_FILE_SIZE (TOTAL_RAM / 4ULL) // ~1.2 GB //may pre load scenes in ram
@@ -291,7 +291,6 @@ void TestPhysicsSAT()
 
 }   
 
-
 void TestPhysicsBullet()
 {
     Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
@@ -333,11 +332,12 @@ void DebugTest2()
 }
 extern StandardController controller;
 StandardMenuController* menuControlls;
-GR_Button *button1 = new GR_Button("#05#Button 1", DebugTest, Vector2{100,100}, Vector2{0,0});
+
 void TestMenu()
 {
     menuControlls = new StandardMenuController();
     Menu *menu1 = new Menu("Menu 1");
+    GR_Button *button1 = new GR_Button("#05#Button 1", DebugTest, Vector2{100,100}, Vector2{0,0});
     GR_Button *button2 = new GR_Button("#05#Button 2", DebugTest2, Vector2{100,100}, Vector2{0,100});
     menu1->AddItem(*button1);
     menu1->AddItem(*button2);
@@ -485,10 +485,7 @@ void EngineMain()
          else if(ENGINE_STATES::GetState() == ENGINE_STATES::TEST)
         {
           //DotsUPDATE();
-           BeginDrawing();
-            ClearBackground(BLACK);
-                button1->DisplayButton();
-            EndDrawing();
+          
           
         }
         
