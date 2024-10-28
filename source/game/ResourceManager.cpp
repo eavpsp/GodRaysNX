@@ -23,9 +23,10 @@ std::map<std::string, std::string> RES_Textures =
   {"ENGINE_LOGO", "romfs:/ui/amw_icon.png"},
 };
 //FONTS
-std::map<std::string, std::string> RES_Fonts = 
+std::map<int, std::string> RES_Fonts = 
 {
-  {"DEFAULT", "romfs:/font/mp1m.ttf"},
+  {_RES::GameFonts::DEFAULT, "romfs:/font/mp1m.ttf"},
+  {_RES::GameFonts::GUI, "romfs:/font/NotoMono-Regular.ttf"},
 };
 //MODELS
 std::map<int, std::string> RES_Models = 

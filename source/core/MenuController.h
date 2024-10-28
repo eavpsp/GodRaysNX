@@ -36,14 +36,12 @@ struct GR_Button
     };
 
 };
-//Gets Menu Items
-//takes input from controller
-//renders menu items
-//show selection
-//handle selection execution
 
 //used to enable the view and draw the menu used for custom Begin Draw Methods 
-struct Menu//container for menu items
+//setup overlays to act as menu panels
+//outline origin in which menu items are drawn
+//set up system that takes into account the origin
+struct Menu//container for menu items(Menu Screens)
 {
     std::string title;
     std::vector<GR_Button> *menuItems;
@@ -66,9 +64,6 @@ struct Menu//container for menu items
     ~Menu() {};
 };
 
-//Menu 1 (SUSPENDED) -Transition from 1 to 2> Menu 2 (ACTIVE)
-//Menu 2 CLOSE PUSH BACK TO PREV MENU IF ANY -> Menu 1 (ACTIVE)
-//States to control menus
 struct MenuController//add to vector of menus when active 
 {
     private:

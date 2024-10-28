@@ -10,7 +10,7 @@ void StandardMenuController::UpdateButtonInputs()
     if(!canMove)
     {
         timer += GetFrameTime();
-        if(timer >= 0.5f)
+        if(timer >= 0.2f)
         {
             canMove = true;
             timer = 0;
@@ -94,12 +94,12 @@ void StandardMenuController::UpdateAxisInputs()
    {
     if(Leftx > 0)
     {
-         renderSystem->activeMenus->IncrementSelection();
+        renderSystem->activeMenus->IncrementSelection();
         canMove = false;
     }
     if (Leftx < 0)
     {
-         renderSystem->activeMenus->DecrementSelection();
+        renderSystem->activeMenus->DecrementSelection();
         canMove = false;
     }
    }

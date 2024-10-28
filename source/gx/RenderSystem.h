@@ -1017,6 +1017,7 @@ struct PostProcessingFXConfig
     bool blur = true;
     bool shadows = true;
     bool anti_aliasing = true;
+    bool fog = true;
     int shadow_map_size = 1024;
 
 };
@@ -1031,7 +1032,7 @@ struct RenderSystem
     Shader postProcessingShaders, shadow_shader;
     PostProcessingFXConfig ppfxConfig;
     Shader defaultShader;
-    Light defaultLight;
+    Light defaultLight, fogLight;
     std::vector<RENDER_PROC> renderProcs;
     int lightVPLoc, shadowMapLoc,lightDirLoc;
     std::vector<Overlay*> overlays;
@@ -1043,6 +1044,7 @@ struct RenderSystem
     void RemoveOverlay(Overlay* overlay);
     RenderSystem()
     {
+        //Lights camera and skybox
         defaultSkyBox = SkyBox();
         if(ppfxConfig.anti_aliasing )
         {
@@ -1059,13 +1061,14 @@ struct RenderSystem
         defaultShader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT_SHADOW].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT_SHADOW].second.c_str());
         defaultShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(defaultShader, "viewPos");
         SetLights();
+        //Shadow Map
         int ambientLoc = GetShaderLocation(defaultShader, "ambient");
         SetShaderValue(defaultShader, ambientLoc, (float[4]){ 0.12f, 0.12f, 0.12f, 1.0f }, SHADER_UNIFORM_VEC4);
         lightVPLoc = GetShaderLocation(defaultShader, "lightVP");
         shadowMapLoc = GetShaderLocation(defaultShader, "shadowMap");
         int shadowMapResolution = ppfxConfig.shadow_map_size;
         SetShaderValue(defaultShader, GetShaderLocation(defaultShader, "shadowMapResolution"), &shadowMapResolution, SHADER_UNIFORM_INT);
-
+        //Set Up POST
         post_process_target = LoadRenderTexture(screenWidth, screenHeight);
         shadowMap = LoadShadowmapRenderTexture(1024 , 1024);
         postProcessingShaders = LoadShader(0, "romfs:/shaders/ppfx.fs");
@@ -1073,8 +1076,10 @@ struct RenderSystem
         int blurFX = GetShaderLocation(postProcessingShaders, "blurFX");
         SetShaderValue(postProcessingShaders, bloomFX, (float[1]){ ppfxConfig.bloom ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);//
         SetShaderValue(postProcessingShaders, blurFX, (float[1]){ ppfxConfig.blur ? 1.0f : 0.0f}, SHADER_UNIFORM_FLOAT);
+        
 
     };
+   
     void DrawMenusSolo(){
         if(activeMenus == nullptr) return;
         BeginDrawing();
@@ -1095,6 +1100,7 @@ struct RenderSystem
     {
         renderProcs.erase(std::remove(renderProcs.begin(), renderProcs.end(), *proc), renderProcs.end());
     }
+    
     void SetLights()
     {
         defaultLight = CreateLight(LIGHT_POINT, (Vector3){ 0.35f, -1.0f, -0.35f }, Vector3Zero(), DARKGRAY, defaultShader);

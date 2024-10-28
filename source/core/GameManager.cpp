@@ -10,13 +10,13 @@
 #include <StandardInput.h>
 #include <GamePad.h>
 #include <RenderSystem.h>
-extern std::map<std::string, std::string> RES_Fonts;
 RenderSystem *renderSystem;
-Font gameFont;
+Font gameFont, newGuiFont;
 const int screenWidth = 1280;
 const int screenHeight = 720;
 GamePads gamePads;
 StandardController controller;
+extern std::map<int, std::string> RES_Fonts;
 GameManager::GameManager(bool running) : _running{running}
 {
 
@@ -43,7 +43,9 @@ GameManager& GameManager::getGameManager()
         //set up controller
         controller = StandardController(&renderSystem->mainCamera);
         gamePads.Init(&controller);
-        gameFont = LoadFont(RES_Fonts["DEFAULT"].c_str());//set var for game fonts
+        gameFont = LoadFont(RES_Fonts[_RES::GameFonts::DEFAULT].c_str());//set var for game fonts
+        newGuiFont = LoadFont(RES_Fonts[_RES::GameFonts::GUI].c_str());//set var for game fonts
+        GuiSetFont(newGuiFont);
         if(IsFontReady(gameFont))
             debugLog("Made Font!");
         debugLog("Made Game Manager!");

@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 #include <raylib.h>
-extern std::map<std::string, std::string> RES_Fonts;
+extern std::map<int, std::string> RES_Fonts;
 extern std::map<std::string, std::string> RES_Textures;
 extern std::map<int, std::string> RES_Models;
 
@@ -25,6 +25,11 @@ namespace _RES
         LIGHT_MAP,
         SKYBOX,
         CUBE_MAP
+    };
+    enum GameFonts
+    {
+        DEFAULT = 0,
+        GUI  
     };
     enum SkyBoxTextures
     {

@@ -38,18 +38,30 @@ Object Pool - Implemented not tested
 Texture2D Animator - Implemented not tested
 ~SkyBox - Added Not working
 ~More Overlays - Done
+Skeletal Animation - M3D - Already implemented by Raylib
+~Add Fog to PPFX - DIDNT WORK
+~UI Screen Touch Controls - Tested works on Default
+~On Screen Debugger - Implemented
 -------------------------
 *WIP
 ___________________________
 **Current
-~Add Fog to PPFX - WIP
-`UI Screen Touch Controls
+~Physics 2D Component - WIP
+~Split MAIN.cpp to core components
+    Engine Procs - used to determine what process should run at what state
 ~Update Editor Components For Scene Loading- WIP
     `Loader - 
     `Editor -
-~Physics 2D Component - WIP
-
+    -set  up box and handle collisions
 PBR as Shader Option -
+
+
+---------------------------
+*NOT STARTED
+__________________________
+----------------------------
+*FUTURE IMPLEMENTATIONS/OPTIMIZATIONS
+_____________________________
 Multithreading -
     Thread Pool-
     Task Scheduler-
@@ -57,17 +69,9 @@ Multithreading -
     Audio/Video Processing Thread -
     Asset Loading Thread -
         Game Scene Loader -
-On Screen Debugger -
----------------------------
-*NOT STARTED
-__________________________
-----------------------------
-*FUTURE IMPLEMENTATIONS
-_____________________________
-Skeletal Animation - M3D
+Animation Events -
 IK -
 Procedural Animation -
-Animation Events -
 File Archive System -
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
@@ -104,6 +108,7 @@ Networking -
 #include <MenuController.h>
 #include <DefaultMenuController.h>
 #include "StandardInput.h"
+#include <EngineProcs.h>
 //move res stuff to scene manager//
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
@@ -333,18 +338,25 @@ void DebugTest2()
 extern StandardController controller;
 StandardMenuController* menuControlls;
 
+EngineProcs *testMenu; 
 void TestMenu()
 {
     menuControlls = new StandardMenuController();
     Menu *menu1 = new Menu("Menu 1");
-    GR_Button *button1 = new GR_Button("#05#Button 1", DebugTest, Vector2{100,100}, Vector2{0,0});
-    GR_Button *button2 = new GR_Button("#05#Button 2", DebugTest2, Vector2{100,100}, Vector2{0,100});
+    Vector2 size = Vector2{250,300};
+    float spacing = 10.0f;
+    GR_Button *button1 = new GR_Button("#05#Button 1", DebugTest, size, Vector2{500,10});
+    GR_Button *button2 = new GR_Button("#05#Button 2", DebugTest2, size, Vector2{500, 10 + size.y + spacing});
     menu1->AddItem(*button1);
     menu1->AddItem(*button2);
     menuController = new MenuController(menuControlls);
     menuController->AddMenu(menu1);
     menuController->OpenMenuController(&controller);
-    
+}
+void UpadateMenu()
+{
+    renderSystem->activeMenus->UpdateInputs();
+    renderSystem->DrawMenusSolo();
 }
 
 ////////////END TEST--------------------
@@ -360,6 +372,7 @@ void TestMenu()
 
 void initSystem()
 {   
+    
     //init gamepad
     romfsInit();
     debugLogInit();
@@ -381,7 +394,8 @@ void initSystem()
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
     BoundingBox stageBounds = {Vector3{-1000,-1000,-1000}, Vector3{1000,1000,1000}};
     quadTreeContainer = new StaticQuadTreeContainer<Entity>(stageBounds);
-
+    testMenu = new EngineProcs(TestMenu, UpadateMenu);
+//
     
 }
 
@@ -403,7 +417,7 @@ void BOOT()//Move to render system
         timer = 0;
       
         ENGINE_STATES::ChangeState(ENGINE_STATES::MENU);
-        TestMenu();//Convert this to Proccess System with manager
+        testMenu->onInit();//Convert this to Proccess System with manager
     }
 
 }
@@ -467,8 +481,7 @@ void EngineMain()
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::MENU)
         {
-            renderSystem->activeMenus->UpdateInputs();
-            renderSystem->DrawMenusSolo();
+            testMenu->RUN();
         }
         else if (ENGINE_STATES::GetState() == ENGINE_STATES::IDLE)
         {

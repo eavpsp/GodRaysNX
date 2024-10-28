@@ -92,6 +92,7 @@ void RenderSystem::RenderScene()
         rlEnableTexture(shadowMap.depth.id);
         rlSetUniform(shadowMapLoc, &slot, SHADER_UNIFORM_INT, 1);
         BeginMode3D(*mainCamera.camToUse);
+        //defaultSkyBox.DrawSkyBox();
         DrawScene();
         if(debugMode)
         {
