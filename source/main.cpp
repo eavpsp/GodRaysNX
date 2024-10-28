@@ -47,7 +47,7 @@ Skeletal Animation - M3D - Already implemented by Raylib
 ___________________________
 **Current
 ~Physics 2D Component - WIP
-~Split MAIN.cpp to core components
+~Split MAIN.cpp to core components - Started
     Engine Procs - used to determine what process should run at what state
 ~Update Editor Components For Scene Loading- WIP
     `Loader - 
