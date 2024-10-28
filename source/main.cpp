@@ -129,43 +129,39 @@ extern BOOT_PROC* bootProc;
 extern TEST_PROC* testProc;
 extern DEBUG_PROC* debugProc;
 
-VIDEO_PROC videoProcDemo = VIDEO_PROC(nullptr,VideoProcDemo);
-IN_GAME_PROC gameProcDemo = IN_GAME_PROC(nullptr,GameProcDemo);
-LOADING_PROC loadingProcDemo = LOADING_PROC(nullptr,DemoLoadingProc);
-BOOT_PROC bootProcDemo = BOOT_PROC(nullptr,BOOT);
-IDLE_PROC idleProcDemo = IDLE_PROC(nullptr,Wait);
-void initSystem()
-{   
-    romfsInit();
-    debugLogInit();
-    debugLog("romFS Init");
-    debugLog("System Starting...");
-    SDL_Init(SDL_INIT_AUDIO);
-    Mix_Init(MIX_INIT_MP3);
-    debugLog("SDL Mixer Init");
-    GameObjects = new std::vector<GameObject *>();
-    engineCallBacks = new EngineCallBacks();
-    physicsWorld = new PhysicsWorld();
-    physicsWorld->InitBasic();
-    physicsWorld->InitBullet();
-    PhysicsObjects = new std::vector<PhysicsComponent *>();
-    ecs.InitSystem();
-    debugLog("Engine Callbacks Init");
-    ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);
-    videoProc = &videoProcDemo;
-    inGameProc = &gameProcDemo;
-    loadingProc = &loadingProcDemo;
-    bootProc = &bootProcDemo;
-    idleProc = &idleProcDemo;
 
-}
-void VideoProcDemo()
+//PROCS TO RUN
+void TestPhysicsBullet()
 {
-    if(!Player::playbackLoop())//update to use framebuffer
-    {
-        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
-    }
-}
+    Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
+    GameObject *plane = GameObject::InstantiateGameObject<GameObject>(Vector3{0,-5,0}, Quaternion{0,0,0,0},20.0f);
+    GR_Mesh* planeData = new GR_Mesh(LoadModel("romfs:/models/prim/plane.obj"));
+    GR_MeshComponent *planeMesh = new GR_MeshComponent(planeData);
+    planeMesh->SetShader(renderSystem->defaultShader);
+    planeMesh->SetTint(RED);
+    plane->AddComponent(planeMesh);
+    BulletPhysicsComponent *planeBody = new BulletPhysicsComponent(plane->position, plane->rotation, 0.0f, new btBoxShape(btVector3(20.0f,0.5f,20.0f)));      
+    plane->AddComponent(planeBody);
+    
+    GameObject *slope = GameObject::InstantiateGameObject<GameObject>(Vector3{0,0,0}, Quaternion{0,180,0,0}, 2.0f);
+    GR_Mesh* slopeData = new GR_Mesh(LoadModel("romfs:/models/prim/cube.obj"));
+    GR_MeshComponent *slopeMesh = new GR_MeshComponent(slopeData);
+    slopeMesh->SetShader(renderSystem->defaultShader);
+    slopeMesh->SetTint(GREEN);
+    slope->AddComponent(slopeMesh);
+    BulletPhysicsComponent *slopeBody = new BulletPhysicsComponent(slope->position, slope->rotation, 0.0f, new btBoxShape(btVector3(10.0f,2.0f,10.0f)));      
+    slope->AddComponent(slopeBody);
+   
+    GameObject *meshObject = GameObject::InstantiateGameObject<GameObject>(Vector3{0,10,0}, Quaternion{0,0,0,0}, 2.0f);
+    GR_Mesh* meshData = new GR_Mesh(LoadModel("romfs:/models/prim/sphere.obj"));
+    GR_MeshComponent *mesh = new GR_MeshComponent(meshData);
+    mesh->SetShader(renderSystem->defaultShader);
+    mesh->SetTexture(texture);
+    meshObject->AddComponent(mesh);
+    BulletPhysicsComponent *meshBody = new BulletPhysicsComponent(meshObject->position, meshObject->rotation, 1.0f, new btSphereShape(1.2f));      
+    meshObject->AddComponent(meshBody);
+
+}   
 void GameProcDemo()
 {
      //ecs.UpdateSystem();
@@ -179,6 +175,19 @@ void GameProcDemo()
     if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
         gameManager->destroyGameManager();
 }
+
+IN_GAME_PROC gameProcDemo = IN_GAME_PROC(TestPhysicsBullet,GameProcDemo);
+
+
+void VideoProcDemo()
+{
+    if(!Player::playbackLoop())//update to use framebuffer
+    {
+        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
+    }
+}
+VIDEO_PROC videoProcDemo = VIDEO_PROC(nullptr,VideoProcDemo);
+
 void DemoLoadingProc()
 {
     BeginDrawing();
@@ -186,6 +195,8 @@ void DemoLoadingProc()
     loadingOverlay->Draw();
     EndDrawing();
 }
+LOADING_PROC loadingProcDemo = LOADING_PROC(nullptr,DemoLoadingProc);
+
 void BOOT()//Move to render system
 {
     if(bootOverlay == nullptr)
@@ -202,11 +213,12 @@ void BOOT()//Move to render system
     {
         timer = 0;
       
-        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
-        
+        RunProc(&gameProcDemo);
     }
 
 }
+BOOT_PROC bootProcDemo = BOOT_PROC(nullptr,BOOT);
+
 void Wait()//move to render system
 {
     if(loadingOverlay == nullptr)
@@ -224,6 +236,38 @@ void Wait()//move to render system
         ENGINE_STATES::ChangeState(ENGINE_STATES::IDLE);
     }
 }
+
+IDLE_PROC idleProcDemo = IDLE_PROC(nullptr,Wait);
+
+
+
+
+
+void initSystem()
+{   
+    romfsInit();
+    debugLogInit();
+    debugLog("romFS Init");
+    debugLog("System Starting...");
+    SDL_Init(SDL_INIT_AUDIO);
+    Mix_Init(MIX_INIT_MP3);
+    debugLog("SDL Mixer Init");
+    GameObjects = new std::vector<GameObject *>();
+    engineCallBacks = new EngineCallBacks();
+    physicsWorld = new PhysicsWorld();
+    physicsWorld->InitBasic();
+    physicsWorld->InitBullet();
+    PhysicsObjects = new std::vector<PhysicsComponent *>();
+    ecs.InitSystem();
+    debugLog("Engine Callbacks Init");
+    ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);//always runs first
+    videoProc = &videoProcDemo;
+    loadingProc = &loadingProcDemo;
+    bootProc = &bootProcDemo;
+    idleProc = &idleProcDemo;
+
+}
+
 void EngineMain()
 {
     debugLog("Engine Starting...");

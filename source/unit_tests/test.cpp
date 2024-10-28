@@ -27,19 +27,12 @@
 extern std::map<int, std::string> RES_ModelAnimations;
 LoadingOverlay *loadingOverlay;
 GameSceneManager *sceneManager;
-EngineCallBacks *engineCallBacks;
-std::vector<GameObject *> *GameObjects;
-std::vector<PhysicsComponent *> *PhysicsObjects;
-GameManager *gameManager;
-static float timer = 0;
-EntityComponentSystem ecs;
+extern std::vector<GameObject *> *GameObjects;
+extern std::vector<PhysicsComponent *> *PhysicsObjects;
 extern RenderSystemECS renderSystemECS;
 extern TransformSystemECS transformSystem;
 StaticQuadTreeContainer<Entity> *quadTreeContainer;//move to RenderSystem ECS & make one for RenderSystem
 BurstParticleSystem* burstParticleSystem;
-extern RenderSystem *renderSystem;
-PhysicsWorld *physicsWorld;
-BootOverlay *bootOverlay;
 MenuController *menuController;
 void Init()
 {
