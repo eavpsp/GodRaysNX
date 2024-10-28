@@ -152,6 +152,9 @@ void RunProc(EngineProcs* proc)
 {
     ENGINE_STATES::ChangeState(proc->state);
     SetProc(proc);
-    proc->onInit();
+    if(proc->onInit != nullptr)
+    {
+        proc->onInit();
+    }
 }
 #endif
