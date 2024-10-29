@@ -18,6 +18,7 @@
 #include <GameObject.h>
 #include <SkyBoxRenderer.h>
 #include <MenuController.h>
+#include <GameManager.h>
 constexpr size_t MAX_DEPTH = 8;
 //Search using the cameraview
 //all items returned will run their draw call to show on screen
@@ -1006,8 +1007,7 @@ struct RENDER_PROC//begin shader process //custom func for running in the render
         return draw == other.draw;
     }
 };
-extern const int screenWidth;
-extern const int screenHeight;
+extern GameManager *gameManager;
 extern std::vector<std::string> ShaderPaths;
 extern std::map<int, std::pair<std::string, std::string>> RES_Shaders;
 struct PostProcessingFXConfig
@@ -1069,7 +1069,7 @@ struct RenderSystem
         int shadowMapResolution = ppfxConfig.shadow_map_size;
         SetShaderValue(defaultShader, GetShaderLocation(defaultShader, "shadowMapResolution"), &shadowMapResolution, SHADER_UNIFORM_INT);
         //Set Up POST
-        post_process_target = LoadRenderTexture(screenWidth, screenHeight);
+        post_process_target = LoadRenderTexture(gameManager->gameConfig.screenWidth, gameManager->gameConfig.screenHeight);
         shadowMap = LoadShadowmapRenderTexture(1024 , 1024);
         postProcessingShaders = LoadShader(0, "romfs:/shaders/ppfx.fs");
         int bloomFX = GetShaderLocation(postProcessingShaders, "bloomFX");

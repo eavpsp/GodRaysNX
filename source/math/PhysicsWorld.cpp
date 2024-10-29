@@ -3,12 +3,13 @@
 #include <vector>
 #include "ScriptCallbacks.h"
 #include <btBulletDynamicsCommon.h>
-extern std::vector<PhysicsComponent *> *PhysicsObjects;
 static float gravity;
 static bool _initialized;
 static Vector3 groundPosition = {0,0,0};
 static bool useGround = false;
 extern EngineCallBacks *engineCallBacks;
+std::vector<PhysicsComponent *> *PhysicsObjects;
+std::vector<Physics2DComponent *> *Physics2DObjects;
 Vector3 PhysicsWorld::GetGroundPosition()
 {
     return groundPosition;
@@ -25,6 +26,8 @@ void PhysicsWorld::SetGravity(float value)
 
 void PhysicsWorld::InitBasic(float gravity, bool ground)
 {
+    PhysicsObjects = new std::vector<PhysicsComponent *>();
+    Physics2DObjects = new std::vector<Physics2DComponent *>();
     useGround = ground;    
     PhysicsWorld::SetGravity(gravity);
     _initialized = true;
@@ -87,12 +90,9 @@ void PhysicsWorld::UpdateBullet()
 }
 void PhysicsWorld::UpdateBasic()
 {
-    if(PhysicsObjects->size() == 0)
-    {
-        return;
-    }
+    
     SetTargetFPS(120);
-
+    //3D
     //gravity
     for (int i = 0; i < PhysicsObjects->size(); i++)
     {
@@ -127,6 +127,7 @@ void PhysicsWorld::UpdateBasic()
             }
         }
     }
+    //2D
     SetTargetFPS(60);
 
 }

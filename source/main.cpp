@@ -49,13 +49,13 @@ Skeletal Animation - M3D - Already implemented by Raylib
 ___________________________
 **Current
 ~Physics 2D Component - WIP
+    -set up box or circle and handle collisions
 ~Update Editor Components For Scene Loading- WIP
     `Loader - 
     `Editor -
-    -set  up box and handle collisions
 PBR as Shader Option -
-
-
+~Screen Space Interactions/Raycasts
+~Cutscene events
 ---------------------------
 *NOT STARTED
 __________________________
@@ -78,6 +78,7 @@ Add Smart Pointers -
 Networking - 
     Multiplayer -
 */
+
 //Heap 256MB
 //4GB Ram  ~50% used for current levels and preloading levels
 #define TOTAL_RAM (4ULL * 1024ULL * 1024ULL * 1024ULL)
@@ -105,12 +106,10 @@ Networking -
 //CORE SYSTEMS
 GameManager *gameManager;
 EntityComponentSystem ecs;
-EngineCallBacks *engineCallBacks;
 extern RenderSystem *renderSystem;
 PhysicsWorld *physicsWorld;
 //CALL BACK VARIABLES
-std::vector<GameObject *> *GameObjects;
-std::vector<PhysicsComponent *> *PhysicsObjects;
+
 //LOCAL OVERLAYS
 BootOverlay *bootOverlay;
 LoadingOverlay *loadingOverlay;
@@ -131,7 +130,7 @@ extern DEBUG_PROC* debugProc;
 
 
 //PROCS TO RUN
-void TestPhysicsBullet()
+void TestPhysicsBullet()//Sets up our game scene
 {
     Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
     GameObject *plane = GameObject::InstantiateGameObject<GameObject>(Vector3{0,-5,0}, Quaternion{0,0,0,0},20.0f);
@@ -162,16 +161,12 @@ void TestPhysicsBullet()
     meshObject->AddComponent(meshBody);
 
 }   
-void GameProcDemo()
+void GameProcDemo()//updates our game scene
 {
      //ecs.UpdateSystem();
     gameManager->runGameLoop();
     renderSystem->mainCamera.UpdateCamera();
     renderSystem->RenderScene();
-    //Run Update Callbacks//
-    engineCallBacks->PhysicsUpdate();
-    engineCallBacks->RunUpdateCallbacks();
-    // Get and process input
     if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
         gameManager->destroyGameManager();
 }
@@ -239,10 +234,10 @@ void Wait()//move to render system
 
 IDLE_PROC idleProcDemo = IDLE_PROC(nullptr,Wait);
 
-
-
-
-
+/**
+ * @brief Initializes the engine.
+ * @details This function is responsible for initializing the engine. It includes initializing the romFS, initializing the debug log, initializing the game objects, initializing the physics world, initializing the ECS, and setting the initial state of the engine.
+ */
 void initSystem()
 {   
     romfsInit();
@@ -252,12 +247,9 @@ void initSystem()
     SDL_Init(SDL_INIT_AUDIO);
     Mix_Init(MIX_INIT_MP3);
     debugLog("SDL Mixer Init");
-    GameObjects = new std::vector<GameObject *>();
-    engineCallBacks = new EngineCallBacks();
     physicsWorld = new PhysicsWorld();
     physicsWorld->InitBasic();
     physicsWorld->InitBullet();
-    PhysicsObjects = new std::vector<PhysicsComponent *>();
     ecs.InitSystem();
     debugLog("Engine Callbacks Init");
     ENGINE_STATES::ChangeState(ENGINE_STATES::BOOT);//always runs first
@@ -268,13 +260,18 @@ void initSystem()
 
 }
 
+/**
+ * @brief Main loop of the engine. Runs the current state of the engine.
+ * @details This function is the main loop of the engine. It runs the current state of the engine, whether it is in-game, in a cutscene, in a menu, or in a loading screen.
+ * The current state of the engine is determined by the value of ENGINE_STATES::GetState().
+ * The function will run until the window is closed or the game manager's Running() function returns false.
+ */
 void EngineMain()
 {
     debugLog("Engine Starting...");
-    //init GM
-    gameManager = &GameManager::getGameManager();
-    while (!WindowShouldClose() && gameManager->Running())      // Detect window close button
-    //move states to game manager
+    gameManager = new GameManager(true);
+    gameManager->Init();
+    while (!WindowShouldClose() && gameManager->Running())
     {
         if(ENGINE_STATES::GetState() == ENGINE_STATES::IN_GAME)
         {
@@ -286,11 +283,10 @@ void EngineMain()
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::VIDEO)
         {
-          videoProc->RUN();
+            videoProc->RUN();
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
         {
-            //Cutscene Here
             cutsceneProc->RUN();
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::MENU)
@@ -301,7 +297,7 @@ void EngineMain()
         {
             idleProc->RUN();
         }
-        else if(ENGINE_STATES::GetState() == ENGINE_STATES::LOADING)//move to render system
+        else if(ENGINE_STATES::GetState() == ENGINE_STATES::LOADING)
         {
             loadingProc->RUN();
         }

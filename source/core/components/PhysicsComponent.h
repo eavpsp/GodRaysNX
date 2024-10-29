@@ -6,16 +6,7 @@
 #include <vector>
 #include <RenderSystem.h>
 #include <btBulletDynamicsCommon.h>
-/*************************** 
-Physics System
-------------------
-TODO:
-Joints
-IK
-Rolling (Check if on a slope or slant and add velocity)
-Bouncing (check velocity going towards object and bounce off in opposite direction)
 
-****************************/
 enum CollisionShape
 {
     SPHERE,
@@ -147,15 +138,33 @@ class BulletPhysicsComponent : public GameComponent
         BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape* shape);
        
         ~BulletPhysicsComponent(){};
+        void onCollision(PhysicsComponent *other);
+        void onTrigger(PhysicsComponent *other);
+        void OnUpdate() override;
+        
+};
 
-        void OnUpdate() override
-        {
-            if(!parentObject->isActive || !isActive)
-            {
-                return;
-            }
-            BindMatrix();
-        }
+
+struct Physics2DComponent : public GameComponent
+{
+    bool isTrigger = false;
+    bool isKinematic = false;
+    bool useGravity = true;
+    float mass = 1.0f;
+    enum CollisionShape
+    {
+        SPHERE,
+        BOX
+    };
+    CollisionShape shape = CollisionShape::BOX;
+    float radius = 0;
+    Vector3 velocity = {0,0,0};
+    Rectangle rect;
+    void onCollision(PhysicsComponent *other);
+    void onTrigger(PhysicsComponent *other);
+    void ComponentAddedCallback() override;
+    void OnUpdate() override;
+
 };
 
 #endif // PHYSICSCOMPONENT_H

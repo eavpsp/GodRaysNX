@@ -62,10 +62,6 @@ std::map<int, std::pair<std::string, std::string>> RES_Shaders =
   {_RES::ShaderFiles::CUBE_MAP, {"romfs:/shaders/basic_shaders/cubemap.vs", "romfs:/shaders/basic_shaders/cubemap.fs"}},
 };
 
-// Loads and returns a lighting shader with predefined settings.
-// This function initializes a shader using the vertex and fragment shader files specified in the RES_Shaders map.
-// It sets the shader's "viewPos" and "ambient" uniform locations and assigns an ambient light value.
-// Returns the configured Shader object.
 Shader _RES::GetLightShader()
 {
     Shader shader = LoadShader(RES_Shaders[_RES::ShaderFiles::LIGHT].first.c_str(), RES_Shaders[_RES::ShaderFiles::LIGHT].second.c_str());
