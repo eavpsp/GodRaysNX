@@ -3,10 +3,12 @@
 #include "../debug/debug.h" 
 #include <PhysicsWorld.h>
 #include <RenderSystem.h>   
+
+
 extern std::vector<PhysicsComponent *> *PhysicsObjects;
 extern std::vector<Physics2DComponent *> *Physics2DObjects;
 extern PhysicsWorld *physicsWorld;
-
+class btPairCachingGhostObject;
 void PhysicsComponent::updateBounds()//
 {
     _bounds.UpdateCollider(parentObject->position);
@@ -123,22 +125,41 @@ BulletPhysicsComponent::BulletPhysicsComponent(Vector3 pos, Quaternion rot, floa
     this->mass = btScalar(mass);
     this->localInertia = btVector3(0, 0, 0);
     this->myMotionState = new btDefaultMotionState(*transform);
-    collisionShapes.push_back(shape);
+    this->shape = shape;
+    this->collisionObject = new btCollisionObject();
+    this->collisionObject->setCollisionShape(shape);
+    this->collisionObject->setUserPointer(this);
+    this->collisionObject->setUserIndex(0);
+    this->collisionObject->setWorldTransform(*transform);
     btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
     btRigidBody* body = new btRigidBody(rbInfo);
     body->setWorldTransform(*transform);
     physicsWorld->dynamicsWorld->addRigidBody(body);
 }
 //Handle Bullet Collisions
-void BulletPhysicsComponent::onCollision(PhysicsComponent *other)
+extern std::map<const btCollisionObject*,std::vector<btManifoldPoint*>> objectsCollisions;
+bool checkCollision(btCollisionObject* other)
 {
-
+        btRigidBody *body = btRigidBody::upcast(other);
+        btTransform trans;
+        if (body && body->getMotionState()) {
+            body->getMotionState()->getWorldTransform(trans);
+        } else {
+            trans = other->getWorldTransform();
+        }
+        btVector3 origin = trans.getOrigin();
+        auto& manifoldPoints = objectsCollisions[body];
+        if (manifoldPoints.empty()) 
+        {
+            return false;
+        } 
+        else 
+        {
+           return true;
+        }
+        
+        
 }
-void BulletPhysicsComponent::onTrigger(PhysicsComponent *other) 
-{
-
-}
-
 void BulletPhysicsComponent::OnUpdate()
 {
     if(!parentObject->isActive || !isActive)
@@ -146,26 +167,113 @@ void BulletPhysicsComponent::OnUpdate()
         return;
     }
     BindMatrix();
+    //check for collisions
+    for (int j = physicsWorld->dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
+    {
+        checkCollision(physicsWorld->dynamicsWorld->getCollisionObjectArray()[j]);
+    }
+    
 }
 
 //2D Physics
 //Handle 2D Collisions
-void Physics2DComponent::onCollision(PhysicsComponent *other)
+void Physics2DComponent::onCollision(Physics2DComponent *other)
 {
 
 }
 
-void Physics2DComponent::onTrigger(PhysicsComponent *other)
+void Physics2DComponent::onTrigger(Physics2DComponent *other)
 {
 
 }
 
 void Physics2DComponent::ComponentAddedCallback()
+/**
+ * @brief Called when the component is added to a GameObject.
+ * @details This is called when the component is added to a GameObject. It is used to initialize the component and add it to the list of physics components.
+ */
 {
-
+    Physics2DObjects->push_back(this);//add to list of physics Objects
 }
 
 void Physics2DComponent::OnUpdate()
 {
+    //check for collisions
+    for (size_t i = 0; i < Physics2DObjects->size(); i++)
+    {
+        if(shape == CollisionShape::BOX)
+        {
+            if(Physics2DObjects->at(i)->shape == CollisionShape::BOX)
+            {
+                if(CheckCollisionRecs(rect, Physics2DObjects->at(i)->rect))
+                {
+                    if(Physics2DObjects->at(i)->isTrigger)
+                    {
+                        onTrigger(Physics2DObjects->at(i));
+
+                    }
+                    else
+                    {
+                        onCollision(Physics2DObjects->at(i));
+
+                    }
+                }
+            }
+            else
+            {
+                if(CheckCollisionCircleRec(Vector2{Physics2DObjects->at(i)->parentObject->position.x, Physics2DObjects->at(i)->parentObject->position.y}, Physics2DObjects->at(i)->radius, Physics2DObjects->at(i)->rect))
+                {
+                     if(Physics2DObjects->at(i)->isTrigger)
+                    {
+                        onTrigger(Physics2DObjects->at(i));
+
+                    }
+                    else
+                    {
+                        onCollision(Physics2DObjects->at(i));
+
+                    }
+                }
+            }
+           
+        }
+        else
+        {
+             if(Physics2DObjects->at(i)->shape == CollisionShape::BOX)
+            {
+                if(CheckCollisionCircleRec(Vector2{Physics2DObjects->at(i)->parentObject->position.x, Physics2DObjects->at(i)->parentObject->position.y}, radius, Physics2DObjects->at(i)->rect))
+                {
+                    if(Physics2DObjects->at(i)->isTrigger)
+                    {
+                        onTrigger(Physics2DObjects->at(i));
+
+                    }
+                    else
+                    {
+                        onCollision(Physics2DObjects->at(i));
+
+                    }
+                }
+            }
+            else
+            {
+                if(CheckCollisionCircles(Vector2{Physics2DObjects->at(i)->parentObject->position.x, Physics2DObjects->at(i)->parentObject->position.y}, Physics2DObjects->at(i)->radius, Vector2{parentObject->position.x, parentObject->position.y}, radius))
+                {
+                     if(Physics2DObjects->at(i)->isTrigger)
+                    {
+                        onTrigger(Physics2DObjects->at(i));
+
+                    }
+                    else
+                    {
+                        onCollision(Physics2DObjects->at(i));
+
+                    }
+                }
+            }
+        }
+        
+    }
+    
 
 }

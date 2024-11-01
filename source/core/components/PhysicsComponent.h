@@ -98,7 +98,8 @@ class PhysicsComponent : public GameComponent
 
 class BulletPhysicsComponent : public GameComponent
 {
-    btAlignedObjectArray<btCollisionShape*> collisionShapes;//Bullet Shapes Vector
+    btCollisionObject *collisionObject;
+    btCollisionShape *shape;
     btTransform *transform;
     btScalar mass;
     btVector3 localInertia;
@@ -109,7 +110,7 @@ class BulletPhysicsComponent : public GameComponent
         return;
     }
     //ref to gameobject
-   
+    bool CheckCollision(btCollisionObject* other);
    
     void BindMatrix()
     {       
@@ -160,8 +161,8 @@ struct Physics2DComponent : public GameComponent
     float radius = 0;
     Vector3 velocity = {0,0,0};
     Rectangle rect;
-    void onCollision(PhysicsComponent *other);
-    void onTrigger(PhysicsComponent *other);
+    void onCollision(Physics2DComponent *other);
+    void onTrigger(Physics2DComponent *other);
     void ComponentAddedCallback() override;
     void OnUpdate() override;
 

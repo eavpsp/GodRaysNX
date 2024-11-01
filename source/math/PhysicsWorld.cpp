@@ -32,6 +32,26 @@ void PhysicsWorld::InitBasic(float gravity, bool ground)
     PhysicsWorld::SetGravity(gravity);
     _initialized = true;
 }
+
+std::map<const btCollisionObject*,std::vector<btManifoldPoint*>> objectsCollisions;
+void myTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep) {
+    objectsCollisions.clear();
+    int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+    for (int i = 0; i < numManifolds; i++) {
+        btPersistentManifold *contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+        auto *objA = contactManifold->getBody0();
+        auto *objB = contactManifold->getBody1();
+        auto& collisionsA = objectsCollisions[objA];
+        auto& collisionsB = objectsCollisions[objB];
+        int numContacts = contactManifold->getNumContacts();
+        for (int j = 0; j < numContacts; j++) {
+            btManifoldPoint& pt = contactManifold->getContactPoint(j);
+            collisionsA.push_back(&pt);
+            collisionsB.push_back(&pt);
+        }
+    }
+}
+
 void PhysicsWorld::InitBullet()
 {
     
@@ -74,6 +94,7 @@ void PhysicsWorld::InitBullet()
 
         //add the body to the dynamics world
         dynamicsWorld->addRigidBody(body);
+        dynamicsWorld->setInternalTickCallback(myTickCallback);
         _initialized = true;
 }
 
@@ -128,7 +149,30 @@ void PhysicsWorld::UpdateBasic()
         }
     }
     //2D
+    for(int i = 0; i < Physics2DObjects->size(); i++)
+    {
+        if(!Physics2DObjects->at(i)->isKinematic)
+        {
+            if(Physics2DObjects->at(i)->parentObject->position.y <= PhysicsWorld::GetGroundPosition().y)
+            {
+                Physics2DObjects->at(i)->parentObject->position.y = PhysicsWorld::GetGroundPosition().y; 
+                Physics2DObjects->at(i)->velocity.y = 0; // Implement dampening to reduce speed
+
+               
+            }
+            float gravityEffect = PhysicsWorld::GetGravity() * GetFrameTime();
+            Physics2DObjects->at(i)->velocity.y += gravityEffect; // gravity
+            
+          
+            if(Physics2DObjects->at(i)->velocity.y < 0)
+            {
+                Physics2DObjects->at(i)->parentObject->position.y += Physics2DObjects->at(i)->velocity.y + 0.5f * gravityEffect; // Make the velocity influence the object
+            }
+        }
+    }
     SetTargetFPS(60);
+
+
 
 }
 
