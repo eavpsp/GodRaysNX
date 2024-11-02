@@ -1,7 +1,5 @@
 #include <EngineProcs.h>
 
-
-CUTSCENE_PROC* cutsceneProc;
 VIDEO_PROC* videoProc;
 MENU_PROC* menuProc;
 IN_GAME_PROC* inGameProc;
@@ -16,9 +14,6 @@ void SetProc(EngineProcs* proc)
     {
     case ENGINE_STATES::VIDEO:
         videoProc = (VIDEO_PROC*)proc;
-        break;
-    case ENGINE_STATES::CUTSCENE:
-        cutsceneProc = (CUTSCENE_PROC*)proc;
         break;
     case ENGINE_STATES::MENU:
         menuProc = (MENU_PROC*)proc;

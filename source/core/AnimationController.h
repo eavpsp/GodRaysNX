@@ -35,8 +35,18 @@ struct AnimationController
     void ResetTrigger(int index);
     void SetTrigger(int index);
     bool GetTrigger(int index);
+    bool LoadAnimationData(const char* filename);
     AnimationComponent *animationComponent;
-    AnimationControllerData *data;
+    AnimationControllerData *animData;
+    AnimationController(AnimationComponent *_animationComponent, const char* _dataPath)
+    {
+        animationComponent = _animationComponent;
+        if (!LoadAnimationData(_dataPath))
+        {
+            animData = new AnimationControllerData();
+        }
+        animationComponent->animationController = this;
+    }
 /**
  * @brief Initializes the AnimationController with the provided AnimationComponent and AnimationControllerData.
  *
@@ -48,9 +58,14 @@ struct AnimationController
     AnimationController(AnimationComponent *_animationComponent, AnimationControllerData *_data)
     {
         animationComponent = _animationComponent;
-        data = _data;
+        animData = _data;
         animationComponent->animationController = this;
     }
+/**
+ * @brief Destroys the AnimationController and performs necessary cleanup.
+ *
+ * This destructor cleans up any resources associated with the AnimationController.
+ */
     ~AnimationController()
     {
         

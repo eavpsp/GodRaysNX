@@ -54,6 +54,16 @@ AnimationComponent::AnimationComponent(const char *filePath)
     Play();
 }
 
+void SpriteAnimationComponent::AddAnimationEvent(float frame, AnimationEventDelegate event)
+{
+    animationEvents[frame] = event;
+}
+
+void SpriteAnimationComponent::RemoveAnimationEvent(float frame, AnimationEventDelegate event)
+{
+    animationEvents.erase(frame);
+}
+
 void SpriteAnimationComponent::Play()
 {
     animCurrentFrame = 0;
@@ -84,6 +94,10 @@ void SpriteAnimationComponent::Play(const char *animName)
 void SpriteAnimationComponent::OnUpdate()
 {
     animCurrentFrame = (animCurrentFrame + 1)%currentAnimation.totalFrames;
+    if(animationEvents.find(animCurrentFrame) != animationEvents.end())
+    {
+        animationEvents[animCurrentFrame]();
+    }
     //update texture component
     Texture2DComponent* texComp = ((GameObject*)parentObject)->GetComponent<Texture2DComponent>();
     if(texComp != nullptr)

@@ -50,19 +50,19 @@ Skeletal Animation - M3D - Already implemented by Raylib
     `Loader - Done
     `Editor - Done
 ~Screen Space Interactions/Raycasts - Done
+~Animation Events - Done
+~Serialize Animation Data - Done
+    Add Animation Controller + Data to Res Manager(ControllerID -- AnimationData File To Load)
 -------------------------
 *WIP
 ___________________________
 **Current
-~PBR as Shader Option -
-~Cutscene events
-    Animation Events -
----------------------------
-*NOT STARTED
-__________________________
-----------------------------
-*FUTURE IMPLEMENTATIONS/OPTIMIZATIONS
-_____________________________
+~Bone Attachments
+  Add Children to bones
+~Children Objects
+    test this mechanic 
+ARM SIMD Instruction Set Implementation - 
+Add Smart Pointers -
 Multithreading -
     Thread Pool-
     Task Scheduler-
@@ -70,11 +70,18 @@ Multithreading -
     Audio/Video Processing Thread -
     Asset Loading Thread -
         Game Scene Loader -
+Start Game
+---------------------------
+*NOT STARTED
+~PBR as Shader Option -
+__________________________
+----------------------------
+*FUTURE IMPLEMENTATIONS/OPTIMIZATIONS
+_____________________________
+~File Archive System -
+    Zlib Compression and Decompression
 IK -
 Procedural Animation -
-File Archive System -
-ARM SIMD Instruction Set Implementation - 
-Add Smart Pointers -
 Networking - NET Spirit
     Multiplayer -
 */
@@ -118,7 +125,6 @@ LoadingOverlay *loadingOverlay;
 static float timer = 0;
 
 //Get all system procs
-extern CUTSCENE_PROC* cutsceneProc;
 extern VIDEO_PROC* videoProc;
 extern MENU_PROC* menuProc;
 extern IN_GAME_PROC* inGameProc;
@@ -297,10 +303,6 @@ void EngineMain()
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::VIDEO)
         {
             videoProc->RUN();
-        }
-        else if(ENGINE_STATES::GetState() == ENGINE_STATES::CUTSCENE)
-        {
-            cutsceneProc->RUN();
         }
         else if(ENGINE_STATES::GetState() == ENGINE_STATES::MENU)
         {

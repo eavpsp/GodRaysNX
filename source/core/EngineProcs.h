@@ -14,15 +14,7 @@ struct EngineProcs
     EngineProcs() = default;
     virtual ~EngineProcs() = default; 
 };
-struct CUTSCENE_PROC : EngineProcs
-{
-    CUTSCENE_PROC(ENIGNEPROC _onInit, ENIGNEPROC _onUpdate)
-    {
-        this->onInit = _onInit;
-        this->RUN = _onUpdate;
-        state = ENGINE_STATES::CUTSCENE;
-    }
-};
+
 struct VIDEO_PROC : EngineProcs
 {
     VIDEO_PROC(ENIGNEPROC _onInit, ENIGNEPROC _onUpdate)
