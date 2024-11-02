@@ -46,8 +46,6 @@ class PhysicsComponent : public GameComponent
         bool isGrounded = false;
         CollisionShape shape = CollisionShape::SPHERE;
         float radius = 0;
-        bool canBounce = false;
-        bool canRoll = false;
         Vector3 size = {1,1,1};
         Vector3 velocity = {0,0,0};
         Vector3 acceleration = {0,0,0};
@@ -159,12 +157,14 @@ struct Physics2DComponent : public GameComponent
     };
     CollisionShape shape = CollisionShape::BOX;
     float radius = 0;
-    Vector3 velocity = {0,0,0};
+    Vector2 velocity = {0,0};
     Rectangle rect;
     void onCollision(Physics2DComponent *other);
     void onTrigger(Physics2DComponent *other);
     void ComponentAddedCallback() override;
     void OnUpdate() override;
+    Physics2DComponent(float mass, float radius, bool _isTrig = false, bool _isKinematic = false);
+    Physics2DComponent(float mass, Vector2 _size, bool _isTrig = false, bool _isKinematic = false);
 
 };
 

@@ -44,12 +44,12 @@ Skeletal Animation - M3D - Already implemented by Raylib
 ~On Screen Debugger - Implemented
 ~Split MAIN.cpp to core components - Done
     Engine Procs - used to determine what process should run at what state
+~Physics 2D Component - Done
+    -set up box or circle and handle collisions
 -------------------------
 *WIP
 ___________________________
 **Current
-~Physics 2D Component - WIP
-    -set up box or circle and handle collisions
 ~Update Editor Components For Scene Loading- WIP
     `Loader - 
     `Editor -

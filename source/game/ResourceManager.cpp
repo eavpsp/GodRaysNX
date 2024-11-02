@@ -18,9 +18,9 @@ std::map<int, std::string> RES_UI_Textures =
   {_RES::UI_ICONS::LOGO, "romfs:/ui/LOGO.png"},
 };
 //TEXTURES
-std::map<std::string, std::string> RES_Textures = 
+std::map<int, std::string> RES_Textures = 
 {
-  {"ENGINE_LOGO", "romfs:/ui/amw_icon.png"},
+  {0, "romfs:/ui/amw_icon.png"},
 };
 //FONTS
 std::map<int, std::string> RES_Fonts = 

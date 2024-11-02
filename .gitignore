@@ -378,3 +378,9 @@ tools/MatrixEditor/AlmightyMatrixEditor/EngineComponents/ComponentsTemplate.cs
 tools/MatrixEditor/AlmightyMatrixEditor/Editor/ExportMatrixData.cs
 tools/MatrixEditor/AlmightyMatrixEditor/EngineComponents/ComponentsTemplate.cs
 ext
+tools/AlmightyMatrixEditor/AnimationMaker/CompileObject.cs
+tools/AlmightyMatrixEditor/Editor/ExportMatrixData.cs
+tools/AlmightyMatrixEditor/EngineComponents/ComponentsTemplate.cs
+tools/AlmightyMatrixEditor/EngineComponents/ComponentEnums.cs
+tools/AlmightyMatrixEditor/AlmightyMatrixEditor.sln
+tools/AlmightyMatrixEditor/AlmightyMatrixEditor.csproj

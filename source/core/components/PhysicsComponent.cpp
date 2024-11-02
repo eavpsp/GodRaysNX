@@ -198,6 +198,9 @@ void Physics2DComponent::ComponentAddedCallback()
 
 void Physics2DComponent::OnUpdate()
 {
+    
+    rect.x = parentObject->position.x;
+    rect.y = parentObject->position.y;
     //check for collisions
     for (size_t i = 0; i < Physics2DObjects->size(); i++)
     {
@@ -276,4 +279,20 @@ void Physics2DComponent::OnUpdate()
     }
     
 
+}
+
+Physics2DComponent::Physics2DComponent(float mass, float radius, bool _isTrig, bool _isKinematic)
+{
+    this->mass = mass;
+    this->radius = radius;
+    this->isTrigger = _isTrig;
+    this->isKinematic = _isKinematic;
+}
+
+Physics2DComponent::Physics2DComponent(float mass, Vector2 _size, bool _isTrig, bool _isKinematic)
+{
+    this->mass = mass;
+    this->isTrigger = _isTrig;
+    this->isKinematic = _isKinematic;
+    this->rect = {parentObject->position.x, parentObject->position.y, _size.x, _size.y};
 }

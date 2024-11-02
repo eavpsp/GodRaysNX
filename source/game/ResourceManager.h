@@ -4,7 +4,7 @@
 #include <string>
 #include <raylib.h>
 extern std::map<int, std::string> RES_Fonts;
-extern std::map<std::string, std::string> RES_Textures;
+extern std::map<int, std::string> RES_Textures;
 extern std::map<int, std::string> RES_Models;
 
 
