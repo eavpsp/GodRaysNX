@@ -25,7 +25,7 @@ extern std::map<int, std::string> RES_Textures;
 static float sceneTimer = 0;
 enum ComponentType : char16_t
 { 
-    ANIMATION = 0x6261, PHYSICS = 0x6270, AUDIO = 0x6361, BULLET = 0x6210, TEXTURE = 0x6374, MESH = 0x636D, PHYSICS2D = 0x6D70, PARTICLESS = 0x6C70
+    ANIMATION = 0x6261, BULLET = 0x6270, AUDIO = 0x6361, PHYSICS = 0x6210, TEXTURE = 0x6374, MESH = 0x636D, PHYSICS2D = 0x6D70, PARTICLESS = 0x6C70
 };
 enum GameObjectType//Add custom object types for implementation
 {
@@ -253,7 +253,7 @@ class GameSceneManager
                                         }
                                         else
                                         {
-                                            debugLog("Unknown Component: %x", nextHeader);  
+                                          //  debugLog("Unknown Component: %x", nextHeader);  
                                         }
                                         
                                     }
@@ -348,7 +348,7 @@ class GameSceneManager
                             //bp, p2d, texture, mesh
                             else
                             {
-                                debugLog("Unknown Component Found %c", objComps.first);
+                              //  debugLog("Unknown Component Found %c", objComps.first);
                             }
                 
                         }
