@@ -6,16 +6,19 @@
 #include "Texture2DComponent.h"
 class AnimationController;
 //controls animation playback
+using AnimationEventDelegate = void (*)();
 class AnimationComponent : public GameComponent//hash table for animations, anim name -> anim index
 {
-
     public:
+        std::map<int, AnimationEventDelegate> animationEvents;//frame -- event
         int animsCount = 0;
         unsigned int animIndex = 0;
         unsigned int animCurrentFrame = 0;
         ModelAnimation *modelAnimations;
         ModelAnimation anim;
         AnimationController *animationController;//to access functionality for animation
+        void AddAnimationEvent(float frame, AnimationEventDelegate event);
+        void RemoveAnimationEvent(float frame, AnimationEventDelegate event);
         void Play();
         void Play(int index);
         void Play(const char* animName);

@@ -49,13 +49,14 @@ Skeletal Animation - M3D - Already implemented by Raylib
 ~Update Editor Components For Scene Loading- Done
     `Loader - Done
     `Editor - Done
+~Screen Space Interactions/Raycasts - Done
 -------------------------
 *WIP
 ___________________________
 **Current
 ~PBR as Shader Option -
-~Screen Space Interactions/Raycasts
 ~Cutscene events
+    Animation Events -
 ---------------------------
 *NOT STARTED
 __________________________
@@ -69,13 +70,12 @@ Multithreading -
     Audio/Video Processing Thread -
     Asset Loading Thread -
         Game Scene Loader -
-Animation Events -
 IK -
 Procedural Animation -
 File Archive System -
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
-Networking - 
+Networking - NET Spirit
     Multiplayer -
 */
 

@@ -9,12 +9,15 @@
 #include <AnimationComponent.h>
 #include <switch.h>
 #include <GR_MeshComponent.h>
+#include <RenderSystem.h>
+#include <PhysicsWorld.h>
 //TODO:
 //Loading Overlays /Overlay exporter
 //Add loading for new components
 //add functionality for cameras
 //prepare the resource table
-
+extern PhysicsWorld *physicsWorld;
+extern RenderSystem *renderSystem;
 extern LoadingOverlay *loadingOverlay;
 extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
 extern std::map<_RES::Scenes_Types, std::string> RES_Scenes;
@@ -29,12 +32,9 @@ enum ComponentType : char16_t
 };
 enum GameObjectType//Add custom object types for implementation
 {
-    BASEOBJ, PLIGHT, DLIGHT, SLIGHT, OCAMERA, PCAMERA
+    BASEOBJ, PLIGHT, DLIGHT, SLIGHT,
 };
-enum CameraType
-{
-    PERSPECTIVE, OTHOGRAPHIC  
-};
+
 //COMPONENTS 0xC??? 
 struct __attribute__((packed)) ComponentDataBase
 {
@@ -88,21 +88,20 @@ struct __attribute__((packed)) SceneObjectData//add data for children and parent
     Vector3 position; //float 3
     Quaternion rotation; //float 4
     float scale; //float 1
+    bool isStatic;
     int parentIndex;//use this to add any children to parent
-    int numOfComponents;//int
+    int numOfComponents;//int//add int for num of children
 
 };
-struct __attribute__((packed)) SceneDataLoader//cast to start of .grb loads the camera for the scene
+struct __attribute__((packed)) SceneDataLoader//cast to start of .grb loads the camera for the scene//stage size 
 {
     u16 header;//file header 0XA0A0
     int sceneID;//int
-    CameraType cameraType;//int
-    Vector3 cameraPosition;//float 3
-    Quaternion cameraRotation;//float4
+    Vector3 cameraPosition, target, stageMax, stageMin;//float 3 bounds max /min
     float gravityAmount;
-    u16 SceneObjectDataLoaderHeader;//object start header 0xA4A4
+    u16 SceneObjectDataLoaderHeader;
     int numObjects;
-   // SceneObjectData objectsInScene[];//auto sets if proper layout
+  
 
 };
 struct GameScene
@@ -111,9 +110,11 @@ struct GameScene
     bool isLoaded = false;  
     std::vector<SceneObjectData*> objectsInScene;
     std::map<int, std::map<char16_t, ComponentDataBase*>> objectsAndComponentsMap;
+    StaticQuadTreeContainer<GameObject> *quadTreeContainer;//add dynamic as well?
+    BoundingBox stageBounds;
     GameScene(_RES::Scenes_Types _sceneID) : sceneID(_sceneID)
     {
-      
+        
     }
      //.grb/
 };
@@ -170,6 +171,14 @@ class GameSceneManager
             {
                 debugLog("Valid .grb file");
                 debugLog("Num Objects: %d", sceneLoaded->numObjects);
+                //init camera
+                renderSystem->mainCamera.camToUse->position = sceneLoaded->cameraPosition;
+                renderSystem->mainCamera.camToUse->target = sceneLoaded->target;
+                //init physics
+                physicsWorld->SetGravity(sceneLoaded->gravityAmount);
+                //quadTree
+                CurrentScene->stageBounds = {sceneLoaded->stageMin, sceneLoaded->stageMax};
+                CurrentScene->quadTreeContainer = new StaticQuadTreeContainer<GameObject>(CurrentScene->stageBounds);
                 for (int i = 0; i < sceneLoaded->numObjects; i++) 
                 {
 
@@ -177,20 +186,15 @@ class GameSceneManager
                     debugLog("Object ID: %d",objectLoaded->objID);
                     switch (objectLoaded->objType)
                     {
-                        // BASEOBJ, PLIGHT, DLIGHT, SLIGHT, OCAMERA, PCAMERA
+                        // BASEOBJ, PLIGHT, DLIGHT, SLIGHT
                             case PLIGHT:
                             break;
                             case DLIGHT:
-                            break;
-                            case OCAMERA:
-                            break;
-                            case PCAMERA:
                             break;
                             case SLIGHT:
                             break;
                             default://gameobject
                                 debugLog("Game Object Found");
-                                 // GameObject *obj = GameObject::InstantiateGameObject<GameObject>(objectLoaded->position, objectLoaded->rotation,objectLoaded->scale, LoadModel(RES_Models[objectLoaded->modelID].c_str()));
                                 CurrentScene->objectsInScene.push_back(objectLoaded);
                                 if(objectLoaded->numOfComponents > 0)
                                 {
@@ -251,10 +255,7 @@ class GameSceneManager
                                             CurrentScene->objectsAndComponentsMap[i][ComponentType::PHYSICS2D] = (p2d);
                                             addon += sizeof(Physics2DComponentsData);
                                         }
-                                        else
-                                        {
-                                          //  debugLog("Unknown Component: %x", nextHeader);  
-                                        }
+                                       
                                         
                                     }
                                 }
@@ -271,34 +272,30 @@ class GameSceneManager
             //gameobjects
             for (size_t i = 0; i < sceneLoaded->numObjects; i++)
             {   
-                
-
                 GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale);
                 if (CurrentScene->objectsInScene[i]->numOfComponents > 0)
                 {
-                    
-                   
                         for(auto& objComps : CurrentScene->objectsAndComponentsMap[i])
                         {
                             debugLog("Component Found: %x", objComps.first);
                             if(objComps.first == ComponentType::ANIMATION)
                             {
-                                    AnimationComponentData *anim = (AnimationComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::ANIMATION]);//i = current obj, map key = 51967 obj is the val returned
-                                    AnimationComponent *animComp = new AnimationComponent(RES_ModelAnimations[anim->animationID].c_str());
-                                    obj->AddComponent(animComp);
+                                AnimationComponentData *anim = (AnimationComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::ANIMATION]);//i = current obj, map key = 51967 obj is the val returned
+                                AnimationComponent *animComp = new AnimationComponent(RES_ModelAnimations[anim->animationID].c_str());
+                                obj->AddComponent(animComp);
                             }
                             else if(objComps.first == ComponentType::PHYSICS)
                             {
-                                    PhysicsComponentsData *physics = (PhysicsComponentsData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::PHYSICS]);
-                                    PhysicsComponent *physicsComp = new PhysicsComponent(physics->mass, physics->_size,physics->_isTrig, physics->_isKinematic);
-                                    obj->AddComponent(physicsComp);
-                                    debugLog("Physics Component Added");
+                                PhysicsComponentsData *physics = (PhysicsComponentsData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::PHYSICS]);
+                                PhysicsComponent *physicsComp = new PhysicsComponent(physics->mass, physics->_size,physics->_isTrig, physics->_isKinematic);
+                                obj->AddComponent(physicsComp);
+                                debugLog("Physics Component Added");
                             }
                             else if(objComps.first == ComponentType::AUDIO)
                             {
-                                    AudioComponentData *audio = (AudioComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::AUDIO]);
-                                    AudioComponent *audioComp = new AudioComponent(RES_AudioFiles[audio->audioID].c_str());
-                                    obj->AddComponent(audioComp);
+                                AudioComponentData *audio = (AudioComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::AUDIO]);
+                                AudioComponent *audioComp = new AudioComponent(RES_AudioFiles[audio->audioID].c_str());
+                                obj->AddComponent(audioComp);
                             }
                             else if (objComps.first == ComponentType::MESH)
                             {
@@ -345,19 +342,24 @@ class GameSceneManager
                                     obj->AddComponent(p2dComp);
                                 }
                             }
-                            //bp, p2d, texture, mesh
-                            else
-                            {
-                              //  debugLog("Unknown Component Found %c", objComps.first);
-                            }
-                
+
                         }
                      
-      
-                
                 loadingOverlay->GetProgress()->SetText("%d%%", (int)((i+1.0f)/sceneLoaded->numObjects*100.0f));
                     
             }
+                if(obj->isStatic)
+                {
+                    BoundingBox bounds = (BoundingBox){
+                            (Vector3){  obj->position.x - obj->scale,
+                                        obj->position.y - obj->scale,
+                                        obj->position.z - obj->scale },
+                            (Vector3){  obj->position.x + obj->scale,
+                                        obj->position.y + obj->scale,
+                                        obj->position.z + obj->scale }};
+                    CurrentScene->quadTreeContainer->insert(*obj, bounds);//insert into quadtree
+                }
+                //create dynamic tree
                 
         }
             

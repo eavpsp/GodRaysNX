@@ -337,7 +337,7 @@ struct Frustum
     
 };
 
-struct MightyCam
+struct MightyCam//add 2D Camera
 {
     Camera *camToUse;
     Frustum frustum;
@@ -1027,6 +1027,9 @@ struct RenderSystem
     bool debugMode;
     MightyCam mainCamera;
     Camera3D lightCam;
+    //register current quadtree for obj rendering
+    StaticQuadTreeContainer<GameObject> *activeStaticQuadTree;
+    DynamicOctreeContainer<GameObject> *activeDynamicQuadTree;
     SkyBox defaultSkyBox;
     RenderTexture2D post_process_target , shadowMap;
     Shader postProcessingShaders, shadow_shader;

@@ -42,8 +42,10 @@ struct GameObject : public EngineObject
         void onDestroy() override;
     public:
         //base model data
+        bool isStatic;
         int gameObjectID;
         void Draw();
+
         template <typename T>
         static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, float _scale, const char* _name = "GameObject")
         {

@@ -48,6 +48,13 @@ namespace PhysicsUtil
             Ray ray = {pos, dir};
             DrawRay(ray, color);
         }
+       static RayCollision ShootRayMeshFromScreen(Mesh mesh, Camera3D camera, Matrix transform)
+        {
+            Vector2 mousePosition = GetMousePosition();
+            Ray ray = GetScreenToWorldRay(mousePosition, camera);
+            return GetRayCollisionMesh(ray, mesh, transform);
+        }
+        
 }
 
 
