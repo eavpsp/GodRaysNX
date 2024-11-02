@@ -51,7 +51,7 @@ std::map<int, std::string> RES_AudioFiles =
 {
   {0, "romfs:/audio/test.wav"},
 };
-//GAME SHADERS
+//GAME SHADERS//
 std::map<int, std::pair<std::string, std::string>> RES_Shaders = 
 {
   {_RES::ShaderFiles::LIGHT, {"romfs:/shaders/basic_shaders/lighting.vs", "romfs:/shaders/basic_shaders/lighting.fs"}},

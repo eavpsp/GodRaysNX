@@ -46,14 +46,14 @@ Skeletal Animation - M3D - Already implemented by Raylib
     Engine Procs - used to determine what process should run at what state
 ~Physics 2D Component - Done
     -set up box or circle and handle collisions
+~Update Editor Components For Scene Loading- Done
+    `Loader - Done
+    `Editor - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-~Update Editor Components For Scene Loading- WIP
-    `Loader - 
-    `Editor -
-PBR as Shader Option -
+~PBR as Shader Option -
 ~Screen Space Interactions/Raycasts
 ~Cutscene events
 ---------------------------
@@ -128,8 +128,17 @@ extern BOOT_PROC* bootProc;
 extern TEST_PROC* testProc;
 extern DEBUG_PROC* debugProc;
 
+GameSceneManager *sceneManager;
 
 //PROCS TO RUN
+void TestLoadScene()
+{
+   
+    sceneManager = new GameSceneManager();
+    GameScene *scene = new GameScene(_RES::Scenes_Types::TEST_SCENE);
+    sceneManager->LoadScene(scene);//convert to load scene
+    
+}
 void TestPhysicsBullet()//Sets up our game scene
 {
     Texture2D texture = LoadTexture("romfs:/textures/nosignal.png");
@@ -171,7 +180,7 @@ void GameProcDemo()//updates our game scene
         gameManager->destroyGameManager();
 }
 
-IN_GAME_PROC gameProcDemo = IN_GAME_PROC(TestPhysicsBullet,GameProcDemo);
+IN_GAME_PROC gameProcDemo = IN_GAME_PROC(TestLoadScene,GameProcDemo);
 
 
 void VideoProcDemo()
@@ -185,6 +194,10 @@ VIDEO_PROC videoProcDemo = VIDEO_PROC(nullptr,VideoProcDemo);
 
 void DemoLoadingProc()
 {
+    if(loadingOverlay == nullptr)
+    {
+        loadingOverlay = new LoadingOverlay();
+    }
     BeginDrawing();
     ClearBackground(RAYWHITE);
     loadingOverlay->Draw();
@@ -228,7 +241,7 @@ void Wait()//move to render system
     if (timer > 2)
     {
         timer = 0;
-        ENGINE_STATES::ChangeState(ENGINE_STATES::IDLE);
+        ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
     }
 }
 

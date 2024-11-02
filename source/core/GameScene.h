@@ -23,9 +23,9 @@ extern std::map<int, std::string> RES_AudioFiles;
 extern std::map<int, std::string> RES_Models;
 extern std::map<int, std::string> RES_Textures;
 static float sceneTimer = 0;
-enum ComponentType : uint16_t
-{
-    ANIMATION = 0x6162, PHYSICS = 0x7061, AUDIO = 0x6163, BULLET = 0x7062, TEXTURE = 0x7463, MESH = 0x6D63, PHYSICS2D = 0x706D
+enum ComponentType : char16_t
+{ 
+    ANIMATION = 0x6261, PHYSICS = 0x6270, AUDIO = 0x6361, BULLET = 0x6210, TEXTURE = 0x6374, MESH = 0x636D, PHYSICS2D = 0x6D70, PARTICLESS = 0x6C70
 };
 enum GameObjectType//Add custom object types for implementation
 {
@@ -52,7 +52,7 @@ struct __attribute__((packed)) Physics2DComponentsData : ComponentDataBase//Head
     //mass , shape, size, 
     float mass, radius;
     int shapeType;
-    bool _isTrig, _isKinematic;
+    bool _isTrig, _isKinematic, _useGravity;
     Vector2 _size;
 };
 //If components exist add them with the data in the GRB otherwise just use default data in Gameobject loaded
@@ -70,7 +70,7 @@ struct __attribute__((packed)) AnimationComponentData : ComponentDataBase //Head
 };
 struct __attribute__((packed)) PhysicsComponentsData : ComponentDataBase//Header for physics 0xCB00
 {
-    float mass;
+    float mass, radius;
     Vector3 _size;
     bool _isTrig, _isKinematic, _useGravity;
     int shapeType;
@@ -88,7 +88,6 @@ struct __attribute__((packed)) SceneObjectData//add data for children and parent
     Vector3 position; //float 3
     Quaternion rotation; //float 4
     float scale; //float 1
-   //int
     int parentIndex;//use this to add any children to parent
     int numOfComponents;//int
 
@@ -111,7 +110,7 @@ struct GameScene
     _RES::Scenes_Types sceneID;
     bool isLoaded = false;  
     std::vector<SceneObjectData*> objectsInScene;
-    std::map<int, std::map<int, ComponentDataBase*>> objectsAndComponentsMap;
+    std::map<int, std::map<char16_t, ComponentDataBase*>> objectsAndComponentsMap;
     GameScene(_RES::Scenes_Types _sceneID) : sceneID(_sceneID)
     {
       
@@ -179,10 +178,16 @@ class GameSceneManager
                     switch (objectLoaded->objType)
                     {
                         // BASEOBJ, PLIGHT, DLIGHT, SLIGHT, OCAMERA, PCAMERA
-                            case SLIGHT:
-                           
+                            case PLIGHT:
                             break;
-                        
+                            case DLIGHT:
+                            break;
+                            case OCAMERA:
+                            break;
+                            case PCAMERA:
+                            break;
+                            case SLIGHT:
+                            break;
                             default://gameobject
                                 debugLog("Game Object Found");
                                  // GameObject *obj = GameObject::InstantiateGameObject<GameObject>(objectLoaded->position, objectLoaded->rotation,objectLoaded->scale, LoadModel(RES_Models[objectLoaded->modelID].c_str()));
@@ -207,8 +212,8 @@ class GameSceneManager
                                             
                                             PhysicsComponentsData *physics = (PhysicsComponentsData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
                                             CurrentScene->objectsAndComponentsMap[i][ComponentType::PHYSICS] = (physics);
-                                            debugLog("isKinematic: %d", physics->_isKinematic);
                                             addon += sizeof(PhysicsComponentsData);
+                                            debugLog("Physics Found");
                                            
                                         }
                                         else if(nextHeader == ComponentType::AUDIO)
@@ -225,6 +230,8 @@ class GameSceneManager
                                             MeshComponentData *mesh = (MeshComponentData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
                                             CurrentScene->objectsAndComponentsMap[i][ComponentType::MESH] = (mesh);
                                             addon += sizeof(MeshComponentData);
+                                            debugLog("Mesh Found");
+                                            
                                         }
                                         else if(nextHeader == ComponentType::TEXTURE)
                                         {
@@ -243,6 +250,10 @@ class GameSceneManager
                                             Physics2DComponentsData *p2d = (Physics2DComponentsData *)(data + sizeof(SceneDataLoader) + i * sizeof(SceneObjectData) + addon + sizeof(SceneObjectData));
                                             CurrentScene->objectsAndComponentsMap[i][ComponentType::PHYSICS2D] = (p2d);
                                             addon += sizeof(Physics2DComponentsData);
+                                        }
+                                        else
+                                        {
+                                            debugLog("Unknown Component: %x", nextHeader);  
                                         }
                                         
                                     }
@@ -263,14 +274,13 @@ class GameSceneManager
                 
 
                 GameObject *obj = GameObject::InstantiateGameObject<GameObject>(CurrentScene->objectsInScene[i]->position, CurrentScene->objectsInScene[i]->rotation,CurrentScene->objectsInScene[i]->scale);
-                debugLog("Number of Components: %d", CurrentScene->objectsInScene[i]->numOfComponents);
                 if (CurrentScene->objectsInScene[i]->numOfComponents > 0)
                 {
                     
-                    for (size_t f = 0; f < CurrentScene->objectsInScene[i]->numOfComponents; f++)
-                    {
+                   
                         for(auto& objComps : CurrentScene->objectsAndComponentsMap[i])
                         {
+                            debugLog("Component Found: %x", objComps.first);
                             if(objComps.first == ComponentType::ANIMATION)
                             {
                                     AnimationComponentData *anim = (AnimationComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::ANIMATION]);//i = current obj, map key = 51967 obj is the val returned
@@ -301,7 +311,8 @@ class GameSceneManager
                             else if(objComps.first == ComponentType::TEXTURE)
                             {
                                 TextureComponentData *textureLoaded = (TextureComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::TEXTURE]);
-                                Texture2DComponent *textureComp = new Texture2DComponent(&LoadTexture(RES_Textures[textureLoaded->textureID].c_str()));
+                                Texture2D texture = LoadTexture(RES_Textures[textureLoaded->textureID].c_str());
+                                Texture2DComponent *textureComp = new Texture2DComponent(&texture);
                                 obj->AddComponent(textureComp);
                             }
                             else if(objComps.first == ComponentType::BULLET)
@@ -343,7 +354,7 @@ class GameSceneManager
                         }
                      
       
-                }
+                
                 loadingOverlay->GetProgress()->SetText("%d%%", (int)((i+1.0f)/sceneLoaded->numObjects*100.0f));
                     
             }
@@ -385,8 +396,8 @@ class GameSceneManager
             }
             else
             {
-                
-               ENGINE_STATES::ChangeState(ENGINE_STATES::IDLE);
+                debugLog("Loaded scene");   
+               ENGINE_STATES::ChangeState(ENGINE_STATES::IN_GAME);
                 
             }
 
