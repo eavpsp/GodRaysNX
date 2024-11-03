@@ -303,6 +303,7 @@ class GameSceneManager
                                 MeshComponentData *mesh = (MeshComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::MESH]);
                                 Model model = LoadModel(RES_Models[mesh->meshID].c_str());
                                 GR_MeshComponent *meshComp = new GR_MeshComponent(new GR_Mesh(model));
+                                meshComp->SetShader(renderSystem->defaultShader);
                                 obj->AddComponent(meshComp);
                             }
                             else if(objComps.first == ComponentType::TEXTURE)
