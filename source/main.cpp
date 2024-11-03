@@ -68,7 +68,6 @@ Multithreading -
     Audio/Video Processing Thread -
     Asset Loading Thread -
         Game Scene Loader -
-Start Game
 ---------------------------
 *NOT STARTED
 ~PBR as Shader Option -
