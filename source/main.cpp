@@ -53,14 +53,12 @@ Skeletal Animation - M3D - Already implemented by Raylib
 ~Animation Events - Done
 ~Serialize Animation Data - Done
     Add Animation Controller + Data to Res Manager(ControllerID -- AnimationData File To Load)
+~Bone Attachments - Done
+~Children Objects - Done
 -------------------------
 *WIP
 ___________________________
 **Current
-~Bone Attachments
-  Add Children to bones
-~Children Objects
-    test this mechanic 
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
 Multithreading -

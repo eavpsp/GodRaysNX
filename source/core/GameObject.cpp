@@ -64,7 +64,8 @@ void GameObject::onUpdate()
     }
     if(parent != nullptr)//check if there is a parent object to follow
     {
-            
+        position = Vector3Add(parent->position, localPosition);
+        rotation = QuaternionAdd(parent->rotation, localRotation);
     }
     AnimationComponent* animComp = GetComponent<AnimationComponent>();
     if(animComp != nullptr)

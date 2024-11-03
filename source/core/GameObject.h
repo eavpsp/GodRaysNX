@@ -57,6 +57,8 @@ struct GameObject : public EngineObject
                 //add callback
                 //newObject->material = mat;
                 newObject->transform = Matrix();
+                newObject->localPosition = Vector3{_position.x, _position.y, _position.z};
+                newObject->localRotation = Quaternion{_rotation.x, _rotation.y, _rotation.z, _rotation.w};
                 newObject->position = Vector3{_position.x, _position.y, _position.z};
                 newObject->rotation = Quaternion{_rotation.x, _rotation.y, _rotation.z, _rotation.w};
                 newObject->scale = _scale;

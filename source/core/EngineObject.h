@@ -27,11 +27,11 @@ class EngineObject
         EngineObject();
         virtual ~EngineObject(){};
         std::vector<ObjectDrawable*> objectDrawables;
-        Vector3 position;
+        Vector3 position, localPosition;
         float scale = 1.0f;
         Vector3 forward = {0, 0, 1};
         Vector3 upVector = {0, 1, 0};
-        Quaternion rotation;
+        Quaternion rotation, localRotation;
         Matrix transform;
         std::string name;
         bool isActive = true;
