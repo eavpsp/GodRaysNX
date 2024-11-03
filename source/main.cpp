@@ -184,7 +184,7 @@ void GameProcDemo()//updates our game scene
         gameManager->destroyGameManager();
 }
 
-IN_GAME_PROC gameProcDemo = IN_GAME_PROC(TestLoadScene,GameProcDemo);
+IN_GAME_PROC gameProcDemo = IN_GAME_PROC(TestPhysicsBullet,GameProcDemo);
 
 
 void VideoProcDemo()
