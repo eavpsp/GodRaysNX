@@ -67,6 +67,8 @@ void GameObject::onUpdate()
         position = Vector3Add(parent->position, localPosition);
         rotation = QuaternionAdd(parent->rotation, localRotation);
     }
+    transform = MatrixMultiply(MatrixTranslate(position.x, position.y, position.z), MatrixMultiply(QuaternionToMatrix(rotation), MatrixScale(scale, scale, scale)));
+    forward = Vector3Transform({0, 0, 1}, transform);
     AnimationComponent* animComp = GetComponent<AnimationComponent>();
     if(animComp != nullptr)
     {

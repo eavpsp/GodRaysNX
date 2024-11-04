@@ -45,6 +45,7 @@ struct GR_MeshComponent : GameComponent
     void OnUpdate() override
     {
         mesh->activeMesh.transform = MatrixMultiply(MatrixIdentity(),QuaternionToMatrix(parentObject->rotation));
+        parentObject->forward = Vector3Transform({0, 0, 1}, mesh->activeMesh.transform);
     }
    
     void SetShader(Shader shader )
