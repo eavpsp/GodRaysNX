@@ -7,8 +7,10 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <glad/glad.h>
 extern std::map<int, std::string> RES_SkyBoxTextures;
 extern std::map<int, std::pair<std::string, std::string>> RES_Shaders;
+
 struct SkyBox//not working
 {
     Model skyBoxModel;
@@ -17,11 +19,13 @@ struct SkyBox//not working
     Image img;
     void DrawSkyBox()
     {
+        rlEnableShader(skyBoxModel.materials[0].shader.id);
         rlDisableBackfaceCulling();
         rlDisableDepthMask();
             DrawModel(skyBoxModel, (Vector3){0, 0, 0}, 1.0f, WHITE);
         rlEnableBackfaceCulling();
         rlEnableDepthMask();
+        rlDisableShader();
     }
     SkyBox(_RES::SkyBoxTextures skyboxTexture = _RES::SkyBoxTextures::DEFAULT_SKYBOX)
     {
@@ -29,13 +33,13 @@ struct SkyBox//not working
         skyBoxModel = LoadModelFromMesh(cube);
         skyBoxModel.materials[0].shader = LoadShader(RES_Shaders[_RES::ShaderFiles::SKYBOX].first.c_str(), RES_Shaders[_RES::ShaderFiles::SKYBOX].second.c_str());
         SetShaderValue(skyBoxModel.materials[0].shader, GetShaderLocation(skyBoxModel.materials[0].shader, "environmentMap"), (int[1]){ MATERIAL_MAP_CUBEMAP }, SHADER_UNIFORM_INT);
-        SetShaderValue(skyBoxModel.materials[0].shader, GetShaderLocation(skyBoxModel.materials[0].shader, "doGamma"), (int[1]) { false ? 1 : 0 }, SHADER_UNIFORM_INT);
-        SetShaderValue(skyBoxModel.materials[0].shader, GetShaderLocation(skyBoxModel.materials[0].shader, "vflipped"), (int[1]){ false ? 1 : 0 }, SHADER_UNIFORM_INT);
+        SetShaderValue(skyBoxModel.materials[0].shader, GetShaderLocation(skyBoxModel.materials[0].shader, "doGamma"), (int[1]) {  0 }, SHADER_UNIFORM_INT);
+        SetShaderValue(skyBoxModel.materials[0].shader, GetShaderLocation(skyBoxModel.materials[0].shader, "vflipped"), (int[1]){  0 }, SHADER_UNIFORM_INT);
         cubeMapShader = LoadShader(RES_Shaders[_RES::ShaderFiles::CUBE_MAP].first.c_str(), RES_Shaders[_RES::ShaderFiles::CUBE_MAP].second.c_str());
         SetShaderValue(cubeMapShader, GetShaderLocation(cubeMapShader, "equirectangularMap"), (int[1]){ 0 }, SHADER_UNIFORM_INT);
         img = LoadImage(RES_SkyBoxTextures[skyboxTexture].c_str());
         skyBoxModel.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);    // CUBEMAP_LAYOUT_PANORAMA
-        //UnloadImage(img);
+
     }
     ~SkyBox()
     {
@@ -44,22 +48,9 @@ struct SkyBox//not working
         UnloadModel(skyBoxModel);  
         UnloadImage(img);
     }
-    //set shader
-    //cubemap shader
-    //load skybox texture
-    //draw
-    /*// We are inside the cube, we need to disable backface culling!
-                rlDisableBackfaceCulling();
-                rlDisableDepthMask();
-                    DrawModel(skybox, (Vector3){0, 0, 0}, 1.0f, WHITE);
-                rlEnableBackfaceCulling();
-                rlEnableDepthMask();
-
-
- 
-*/
+  
 };
-   static TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, int format)
+static TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, int format)
 {
     TextureCubemap cubemap = { 0 };
 

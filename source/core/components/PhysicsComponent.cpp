@@ -132,7 +132,7 @@ BulletPhysicsComponent::BulletPhysicsComponent(Vector3 pos, Quaternion rot, floa
     this->collisionObject->setUserIndex(0);
     this->collisionObject->setWorldTransform(*transform);
     btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
-    btRigidBody* body = new btRigidBody(rbInfo);
+    body = new btRigidBody(rbInfo);
     body->setWorldTransform(*transform);
     physicsWorld->dynamicsWorld->addRigidBody(body);
 }

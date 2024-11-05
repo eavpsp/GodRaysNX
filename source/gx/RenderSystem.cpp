@@ -92,7 +92,6 @@ void RenderSystem::RenderScene()
         rlEnableTexture(shadowMap.depth.id);
         rlSetUniform(shadowMapLoc, &slot, SHADER_UNIFORM_INT, 1);
         BeginMode3D(*mainCamera.camToUse);
-        //defaultSkyBox.DrawSkyBox();
         DrawScene();
         if(debugMode)
         {
@@ -125,6 +124,7 @@ void RenderSystem::RenderScene()
         BeginDrawing();//Create Render System with View Frustrum //Move to render system
         BeginMode3D(*mainCamera.camToUse);
         ClearBackground(GRAY);//get scene color
+
         DrawScene();
         for (size_t i = 0; i < renderProcs.size(); i++)
         {
@@ -135,6 +135,7 @@ void RenderSystem::RenderScene()
             DrawGrid(10, 1.0f);
         }
         defaultSkyBox.DrawSkyBox();
+
         EndMode3D();
         DrawOverlays();
         DrawMenus();
