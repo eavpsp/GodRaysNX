@@ -1,7 +1,6 @@
 #ifndef SHADERINTERFACE_H
 #define SHADERINTERFACE_H
 #include <stdlib.h>
-#include <switch.h>
 #include <ShaderLoader.h>
 #include <glad/glad.h>  // glad library (OpenGL loader)
 #include <string>
