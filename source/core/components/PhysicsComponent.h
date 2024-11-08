@@ -92,10 +92,29 @@ class PhysicsComponent : public GameComponent
 
 
 };
-
-
-class BulletPhysicsComponent : public GameComponent
+struct BulletPhysicsEvents
 {
+    virtual void DoEvent(BulletPhysicsComponent *other) = 0;
+};
+struct BP_TriggerEvents : public BulletPhysicsEvents
+{
+    void DoEvent(BulletPhysicsComponent *other) override
+    {
+
+    };
+};
+struct BP_CollisionEvents : public BulletPhysicsEvents   
+{
+    void DoEvent(BulletPhysicsComponent *other) override
+    {
+
+    };
+};
+
+struct BulletPhysicsComponent : public GameComponent
+{
+    bool isTrigger = false;
+    bool isKinematic = false;
     btCollisionObject *collisionObject;
     btCollisionShape *shape;
     btTransform *transform;
@@ -103,6 +122,8 @@ class BulletPhysicsComponent : public GameComponent
     btVector3 localInertia;
     btDefaultMotionState* myMotionState;
     btRigidBody* body;
+    std::vector<BP_TriggerEvents *> triggerEvents;
+    std::vector<BP_CollisionEvents *> collisionEvents;
     void ComponentAddedCallback() override
     {
         return;
@@ -137,8 +158,8 @@ class BulletPhysicsComponent : public GameComponent
         BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape* shape);
        
         ~BulletPhysicsComponent(){};
-        void onCollision(PhysicsComponent *other);
-        void onTrigger(PhysicsComponent *other);
+        void onCollision(BulletPhysicsComponent *other);
+        void onTrigger(BulletPhysicsComponent *other);
         void OnUpdate() override;
         
 };

@@ -32,15 +32,24 @@ void PhysicsWorld::InitBasic(float gravity, bool ground)
     PhysicsWorld::SetGravity(gravity);
     _initialized = true;
 }
-
+std::map<const btCollisionObject*, CollisionInfo*> objectsCollisionInfoMap;
 std::map<const btCollisionObject*,std::vector<btManifoldPoint*>> objectsCollisions;
 void myTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep) {
     objectsCollisions.clear();
+    objectsCollisionInfoMap.clear();
     int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
     for (int i = 0; i < numManifolds; i++) {
         btPersistentManifold *contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
         auto *objA = contactManifold->getBody0();
         auto *objB = contactManifold->getBody1();
+        CollisionInfo *collisionInfoA = new CollisionInfo();
+        collisionInfoA->bodyA = contactManifold->getBody0();
+        collisionInfoA->bodyB = contactManifold->getBody1();
+         CollisionInfo *collisionInfoB = new CollisionInfo();
+        collisionInfoB->bodyA = contactManifold->getBody1();
+        collisionInfoB->bodyB = contactManifold->getBody0();
+        objectsCollisionInfoMap[objA] = collisionInfoA;
+        objectsCollisionInfoMap[objB] = collisionInfoB;
         auto& collisionsA = objectsCollisions[objA];
         auto& collisionsB = objectsCollisions[objB];
         int numContacts = contactManifold->getNumContacts();

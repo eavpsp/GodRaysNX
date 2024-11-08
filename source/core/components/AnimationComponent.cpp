@@ -2,13 +2,13 @@
 #include <string.h>
 #include <GR_MeshComponent.h>
 #include <Texture2DComponent.h>
-void AnimationComponent::AddAnimationEvent(float frame, AnimationEventDelegate event)
+void AnimationComponent::AddAnimationEvent(std::string animName,float frame, AnimationEventDelegate event)
 {
-    animationEvents[frame] = event;
+    animationEvents[animName][frame] = event;
 }
-void AnimationComponent::RemoveAnimationEvent(float frame, AnimationEventDelegate event)
+void AnimationComponent::RemoveAnimationEvent(std::string animName,float frame, AnimationEventDelegate event)
 {
-    animationEvents.erase(frame);
+    animationEvents[animName].erase(frame);
 }
 void AnimationComponent::Play()
 {
@@ -41,12 +41,13 @@ void AnimationComponent::Play(const char *animName)
 void AnimationComponent::OnUpdate()//frame time consideration
 {
     animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-    if(animationEvents.find(animCurrentFrame) != animationEvents.end())
+    if(animationEvents[anim.name].find(animCurrentFrame) != animationEvents[anim.name].end())
     {
-        animationEvents[animCurrentFrame]();
+        animationEvents[anim.name][animCurrentFrame]();
     }
     UpdateModelAnimation(((GameObject*)parentObject)->GetComponent<GR_MeshComponent>()->mesh->model, anim, animCurrentFrame);
 }
+
 
 AnimationComponent::AnimationComponent(const char *filePath)
 {
@@ -54,14 +55,14 @@ AnimationComponent::AnimationComponent(const char *filePath)
     Play();
 }
 
-void SpriteAnimationComponent::AddAnimationEvent(float frame, AnimationEventDelegate event)
+void SpriteAnimationComponent::AddAnimationEvent(std::string animName,float frame, AnimationEventDelegate event)
 {
-    animationEvents[frame] = event;
+    animationEvents[animName][frame] = event;
 }
 
-void SpriteAnimationComponent::RemoveAnimationEvent(float frame, AnimationEventDelegate event)
+void SpriteAnimationComponent::RemoveAnimationEvent(std::string animName,float frame, AnimationEventDelegate event)
 {
-    animationEvents.erase(frame);
+    animationEvents[animName].erase(frame);
 }
 
 void SpriteAnimationComponent::Play()
@@ -94,9 +95,9 @@ void SpriteAnimationComponent::Play(const char *animName)
 void SpriteAnimationComponent::OnUpdate()
 {
     animCurrentFrame = (animCurrentFrame + 1)%currentAnimation.totalFrames;
-    if(animationEvents.find(animCurrentFrame) != animationEvents.end())
+    if(animationEvents[currentAnimation.name].find(animCurrentFrame) != animationEvents[currentAnimation.name].end())
     {
-        animationEvents[animCurrentFrame]();
+        animationEvents[currentAnimation.name][animCurrentFrame]();
     }
     //update texture component
     Texture2DComponent* texComp = ((GameObject*)parentObject)->GetComponent<Texture2DComponent>();

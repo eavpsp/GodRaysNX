@@ -10,15 +10,15 @@ using AnimationEventDelegate = void (*)();
 class AnimationComponent : public GameComponent//hash table for animations, anim name -> anim index
 {
     public:
-        std::map<int, AnimationEventDelegate> animationEvents;//frame -- event //add these from the gameobject
+        std::map<std::string, std::map<float, AnimationEventDelegate>> animationEvents;//anim -- frame -- event //add these from the gameobject
         int animsCount = 0;
         unsigned int animIndex = 0;
         unsigned int animCurrentFrame = 0;
         ModelAnimation *modelAnimations;
         ModelAnimation anim;
         AnimationController *animationController;//to access functionality for animation
-        void AddAnimationEvent(float frame, AnimationEventDelegate event);
-        void RemoveAnimationEvent(float frame, AnimationEventDelegate event);
+        void AddAnimationEvent(std::string animName, float frame, AnimationEventDelegate event);
+        void RemoveAnimationEvent(std::string animName,float frame, AnimationEventDelegate event);
         void Play();
         void Play(int index);
         void Play(const char* animName);
@@ -48,9 +48,9 @@ struct SpriteAnimationComponent : public GameComponent//Requires Texture2DCompon
     SpriteAnimation *spriteAnimations;
     SpriteAnimation currentAnimation;
     AnimationController *animationController;//to access functionality for animation
-    std::map<int, AnimationEventDelegate> animationEvents;
-    void AddAnimationEvent(float frame, AnimationEventDelegate event);
-    void RemoveAnimationEvent(float frame, AnimationEventDelegate event);
+    std::map<std::string, std::map<float, AnimationEventDelegate>> animationEvents;
+    void AddAnimationEvent(std::string animName,float frame, AnimationEventDelegate event);
+    void RemoveAnimationEvent(std::string animName,float frame, AnimationEventDelegate event);
     void Play();
     void Play(int index);
     void Play(const char* animName);

@@ -117,7 +117,7 @@ void PhysicsComponent::ComponentAddedCallback()
         
 }
 
-//BULLET
+// BULLET
 BulletPhysicsComponent::BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape *shape)
  {
     transform = new btTransform(btQuaternion(btScalar(rot.z), btScalar(rot.y), btScalar(rot.x)));
@@ -131,12 +131,15 @@ BulletPhysicsComponent::BulletPhysicsComponent(Vector3 pos, Quaternion rot, floa
     this->collisionObject->setUserPointer(this);
     this->collisionObject->setUserIndex(0);
     this->collisionObject->setWorldTransform(*transform);
-    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, shape, localInertia);
-    body = new btRigidBody(rbInfo);
-    body->setWorldTransform(*transform);
-    physicsWorld->dynamicsWorld->addRigidBody(body);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(this->mass, myMotionState, this->shape, localInertia);
+    this->body = new btRigidBody(rbInfo);
+    this->body->setWorldTransform(*transform);
+    this->body->setUserPointer(this);
+    physicsWorld->dynamicsWorld->addRigidBody(this->body);
+    physicsWorld->collisionObjectMap[this->body] = this;
 }
 //Handle Bullet Collisions
+extern std::map<const btCollisionObject*, CollisionInfo*> objectsCollisionInfoMap;
 extern std::map<const btCollisionObject*,std::vector<btManifoldPoint*>> objectsCollisions;
 bool checkCollision(btCollisionObject* other)
 {
@@ -147,7 +150,6 @@ bool checkCollision(btCollisionObject* other)
         } else {
             trans = other->getWorldTransform();
         }
-        btVector3 origin = trans.getOrigin();
         auto& manifoldPoints = objectsCollisions[body];
         if (manifoldPoints.empty()) 
         {
@@ -155,10 +157,38 @@ bool checkCollision(btCollisionObject* other)
         } 
         else 
         {
-           return true;
+         
+          return true;
+                
         }
+  
+}
+const btCollisionObject* getCollidedBody(btCollisionObject* other) 
+{
+    if(objectsCollisionInfoMap[other]->bodyB != nullptr)
+    {
+        return objectsCollisionInfoMap[other]->bodyB;
+
+    }
+    return nullptr;
+}
+void BulletPhysicsComponent::onCollision(BulletPhysicsComponent *other)
+{
+    
+    for (size_t i = 0; i < collisionEvents.size(); i++)
+    {
         
+        collisionEvents[i]->DoEvent(other);
+    }
+    
+}
+void BulletPhysicsComponent::onTrigger(BulletPhysicsComponent *other)
+{
+    for (size_t i = 0; i < triggerEvents.size(); i++)
+    {
         
+        triggerEvents[i]->DoEvent(other);
+    }
 }
 void BulletPhysicsComponent::OnUpdate()
 {
@@ -170,11 +200,27 @@ void BulletPhysicsComponent::OnUpdate()
     //check for collisions
     for (int j = physicsWorld->dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
     {
-        checkCollision(physicsWorld->dynamicsWorld->getCollisionObjectArray()[j]);
+        if(checkCollision(physicsWorld->dynamicsWorld->getCollisionObjectArray()[j]))
+        {
+            const btCollisionObject* body = getCollidedBody(physicsWorld->dynamicsWorld->getCollisionObjectArray()[j]);
+            BulletPhysicsComponent* otherObj = static_cast<BulletPhysicsComponent*>(body->getUserPointer());
+            if(!isKinematic)
+            {
+                 if(isTrigger)
+                {
+                    onTrigger(static_cast<BulletPhysicsComponent*>(body->getUserPointer()));
+                }
+                else
+                {
+                    onCollision(static_cast<BulletPhysicsComponent*>(body->getUserPointer()));
+                }
+            }
+           
+   
+        }
     }
     
 }
-
 //2D Physics
 //Handle 2D Collisions
 void Physics2DComponent::onCollision(Physics2DComponent *other)

@@ -37,6 +37,7 @@ void GameManager::Init()
         }
         SetTargetFPS(60);
         renderSystem = &RenderSystem::getRenderSystem();
+        renderSystem->skyBoxObj = SkyBoxObject::InstantiateGameObject<SkyBoxObject>(Vector3{0,0,0}, Quaternion{0,0,0,0}, 100.0f);
         //set up controller
         controller = StandardController(&renderSystem->mainCamera);
         gamePads.Init(&controller);

@@ -1030,7 +1030,7 @@ struct RenderSystem
     //register current quadtree for obj rendering
     StaticQuadTreeContainer<GameObject> *activeStaticQuadTree;
     DynamicOctreeContainer<GameObject> *activeDynamicQuadTree;
-    SkyBox defaultSkyBox;
+    SkyBoxObject *skyBoxObj;
     RenderTexture2D post_process_target , shadowMap;
     Shader postProcessingShaders, shadow_shader;
     PostProcessingFXConfig ppfxConfig;
@@ -1048,7 +1048,6 @@ struct RenderSystem
     RenderSystem()
     {
         //Lights camera and skybox
-        defaultSkyBox = SkyBox();
         if(ppfxConfig.anti_aliasing )
         {
             SetConfigFlags(FLAG_MSAA_4X_HINT);

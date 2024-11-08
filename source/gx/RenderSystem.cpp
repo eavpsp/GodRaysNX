@@ -134,7 +134,6 @@ void RenderSystem::RenderScene()
         {
             DrawGrid(10, 1.0f);
         }
-        defaultSkyBox.DrawSkyBox();
 
         EndMode3D();
         DrawOverlays();

@@ -3,6 +3,11 @@
 #include <PhysicsComponent.h>
 #include <btBulletDynamicsCommon.h>
 
+struct CollisionInfo
+{
+    const btCollisionObject* bodyA;
+    const btCollisionObject* bodyB;
+};
 class PhysicsWorld
 {   
 
@@ -20,6 +25,7 @@ class PhysicsWorld
         btBroadphaseInterface* overlappingPairCache;
         btDefaultCollisionConfiguration* collisionConfiguration;
         btCollisionDispatcher* dispatcher;
+        std::map<btRigidBody*, BulletPhysicsComponent*> collisionObjectMap;
         void DoPhysicsSimulation();
         void AddForceBullet(BulletPhysicsComponent *obj, Vector3 force);
         void InitBullet();
