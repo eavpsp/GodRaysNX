@@ -92,6 +92,7 @@ class PhysicsComponent : public GameComponent
 
 
 };
+struct BulletPhysicsComponent;
 struct BulletPhysicsEvents
 {
     virtual void DoEvent(BulletPhysicsComponent *other) = 0;
