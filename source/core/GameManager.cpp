@@ -62,7 +62,11 @@ void GameManager::destroyGameManager()
 
 void GameManager::runGameLoop()
 {
-    controller.UpdateInputs();
+    for (size_t i = 0; i < gamePads.connectedControllersCount; i++)
+    {
+        gamePads.connectedControllers[i]->UpdateInputs();
+    }
+    
     engineCallBacks->PhysicsUpdate();
     engineCallBacks->RunUpdateCallbacks();
 }
