@@ -1,5 +1,7 @@
 # GodRays Game Engine
 ----------------
+![Almighty Metal Engine](https://github.com/eavpsp/AlmightyMetalWare/blob/main/yuzu_screen.png)
+
 A game engine inspired by Open RW and some Glitchy code.
 Uses Raylib NX Updated for Open GL 4.2
 Also uses a modified Glad Lib for Open GL 4.4 support

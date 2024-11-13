@@ -1,0 +1,134 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Build",
+            "type": "shell",
+            "command": "make run",
+            "args": [
+                
+            ],
+            "windows": {
+                "command": "make run",
+                "args": [
+                   
+                ],
+            },
+            "osx": {
+                "args": [
+                    
+                ],
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Clean Build",
+            "type": "shell",
+            "command": "make clean",
+            "args": [
+                
+            ],
+            "windows": {
+                "command": "make clean",
+                "args": [
+                   
+                ],
+            },
+            "osx": {
+                "args": [
+                    
+                ],
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Build NX Release",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                
+            ],
+            "windows": {
+                "command": "make",
+                "args": [
+
+                ],
+            },
+            "osx": {
+                "args": [
+                ],
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Build NX Debug",
+            "type": "process",
+            "command": "make",
+            "args": [
+            ],
+            "windows": {
+                "command": "make",
+                "args": [
+                    "-g"
+                ],
+            },
+            "osx": {
+                "args": [
+                ],
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        
+        
+    ]
+}

@@ -1,6 +1,5 @@
 #include <RenderSystem.h>
 #include <GameObject.h>
-#include <ScriptCallbacks.h>
 #include <GR_MeshComponent.h>
 #include <rlgl.h>
 #include <raygui.h>
@@ -54,7 +53,7 @@ void DrawScene()
 {
       for (size_t i = 0; i < GameObjects->size(); i++)
         {
-            if(EngineCallBacks::IsValidPointer(GameObjects->at(i)))
+            if(GameObjects->at(i) != nullptr)
                 GameObjects->at(i)->Draw();    
         }   
 }

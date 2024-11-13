@@ -69,7 +69,17 @@ struct GR_MeshComponent : GameComponent
     }
     GR_MeshComponent(GR_Mesh *mesh) : mesh(mesh) 
     {};
-
+    ~GR_MeshComponent(){
+        for (size_t i = 0; i < parentObject->objectDrawables.size(); i++)
+        {
+            if (parentObject->objectDrawables[i] == mesh)
+            {
+                parentObject->objectDrawables.erase(parentObject->objectDrawables.begin() + i);
+                break;
+            }
+        }
+        
+    }
 };
 //Raylib Model Container
 

@@ -71,17 +71,12 @@
                 "C:/devkitpro/portlibs/switch/include/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/source/**",
-                "${workspaceFolder}/game/objects/**",
-                "${workspaceFolder}/source/external/obj_loader/**",
                 "${workspaceFolder}/source/debug/**",
-                "${workspaceFolder}/game/objects",
-                "${workspaceFolder}/source/external/bullet",
-                "${workspaceFolder}/include/components",
                 "Z:\\SwitchProjects\\raylib-nx-master\\src",
                 "${workspaceFolder}\\source\\ext\\**",
                 "C:/devkitPro/libnx/include/switch",
                 "${workspaceFolder}/source/core/components",
-                "${workspaceFolder}/source/game/input",
+                "${workspaceFolder}/source/input",
                 "C:/devkitPro/portlibs/switch/include/bullet"
             ],
             "defines": [
