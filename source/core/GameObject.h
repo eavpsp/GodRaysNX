@@ -45,7 +45,10 @@ struct GameObject : public EngineObject
         bool isStatic;
         int gameObjectID;
         void Draw();
-
+        void SetRotation(Quaternion _rotation) 
+        {
+            
+        }
         template <typename T>
         static T* InstantiateGameObject(Vector3 _position, Quaternion _rotation, float _scale, const char* _name = "GameObject")
         {
