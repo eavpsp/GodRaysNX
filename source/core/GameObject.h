@@ -43,7 +43,8 @@ struct GameObject : public EngineObject
     public:
         //base model data
         bool isStatic;
-        int gameObjectID;
+        long long gameObjectID;
+        int objectIndex = 0;
         void Draw();
         void SetRotation(Quaternion _rotation) 
         {
@@ -67,6 +68,7 @@ struct GameObject : public EngineObject
                 newObject->scale = _scale;
                 newObject->name = _name;
                 newObject->onInit();
+                newObject->gameObjectID = (long long)newObject;
                 return newObject;
         }
         void AddChild(GameObject *child);
@@ -115,7 +117,19 @@ struct GameObject : public EngineObject
             }
             return nullptr;
         }
-        
+        template<typename T>
+        std::vector<T*> GetComponents()
+        {
+            std::vector<T*> result;
+            for (int i = 0; i < components.size(); i++)
+            {
+                if (dynamic_cast<T*>(components[i]))
+                {
+                    result.push_back(dynamic_cast<T*>(components[i]));
+                }
+            }
+            return result;
+        }
         GameObject();
         virtual ~GameObject();
         //Draw Primatives

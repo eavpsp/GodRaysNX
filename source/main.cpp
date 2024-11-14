@@ -62,6 +62,9 @@ Animation Event fix- done
 *WIP
 ___________________________
 **Current
+~PBR as Shader Option -
+~Shader Materials
+    Preset Shader Loading with variable input
 Change Animation Controller to state machine
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
@@ -74,7 +77,7 @@ Multithreading -
         Game Scene Loader -
 ---------------------------
 *NOT STARTED
-~PBR as Shader Option -
+
 __________________________
 ----------------------------
 *FUTURE IMPLEMENTATIONS/OPTIMIZATIONS
