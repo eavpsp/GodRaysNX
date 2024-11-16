@@ -3,6 +3,7 @@
 extern RenderSystem *renderSystem;
 void SkyBoxObject::onUpdate()
 {
+    GameObject::onUpdate();
     SetPosition(renderSystem->mainCamera.camToUse->position);
 }
 

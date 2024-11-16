@@ -95,6 +95,7 @@ class PhysicsComponent : public GameComponent
 struct BulletPhysicsComponent;
 struct BulletPhysicsEvents
 {
+    BulletPhysicsComponent *baseObject;
     virtual void DoEvent(BulletPhysicsComponent *other) = 0;
 };
 struct BP_TriggerEvents : public BulletPhysicsEvents
@@ -158,7 +159,7 @@ struct BulletPhysicsComponent : public GameComponent
  */
         BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape* shape);
        
-        ~BulletPhysicsComponent(){};
+        ~BulletPhysicsComponent();
         void onCollision(BulletPhysicsComponent *other);
         void onTrigger(BulletPhysicsComponent *other);
         void OnUpdate() override;

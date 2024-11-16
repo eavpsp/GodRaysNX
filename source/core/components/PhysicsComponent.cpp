@@ -172,6 +172,13 @@ const btCollisionObject* getCollidedBody(btCollisionObject* other)
     }
     return nullptr;
 }
+BulletPhysicsComponent::~BulletPhysicsComponent()
+{
+    physicsWorld->dynamicsWorld->removeRigidBody(this->body);
+    delete body;
+    delete myMotionState;
+    delete collisionObject;
+}
 void BulletPhysicsComponent::onCollision(BulletPhysicsComponent *other)
 {
     

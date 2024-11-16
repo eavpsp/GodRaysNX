@@ -28,8 +28,8 @@ void GameObject::Draw()
 void GameObject::AddChild(GameObject *child)
 {
     children.push_back(child);
+    child->SetParent(this);
 }
-
 GameObject *GameObject::GetChild(int index)
 {
     return children.at(index);
