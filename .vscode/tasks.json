@@ -104,30 +104,7 @@
                 "$gcc"
             ]
         },
-        {
-            "label": "Build NX Debug",
-            "type": "process",
-            "command": "make",
-            "args": [
-            ],
-            "windows": {
-                "command": "make",
-                "args": [
-                    "-g"
-                ],
-            },
-            "osx": {
-                "args": [
-                ],
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": [
-                "$gcc"
-            ]
-        },
+      
         
         
     ]
