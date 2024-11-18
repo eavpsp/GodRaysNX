@@ -8,36 +8,41 @@
 #include "GameObject.h"
 #include <bits/algorithmfwd.h>
 #include "../debug/debug.h"
-
+#include <algorithm>
+#include <climits>
+#include <map>
 struct PathFindNode
 {
      bool didRemove;
-     bool isWalkable;
+     bool isWalkable = true;
      GameObject* unit;
      PathFindNode* cameFromNode;
-     int gCost;
-     int fCost;
-     int hCost;
+     int gCost = 0;
+     int fCost = 0;
+     int hCost = 0;
      int x;
      int z;
      int y;
      int index;
+     bool nulled = false;
     void CalculateFCost()
     {
         fCost = gCost + hCost;
     }
     PathFindNode();
-
+   
 
 };
-template<typename T>
+
+
 struct GR_GridSystem
 {
     Vector3 position = {0,0,0};
     int width = 0;
     int length = 0;
     int cellSize;
-    T* gridArray;
+    std::map<Vector2, PathFindNode> gridArray;
+    std::vector<PathFindNode*> totalNodes;
     int ReturnGridWidth()
     {
         return width;
@@ -46,29 +51,39 @@ struct GR_GridSystem
     {
         return length;
     }
-
+    int ReturnGridSize()
+    {
+        return width * length;
+    }
     Vector2 GetXZ(Vector3 worldPos)
     {
         return  Vector2{floor((Vector3Subtract(worldPos, position).x / cellSize)), floor((Vector3Subtract(worldPos, position)).z / cellSize)};
     }
-    T* GetData(int x, int z)
+    PathFindNode GetData(int x, int z)
     {
-        if (x >= 0 && x < width && z >= 0 && z < length)
-            {
-                return gridArray[x, z];
-            }
+        if (x >= 0 && x <= width-1 && z >= 0 && z <= length-1)
+        {
+            PathFindNode node = gridArray[Vector2{x,z}];
+            return gridArray[Vector2{x,z}];
+        }
+        else
+        {
+            PathFindNode node;
+            node.nulled = true;
+            return node;
+        }
 
-            return new T();
+           
     }
-    void SetValue(int x, int z, T value)
+    void SetValue(int x, int z, PathFindNode value)
     {
         if (x >= 0 && x < width && z >= 0 && z < length)
         {
-            gridArray[x, z] = value;
+            gridArray[Vector2{x,z}] = value;
 
         }
     }
-    void SetValue(Vector3 worldPos, T value)
+    void SetValue(Vector3 worldPos, PathFindNode value)
     {
         Vector2 pos = GetXZ(worldPos);
         SetValue(pos.x,pos.y, value);
@@ -78,40 +93,46 @@ struct GR_GridSystem
     {
         return Vector3Add(v1, Vector3Scale(Vector3Subtract(v2, v1), percentage));
     }
-    T* GetCloseNode(Vector3 origin, Vector3 endPos, float distance)
+    PathFindNode GetCloseNode(Vector3 origin, Vector3 endPos, float distance)
+    {
+        int distanceToEnd = std::round(Vector3Distance(origin, endPos));
+        for (int x = 0; x < distance; x++)
         {
-            int distanceToEnd = std::round(Vector3Distance(origin, endPos));
-            for (int x = 0; x < distance; x++)
+            for (int z = 0; z < distance; z++)
             {
-                for (int z = 0; z < distance; z++)
+                if (GetData(std::round(std::abs(endPos.x - x)), std::round(std::abs(endPos.z - z))).isWalkable)
                 {
-                    if (dynamic_cast<T*>(GetData(std::round(std::abs(endPos.x - x)), std::round(std::abs(endPos.z - z))))->isWalkable)
-                    {
-                        Vector3 newEnd = GetWorldPosition(std::round(endPos.x), std::round(endPos.z));
-                        return GetData(std::round(newEnd.x - x), std::round(newEnd.z - z));
-                    }
+                    Vector3 newEnd = GetWorldPosition(std::round(endPos.x), std::round(endPos.z));
+                    return GetData(std::round(newEnd.x - x), std::round(newEnd.z - z));
                 }
             }
-            return nullptr;
         }
-    T* GetData(Vector3 worldPos)
+            PathFindNode node;
+            node.nulled = true;
+            return node;
+        }
+    PathFindNode GetData(Vector3 worldPos)
     {
         Vector2 pos = GetXZ(worldPos);
-        if (pos.x >= 0 && pos.x < width && pos.y >= 0 && pos.y < length)
+        if (pos.x >= 0 && pos.x <= width-1 && pos.y >= 0 && pos.y <= length-1)
         {
-            return gridArray[pos.x, pos.y];
+            int x = pos.x;
+            int z = pos.y;
+            return gridArray[Vector2{x,z}];
         }
         
-            return nullptr;
+            PathFindNode node;
+            node.nulled = true;
+            return node;
         
     }
     Vector3 GetWorldPosition(int x, int z)
     {
         float y = 0;
         Vector3 pos = {0,0,0};
-        if (static_cast<T*>(GetData(x, z)))
+        if (!(GetData(x, z)).nulled)
         {
-            y = std::round(static_cast<T*>(GetData(x, z))->y);
+            y = std::round(GetData(x, z).y);
             pos =  Vector3Add(position, Vector3Scale( Vector3{x, y, z}, cellSize));
 
         }
@@ -121,33 +142,33 @@ struct GR_GridSystem
 
         }
     }
-    GR_GridSystem() {} 
-   GR_GridSystem(int w, int l, int cs, Vector3 p ) : width(w), length(l), cellSize(cs), position(p)
-    {
-        gridArray = new T[w,l];
-        for (size_t x = 0; x < width; x++)
-        {
-            for (size_t z = 0; z < length; z++)
-            {
-                gridArray[x,z] = T();
-                T& node = static_cast<T&>(gridArray[x,z]);
-                node->x = x;
-                node->z = z;
-            }
-            
-        }
-        
-    }
+   
+   GR_GridSystem() {} 
+ GR_GridSystem(int w, int l, int cs, Vector3 p ) : width(w), length(l), cellSize(cs), position(p)
+  {
+      int i = 0;
+      for (size_t x = 0; x < width; x++)
+      {
+          for (size_t z = 0; z < length; z++)
+          {
+                PathFindNode node;
+                node.x = x;
+                node.z = z;
+                gridArray[Vector2{x,z}] = node;
+                totalNodes.push_back(&gridArray[Vector2{x,z}]);
+                i++;
+          }
+      }
+  }
 
 };
 
 struct GR_PathfindingSystem
 {
-    GR_GridSystem<PathFindNode*> grid;
+    GR_GridSystem* grid;
     std::vector<PathFindNode*> openList;
     std::vector<PathFindNode*> closedList;
     std::vector<Vector2> nonWalkableInt;
-
     float radius, distance;
     int totalNodes;
     int width;
@@ -156,7 +177,7 @@ struct GR_PathfindingSystem
     GameObject* origin;
     GR_PathfindingSystem(int w, int l, int cs, Vector3 p) 
     {
-        grid = GR_GridSystem<PathFindNode*>(w, l, cs, p);
+        grid = new GR_GridSystem(w, l, cs, p);
     }
     bool ReturnWalkData(int x, int z)
     {
@@ -209,17 +230,25 @@ struct GR_PathfindingSystem
     }
     std::vector<PathFindNode*> CalculatePath(PathFindNode* endNode)
     {
-        std::vector<PathFindNode*> path;
-        path.push_back(endNode);
-        PathFindNode* currentNode = endNode;
-        while (currentNode->cameFromNode != nullptr)
+        if (endNode == nullptr)
         {
-            path.push_back(currentNode->cameFromNode);
+            return {};
+        }
+
+        std::vector<PathFindNode*> path;
+        PathFindNode* currentNode = endNode;
+        while (currentNode != nullptr)
+        {
+            path.push_back(currentNode);
             currentNode = currentNode->cameFromNode;
         }
+
         std::reverse(path.begin(), path.end());
         return path;
     }
+
+
+
     PathFindNode* GetLowestFCostNode(std::vector<PathFindNode*> pathNodeList)
     {
         PathFindNode* lowestFCostNode = pathNodeList[0];
@@ -233,19 +262,16 @@ struct GR_PathfindingSystem
         return lowestFCostNode;
     }
 
-    float CaluclateDistance(PathFindNode* startNode, PathFindNode* endNode)
+    int CalculateDistance(PathFindNode* startNode, PathFindNode* endNode)
     {
-        float xDistance = std::abs(startNode->x - endNode->x);
-        float yDistance = std::abs(startNode->z - endNode->z);
-        float remaining = std::abs(xDistance - yDistance);
-
-        return 15 * std::min(xDistance, yDistance) + 5.5f * remaining;
+        int xDistance = std::abs(startNode->x - endNode->x);
+        int zDistance = std::abs(startNode->z - endNode->z);
+        return 10 * (xDistance + zDistance); // Manhattan distance (L1 distance)
     }
+
     std::vector<PathFindNode*> GetNearbyList( PathFindNode* pathNode);
 
-
     std::vector<PathFindNode*> FindPath(PathFindNode* startPos, PathFindNode* endPos);
-    
-};
 
+};
 #endif // GR_GRIDSYSTEM_H

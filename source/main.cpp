@@ -1,3 +1,17 @@
+/*******************************************************************************************
+*
+*   God Rays Game Engine for Nintendo Switch
+*
+*   main.cpp
+*
+*   Author: Elisha Victor
+*   email: elisha.victor@gripping-tales.com
+*
+*   Copyright (c) 2024 Gripping Tales, LLC
+*
+********************************************************************************************/
+
+
 /*
 /Random Things
 

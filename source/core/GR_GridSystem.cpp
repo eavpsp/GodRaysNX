@@ -1,10 +1,8 @@
 #include <GR_GridSystem.h>
-std::vector<PathFindNode*> levelPathNodes;
 
 std::vector<PathFindNode *> GR_PathfindingSystem::GetNearbyList(PathFindNode *pathNode)
-{
+ {
         std::vector<PathFindNode*> nearbyNodesList;
-        float tileDistance = 1.0f; // Assuming a fixed tile distance
         PathFindNode* leftTile = nullptr;
         PathFindNode* rightTile = nullptr;
         PathFindNode* upTile = nullptr;
@@ -14,7 +12,8 @@ std::vector<PathFindNode *> GR_PathfindingSystem::GetNearbyList(PathFindNode *pa
         PathFindNode* topRightTile = nullptr;
         PathFindNode* bottomRightTile = nullptr;
 
-        for (PathFindNode* node : levelPathNodes) {
+        for (PathFindNode* node : grid->totalNodes) 
+        {
             if (node->x == pathNode->x - 1 && node->z == pathNode->z) {
                 leftTile = node;
             }
@@ -48,72 +47,103 @@ std::vector<PathFindNode *> GR_PathfindingSystem::GetNearbyList(PathFindNode *pa
         if (bottomLeftTile != nullptr) { nearbyNodesList.push_back(bottomLeftTile); }
         if (topRightTile != nullptr) { nearbyNodesList.push_back(topRightTile); }
         if (bottomRightTile != nullptr) { nearbyNodesList.push_back(bottomRightTile); }
-
         return nearbyNodesList;
 }
-std::vector<PathFindNode *> GR_PathfindingSystem::FindPath(PathFindNode *startPos, PathFindNode *endPos)
+
+std::vector<PathFindNode*> GR_PathfindingSystem::FindPath(PathFindNode* startNode, PathFindNode* endNode)
 {
-        PathFindNode* startNode = startPos;
-        PathFindNode* endNode = endPos;
-        openList = std::vector<PathFindNode*> { startNode };
-        closedList = std::vector<PathFindNode*>();
-        for (int i = 0; i < levelPathNodes.size(); i++)
+    if (startNode == nullptr || endNode == nullptr)
+    {
+        return {};
+    }
+
+    for (PathFindNode* node : grid->totalNodes)
+    {
+        if (node != nullptr)
         {
-            PathFindNode* pathNode = levelPathNodes[i];
-            pathNode->gCost = std::numeric_limits<float>::max();
-            pathNode->CalculateFCost();
-            pathNode->cameFromNode = nullptr;
+            node->gCost = INT_MAX;
+            node->CalculateFCost();
+            node->cameFromNode = nullptr;
+        }
+    }
+
+    startNode->gCost = 0;
+    startNode->hCost = CalculateDistance(startNode, endNode);
+    startNode->CalculateFCost();
+    openList = {startNode};
+    closedList = {};
+
+    while (!openList.empty())
+    {
+        PathFindNode* lowestFCostNode = GetLowestFCostNode(openList);
+        if (lowestFCostNode == nullptr)
+        {
+            return {};
         }
 
-        startNode->gCost = 0;
-        startNode->hCost = CaluclateDistance(startNode, endNode);
-        startNode->CalculateFCost();
-        while (openList.size() > 0)
+        if (lowestFCostNode->x == endNode->x && lowestFCostNode->z == endNode->z)
         {
-            PathFindNode* currentNode = GetLowestFCostNode(openList);
-            if (currentNode == endNode)
+            return CalculatePath(lowestFCostNode);
+        }
+
+        openList.erase(std::remove(openList.begin(), openList.end(), lowestFCostNode), openList.end());
+        closedList.push_back(lowestFCostNode);
+
+        for (PathFindNode* nearbyNode : GetNearbyList(lowestFCostNode))
+        {
+            if (nearbyNode == nullptr || nearbyNode->isWalkable == false)
             {
-                return CalculatePath(endNode);
+                continue;
             }
-            openList.erase(std::remove(openList.begin(), openList.end(), currentNode), openList.end());
-            closedList.push_back(currentNode);
-            for (PathFindNode* nearbyNode : GetNearbyList(currentNode))
+
+            bool isInClosedList = false;
+            for (const auto& node : closedList)
             {
-                if (std::find(closedList.begin(), closedList.end(), nearbyNode) != closedList.end())
+                if (node->x == nearbyNode->x && node->z == nearbyNode->z)
                 {
-                    continue;
+                    isInClosedList = true;
+                    break;
                 }
-                if (!nearbyNode->isWalkable)
-                {
-                    closedList.push_back(nearbyNode);
-                    continue;
-                }
+            }
 
-                float tenativeGCost = currentNode->gCost + CaluclateDistance(currentNode, nearbyNode);
-                if (tenativeGCost < nearbyNode->gCost)
-                {
-                    nearbyNode->cameFromNode = currentNode;
-                    nearbyNode->gCost = tenativeGCost;
-                    nearbyNode->hCost = CaluclateDistance(nearbyNode, endNode);
-                    nearbyNode->CalculateFCost();
+            if (isInClosedList)
+            {
+                continue;
+            }
 
-                    if (std::find(openList.begin(), openList.end(), nearbyNode) == openList.end())
+            int tentativeGCost = lowestFCostNode->gCost + CalculateDistance(lowestFCostNode, nearbyNode);
+            if (tentativeGCost < nearbyNode->gCost)
+            {
+                nearbyNode->gCost = tentativeGCost;
+                nearbyNode->hCost = CalculateDistance(nearbyNode, endNode);
+                nearbyNode->CalculateFCost();
+                nearbyNode->cameFromNode = lowestFCostNode;
+
+                bool isInOpenList = false;
+                for (const auto& node : openList)
+                {
+                    if (node->x == nearbyNode->x && node->z == nearbyNode->z)
                     {
-                        openList.push_back(nearbyNode);
-
+                        isInOpenList = true;
+                        break;
                     }
                 }
 
+                if (!isInOpenList)
+                {
+                    openList.push_back(nearbyNode);
+                }
             }
-
         }
-        debugLog("No Path");
-
-        return std::vector<PathFindNode*>{};
-
     }
+
+    return {};
+}
 
 PathFindNode::PathFindNode()
 {
-    levelPathNodes.push_back(this);
+ 
 }
+
+
+
