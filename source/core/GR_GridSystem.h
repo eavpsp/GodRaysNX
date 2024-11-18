@@ -244,6 +244,9 @@ struct GR_PathfindingSystem
         }
 
         std::reverse(path.begin(), path.end());
+        if (!path.empty()) {
+            path.erase(path.begin());
+        }
         return path;
     }
 
