@@ -209,6 +209,7 @@
 typedef struct Vector2 {
     float x;                // Vector x component
     float y;                // Vector y component
+    bool operator<(const Vector2& other) const { return (x < other.x) || (x == other.x && y < other.y); }
 } Vector2;
 
 // Vector3, 3 components

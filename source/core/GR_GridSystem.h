@@ -16,7 +16,7 @@ struct PathFindNode
      bool didRemove;
      bool isWalkable = true;
      GameObject* unit;
-     PathFindNode* cameFromNode;
+     PathFindNode* cameFromNode = nullptr;
      int gCost = 0;
      int fCost = 0;
      int hCost = 0;
@@ -229,26 +229,31 @@ struct GR_PathfindingSystem
        
     }
     std::vector<PathFindNode*> CalculatePath(PathFindNode* endNode)
+{
+    if (endNode == nullptr)
     {
-        if (endNode == nullptr)
-        {
-            return {};
-        }
-
-        std::vector<PathFindNode*> path;
-        PathFindNode* currentNode = endNode;
-        while (currentNode != nullptr)
-        {
-            path.push_back(currentNode);
-            currentNode = currentNode->cameFromNode;
-        }
-
-        std::reverse(path.begin(), path.end());
-        if (!path.empty()) {
-            path.erase(path.begin());
-        }
-        return path;
+        return {};
     }
+
+    std::vector<PathFindNode*> path;
+    PathFindNode* currentNode = endNode;
+    while (currentNode != nullptr)
+    {
+        if (currentNode->cameFromNode == nullptr)
+        {
+            break;
+        }
+
+        path.push_back(currentNode);
+        currentNode = currentNode->cameFromNode;
+    }
+
+    std::reverse(path.begin(), path.end());
+    if (!path.empty()) {
+        path.erase(path.begin());
+    }
+    return path;
+}
 
 
 

@@ -10,12 +10,12 @@ using AnimationEventDelegate = void (*)();
 class AnimationComponent : public GameComponent//hash table for animations, anim name -> anim index
 {
     public:
+        int modelAnimIndex;
         std::map<std::string, std::map<float, AnimationEventDelegate>> animationEvents;//anim -- frame -- event //add these from the gameobject
         int animsCount = 0;
         unsigned int animIndex = 0;
         unsigned int animCurrentFrame = 0;
         ModelAnimation *modelAnimations;
-        ModelAnimation anim;
         AnimationController *animationController;//to access functionality for animation
         void AddAnimationEvent(std::string animName, float frame, AnimationEventDelegate event);
         void RemoveAnimationEvent(std::string animName,float frame, AnimationEventDelegate event);
