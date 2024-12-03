@@ -17,14 +17,21 @@ void AnimationComponent::Play()
 
 void AnimationComponent::Play(int index)
 {
+    if(animIndex == index)
+    {
+        return;
+    }
     animIndex = index;
     animCurrentFrame = 0;
-    
-
 }
 
 void AnimationComponent::Play(const char *animName)
 {
+    if (strcmp(modelAnimations[animIndex].name, animName) == 0)
+    {
+        return;
+    }
+
     animCurrentFrame = 0;
 
     for (int i = 0; i < animsCount; i++)
@@ -38,6 +45,7 @@ void AnimationComponent::Play(const char *animName)
 }
 void AnimationComponent::OnUpdate()//frame time consideration
 {
+    
     if(modelAnimations == nullptr)
     {
         debugLog("No animations found");
