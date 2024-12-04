@@ -163,7 +163,7 @@ void GameProcUpdate()//updates our game scene
     renderSystem->mainCamera.UpdateCamera();
     renderSystem->RenderScene();
     if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
-        gameManager->destroyGameManager();
+        gameManager->Quit();
 }
 
 IN_GAME_PROC gameProcDemo = IN_GAME_PROC(initGame,GameProcUpdate);
@@ -311,6 +311,7 @@ int main(void)
     EngineMain();
     //--------------------------------------------------------------------------------------
     physicsWorld->ShutdownPhysicsWorld();
+    gameManager->destroyGameManager();
     debugLog("Game Stopped....");
     debugLogCleanup();
     romfsExit();
