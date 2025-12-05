@@ -31,4 +31,9 @@ void GamePads::SwapControllerMap(ControllerMap *currentController, ControllerMap
     newController->ConnectController(currentController->controllerID);
     currentController->DisableController();
 }
+void GamePads::SwapControllerMap(ControllerMap *newController)
+{
+    newController->ConnectController(connectedControllersCount - 1);
+    connectedControllers[connectedControllersCount - 1] = newController;
+}
 

@@ -309,8 +309,8 @@ class GameSceneManager
                             else if(objComps.first == ComponentType::TEXTURE)
                             {
                                 TextureComponentData *textureLoaded = (TextureComponentData *)(CurrentScene->objectsAndComponentsMap[i][ComponentType::TEXTURE]);
-                                Texture2D texture = LoadTexture(RES_Textures[textureLoaded->textureID].c_str());
-                                Texture2DComponent *textureComp = new Texture2DComponent(&texture);
+                                Texture2DComponent *textureComp = new Texture2DComponent(RES_Textures[textureLoaded->textureID].c_str());
+                                textureComp->texture2DIndex = textureLoaded->textureID;
                                 obj->AddComponent(textureComp);
                             }
                             else if(objComps.first == ComponentType::BULLET)

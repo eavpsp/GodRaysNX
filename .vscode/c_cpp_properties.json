@@ -122,7 +122,9 @@
             "name": "Wii U",
             "includePath": [
                 "${env:defaultIncludePath}",
-                "${env:cafeIncludePaths}"
+                "${env:cafeIncludePaths}",
+                "${workspaceFolder}/source/core",
+                "${workspaceFolder}/source/gx"
             ],
             "defines": [
                 "${env:defaultDefines}",

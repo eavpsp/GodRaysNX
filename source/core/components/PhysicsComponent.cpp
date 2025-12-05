@@ -4,11 +4,9 @@
 #include <PhysicsWorld.h>
 #include <RenderSystem.h>   
 
-
 extern std::vector<PhysicsComponent *> *PhysicsObjects;
 extern std::vector<Physics2DComponent *> *Physics2DObjects;
 extern PhysicsWorld *physicsWorld;
-class btPairCachingGhostObject;
 void PhysicsComponent::updateBounds()//
 {
     _bounds.UpdateCollider(parentObject->position);
@@ -118,8 +116,34 @@ void PhysicsComponent::ComponentAddedCallback()
 }
 
 // BULLET
+
+void BulletPhysicsComponent::DrawCollider()
+{
+     if (shape->getShapeType() == 8)
+    {
+
+            btSphereShape *sphere = (btSphereShape *)shape;
+            DrawSphereWires(parentObject->position, shape->getMargin(), 3, 3, GREEN);
+    }
+    else if(shape->getShapeType() == 13)
+    {
+            btCylinderShape *cyl = (btCylinderShape *)shape;
+            DrawCylinderWires(parentObject->position, cyl->getHalfExtentsWithMargin().getX(), cyl->getHalfExtentsWithMargin().getY(), cyl->getHalfExtentsWithMargin().getZ(), 32, GREEN);
+    }
+    else if(shape->getShapeType() == 10)
+    {
+            btCapsuleShape *capsule = (btCapsuleShape *)shape;
+            DrawCapsuleWires(parentObject->position,  Vector3Add(parentObject->position, parentObject->upVector), capsule->getRadius(), 32, 32, GREEN);
+    }
+     else if(shape->getShapeType() == 0)
+     {
+            btBoxShape *box = (btBoxShape *)shape;
+            DrawCubeWires(parentObject->position, box->getHalfExtentsWithMargin().getX(), box->getHalfExtentsWithMargin().getY(), box->getHalfExtentsWithMargin().getZ(), GREEN);
+    }
+}
+
 BulletPhysicsComponent::BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape *shape)
- {
+{
     transform = new btTransform(btQuaternion(btScalar(rot.z), btScalar(rot.y), btScalar(rot.x)));
     transform->setOrigin(btVector3(pos.x, pos.y, pos.z));
     this->mass = btScalar(mass);
@@ -174,7 +198,10 @@ const btCollisionObject* getCollidedBody(btCollisionObject* other)
 }
 void BulletPhysicsComponent::onCollision(BulletPhysicsComponent *other)
 {
-    
+    if(other == nullptr)
+    {
+        return;
+    }   
     for (size_t i = 0; i < collisionEvents.size(); i++)
     {
         
@@ -184,12 +211,46 @@ void BulletPhysicsComponent::onCollision(BulletPhysicsComponent *other)
 }
 void BulletPhysicsComponent::onTrigger(BulletPhysicsComponent *other)
 {
+    if(other == nullptr)
+    {
+        return;
+    }  
     for (size_t i = 0; i < triggerEvents.size(); i++)
     {
         
         triggerEvents[i]->DoEvent(other);
     }
 }
+void BulletPhysicsComponent::onCollisionExit(BulletPhysicsComponent *other)
+{
+    if(other == nullptr)
+    {
+        return;
+    }  
+    for (size_t i = 0; i < collisionExitEvents.size(); i++)
+    {
+        collisionExitEvents[i]->DoEvent(other);
+    }
+    debugLog("Collision Exit");
+    debugLog("Collision Exit: %s", other->parentObject->name.c_str());
+   
+    
+}
+void BulletPhysicsComponent::onTriggerExit(BulletPhysicsComponent * other)
+{
+    if(other == nullptr)
+    {
+        return;
+    }  
+    for (size_t i = 0; i < triggerExitEvents.size(); i++)
+    {
+        
+        triggerExitEvents[i]->DoEvent(other);
+    }
+    
+}
+std::vector<BulletPhysicsComponent*> currentCollidingObjects;
+std::vector<BulletPhysicsComponent*> prevCollidingObjects;
 void BulletPhysicsComponent::OnUpdate()
 {
     if(!parentObject->isActive || !isActive)
@@ -198,29 +259,56 @@ void BulletPhysicsComponent::OnUpdate()
     }
     BindMatrix();
     //check for collisions
+    currentCollidingObjects.clear();
     for (int j = physicsWorld->dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
     {
         if(checkCollision(physicsWorld->dynamicsWorld->getCollisionObjectArray()[j]))
         {
             const btCollisionObject* body = getCollidedBody(physicsWorld->dynamicsWorld->getCollisionObjectArray()[j]);
             BulletPhysicsComponent* otherObj = static_cast<BulletPhysicsComponent*>(body->getUserPointer());
+            currentCollidingObjects.push_back(otherObj);
             if(!isKinematic)
             {
-                 if(isTrigger)
+                if(isTrigger)
                 {
-                    onTrigger(static_cast<BulletPhysicsComponent*>(body->getUserPointer()));
+                    onTrigger(otherObj);
                 }
                 else
                 {
-                    onCollision(static_cast<BulletPhysicsComponent*>(body->getUserPointer()));
+                    onCollision(otherObj);
                 }
             }
-           
-   
+
+        }
+       
+       
+    }
+
+    for (auto it = prevCollidingObjects.begin(); it != prevCollidingObjects.end(); ++it)
+    {
+        if (std::find(currentCollidingObjects.begin(), currentCollidingObjects.end(), *it) == currentCollidingObjects.end()) 
+        {
+            if(!isKinematic)
+            {
+                if((*it)->isTrigger)
+                {
+                    onTriggerExit(*it);
+                }
+                else
+                {
+                    onCollisionExit(*it);
+                }
+            }
+            
         }
     }
     
+    
+    prevCollidingObjects = currentCollidingObjects;
+
+    
 }
+
 //2D Physics
 //Handle 2D Collisions
 void Physics2DComponent::onCollision(Physics2DComponent *other)

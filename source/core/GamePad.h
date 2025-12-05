@@ -38,6 +38,7 @@ struct GamePads
     bool isConnected(int id){return connectedControllers[id]->isConnected;}
     void Disconnect(int id){connectedControllers[id] = nullptr;}
     void SwapControllerMap(ControllerMap *currentController, ControllerMap* newController);
+    void SwapControllerMap(ControllerMap* newController);
     ~GamePads()
     {
         for (size_t i = 0; i < MAX_GAMEPADS; i++)

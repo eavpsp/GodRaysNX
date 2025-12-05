@@ -1,3 +1,17 @@
+/*******************************************************************************************
+*
+*   God Rays Game Engine for Nintendo Switch
+*
+*   main.cpp
+*
+*   Author: Elisha Victor
+*   email: elisha.victor@gripping-tales.com
+*
+*   Copyright (c) 2024 Gripping Tales, LLC
+*
+********************************************************************************************/
+
+
 /*
 /Random Things
 
@@ -62,6 +76,9 @@ Animation Event fix- done
 *WIP
 ___________________________
 **Current
+~PBR as Shader Option -
+~Shader Materials
+    Preset Shader Loading with variable input
 Change Animation Controller to state machine
 ARM SIMD Instruction Set Implementation - 
 Add Smart Pointers -
@@ -74,7 +91,7 @@ Multithreading -
         Game Scene Loader -
 ---------------------------
 *NOT STARTED
-~PBR as Shader Option -
+
 __________________________
 ----------------------------
 *FUTURE IMPLEMENTATIONS/OPTIMIZATIONS
@@ -146,7 +163,7 @@ void GameProcUpdate()//updates our game scene
     renderSystem->mainCamera.UpdateCamera();
     renderSystem->RenderScene();
     if (GetGamepadButtonPressed() == GAMEPAD_BUTTON_MIDDLE_LEFT)
-        gameManager->destroyGameManager();
+        gameManager->Quit();
 }
 
 IN_GAME_PROC gameProcDemo = IN_GAME_PROC(initGame,GameProcUpdate);
@@ -294,6 +311,7 @@ int main(void)
     EngineMain();
     //--------------------------------------------------------------------------------------
     physicsWorld->ShutdownPhysicsWorld();
+    gameManager->destroyGameManager();
     debugLog("Game Stopped....");
     debugLogCleanup();
     romfsExit();

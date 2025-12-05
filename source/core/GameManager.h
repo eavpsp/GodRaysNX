@@ -22,6 +22,10 @@ class GameManager
     void GameLoop();
     bool Running();
     void Init();
+    void Quit()
+    {
+        _running = false;
+    }
     static void destroyGameManager();
     GameConfig gameConfig;
     GamePads gamePads;

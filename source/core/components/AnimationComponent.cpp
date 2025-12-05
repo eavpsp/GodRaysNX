@@ -12,20 +12,26 @@ void AnimationComponent::RemoveAnimationEvent(std::string animName,float frame, 
 }
 void AnimationComponent::Play()
 {
-        animCurrentFrame = 0;
-        anim = modelAnimations[animIndex];
+    animCurrentFrame = 0;
 }
 
 void AnimationComponent::Play(int index)
 {
+    if(animIndex == index)
+    {
+        return;
+    }
     animIndex = index;
     animCurrentFrame = 0;
-    anim = modelAnimations[animIndex];
-
 }
 
 void AnimationComponent::Play(const char *animName)
 {
+    if (strcmp(modelAnimations[animIndex].name, animName) == 0)
+    {
+        return;
+    }
+
     animCurrentFrame = 0;
 
     for (int i = 0; i < animsCount; i++)
@@ -33,26 +39,35 @@ void AnimationComponent::Play(const char *animName)
         if (strcmp(modelAnimations[i].name, animName) == 0)
         {
             animIndex = i;
-            anim = modelAnimations[animIndex];  
             break;
         }
     }
 }
 void AnimationComponent::OnUpdate()//frame time consideration
 {
-    animCurrentFrame = (animCurrentFrame + 1)%anim.frameCount;
-    if(animationEvents[anim.name].find(animCurrentFrame) != animationEvents[anim.name].end())
+    
+    if(modelAnimations == nullptr)
     {
-        animationEvents[anim.name][animCurrentFrame]();
+        debugLog("No animations found");
+        return;
+    
     }
-    UpdateModelAnimation(((GameObject*)parentObject)->GetComponent<GR_MeshComponent>()->mesh->model, anim, animCurrentFrame);
+    animCurrentFrame++;
+
+    if (animCurrentFrame >= modelAnimations[animIndex].frameCount) animCurrentFrame = 0;
+    if(animationEvents[modelAnimations[animIndex].name].find(animCurrentFrame) != animationEvents[modelAnimations[animIndex].name].end())
+    {
+        animationEvents[modelAnimations[animIndex].name][animCurrentFrame]();
+    }
+    UpdateModelAnimation(((GameObject*)parentObject)->GetComponent<GR_MeshComponent>()->mesh->model, modelAnimations[animIndex], animCurrentFrame);
 }
 
 
 AnimationComponent::AnimationComponent(const char *filePath)
 {
-    modelAnimations = LoadModelAnimations(filePath, &animsCount);
+    modelAnimations = LoadModelAnimations(filePath, &animsCount);   
     Play();
+    
 }
 
 void SpriteAnimationComponent::AddAnimationEvent(std::string animName,float frame, AnimationEventDelegate event)
@@ -103,6 +118,6 @@ void SpriteAnimationComponent::OnUpdate()
     Texture2DComponent* texComp = ((GameObject*)parentObject)->GetComponent<Texture2DComponent>();
     if(texComp != nullptr)
     {
-        texComp->SetTexture(&currentAnimation.animationFrames[animCurrentFrame]);
+        texComp->SetTexture(currentAnimation.animationFrames[animCurrentFrame]);
     }
 }

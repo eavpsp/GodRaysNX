@@ -1,6 +1,6 @@
 #include "GameObject.h"
 #include "../debug/debug.h"
-#include <AnimationController.h>
+
 
 extern std::vector<GameObject *> *GameObjects;//NEED THIS FOR CALLBACKS
 extern std::vector<EngineObject *> *GraphicsObjects;//NEED THIS FOR CALLBACKS
@@ -28,8 +28,8 @@ void GameObject::Draw()
 void GameObject::AddChild(GameObject *child)
 {
     children.push_back(child);
+    child->SetParent(this);
 }
-
 GameObject *GameObject::GetChild(int index)
 {
     return children.at(index);
@@ -69,12 +69,7 @@ void GameObject::onUpdate()
     }
     transform = MatrixMultiply(MatrixTranslate(position.x, position.y, position.z), MatrixMultiply(QuaternionToMatrix(rotation), MatrixScale(scale, scale, scale)));
     forward = Vector3Transform({0, 0, 1}, transform);
-    AnimationComponent* animComp = GetComponent<AnimationComponent>();
-    if(animComp != nullptr)
-    {
-        animComp->animationController->OnUpdate();
-    }
-   UpdateComponents();//NEDED TO UPDATE COMPONENT DATA
+    UpdateComponents();//NEDED TO UPDATE COMPONENT DATA
     
 }
 

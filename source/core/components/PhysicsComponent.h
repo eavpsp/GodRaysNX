@@ -96,6 +96,7 @@ struct BulletPhysicsComponent;
 struct BulletPhysicsEvents
 {
     virtual void DoEvent(BulletPhysicsComponent *other) = 0;
+    virtual ~BulletPhysicsEvents() {}
 };
 struct BP_TriggerEvents : public BulletPhysicsEvents
 {
@@ -103,6 +104,7 @@ struct BP_TriggerEvents : public BulletPhysicsEvents
     {
 
     };
+    ~BP_TriggerEvents() {}
 };
 struct BP_CollisionEvents : public BulletPhysicsEvents   
 {
@@ -110,28 +112,37 @@ struct BP_CollisionEvents : public BulletPhysicsEvents
     {
 
     };
+    ~BP_CollisionEvents() {}
 };
 
 struct BulletPhysicsComponent : public GameComponent
 {
     bool isTrigger = false;
     bool isKinematic = false;
-    btCollisionObject *collisionObject;
-    btCollisionShape *shape;
-    btTransform *transform;
+    bool debugCollider = false;
+    btCollisionObject *collisionObject = nullptr;
+    btCollisionShape *shape = nullptr;
+    btTransform *transform = nullptr;
     btScalar mass;
     btVector3 localInertia;
-    btDefaultMotionState* myMotionState;
-    btRigidBody* body;
-    std::vector<BP_TriggerEvents *> triggerEvents;
-    std::vector<BP_CollisionEvents *> collisionEvents;
+    btDefaultMotionState* myMotionState = nullptr;
+    btRigidBody* body = nullptr;
+    std::vector<BP_TriggerEvents *> triggerEvents = {};
+    std::vector<BP_CollisionEvents *> collisionEvents = {};
+    std::vector<BP_TriggerEvents *> triggerExitEvents = {};
+    std::vector<BP_CollisionEvents *> collisionExitEvents = {};
+    void DrawCollider();
     void ComponentAddedCallback() override
     {
         return;
     }
+    int GetShapeType()
+    {
+        return shape->getShapeType();
+    }
     //ref to gameobject
     bool CheckCollision(btCollisionObject* other);
-   
+    
     void BindMatrix()
     {       
 
@@ -148,19 +159,15 @@ struct BulletPhysicsComponent : public GameComponent
         parentObject->rotation = QuaternionFromAxisAngle(axis, angle);
     }
     public:
-/**
- * Constructor for BulletPhysicsComponent.
- * @param pos The initial position of the rigid body.
- * @param rot The initial rotation of the rigid body.
- * @param mass The mass of the rigid body (0 for static, non-zero for dynamic).
- * @param localInertia The local inertia of the rigid body.
- * @param shape The collision shape of the rigid body.
- */
+
+ 
         BulletPhysicsComponent(Vector3 pos, Quaternion rot, float mass, btCollisionShape* shape);
        
         ~BulletPhysicsComponent(){};
         void onCollision(BulletPhysicsComponent *other);
         void onTrigger(BulletPhysicsComponent *other);
+        void onCollisionExit(BulletPhysicsComponent *other);
+        void onTriggerExit(BulletPhysicsComponent *other);
         void OnUpdate() override;
         
 };
@@ -187,6 +194,7 @@ struct Physics2DComponent : public GameComponent
     void OnUpdate() override;
     Physics2DComponent(float mass, float radius, bool _isTrig = false, bool _isKinematic = false);
     Physics2DComponent(float mass, Vector2 _size, bool _isTrig = false, bool _isKinematic = false);
+    ~Physics2DComponent() {}
 
 };
 

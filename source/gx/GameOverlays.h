@@ -15,6 +15,57 @@ struct Drawable //Objects that can be drawn (Text, Images, etc)
     Drawable() = default;
     virtual ~Drawable(){};
 };
+struct ProgressBar : public Drawable//add one that uses images
+{
+    float value = 0;
+    Color fillColor = WHITE;
+    Color bgColor = BLACK;
+    float height = 10;
+    float width = 100;
+    Vector2 position;
+    ProgressBar(float val, Color c, Color b , Vector2 p, float h, float w) : fillColor(c), bgColor(b), value(val), position(p), height(h), width(w) {}
+    void draw() override
+    {
+        DrawRectangle(position.x, position.y, width, height, bgColor);
+        DrawRectangle(position.x, position.y, (value) * width, height, fillColor);
+    }
+    void SetValue(float v) { value = v; }
+    ~ProgressBar(){}
+};
+struct CrosshairDrawable : public Drawable
+{
+    //circle and 4 rects 
+    /*
+    
+                   |
+                ---.---
+                   |
+    
+    
+    */
+   bool showCrosshair = true;
+   Color crossHairColor = WHITE;
+   void SetColor(Color c) { crossHairColor = c; }
+   void draw() override
+   {
+    if(!showCrosshair)
+    {
+        return;
+    }
+       DrawCircle(640, 360, 10, crossHairColor); //center of screen
+       //top
+       DrawRectangle(640 - 10, 360 + 20, 20, 40, BLUE);
+       //bottom
+       DrawRectangle(640 - 10, 360 - (20 + 40), 20, 40, BLUE);
+        //left
+       DrawRectangle(640 - (20 + 40), 360 - 10, 40, 20, BLUE);
+       //right
+       DrawRectangle(640 + 20, 360 - 10, 40, 20, BLUE);
+   }
+   CrosshairDrawable(){};
+   ~CrosshairDrawable(){};
+};
+
 struct Image2D : public Drawable
 {
     Texture2D texture;
