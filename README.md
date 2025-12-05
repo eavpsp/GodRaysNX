@@ -19,9 +19,6 @@ If you are interested in using the God Rays Game Engine, please let us know by m
 Thank you for your interest in the God Rays Game Engine. We hope that it will be a powerful tool for creating games that are both fun and inspiring.
 
 Sincerely,
-
-<<<<<<< HEAD
-
 The Almighty Metal Engine Team
 -Putting the holy spirit into computing! 
 
@@ -35,8 +32,5 @@ The following libraries are required to run this project:
 
 Make sure you have the required libraries installed in the ext/ directory before running the project.
 ![Almighty Metal Engine](https://github.com/eavpsp/GodRaysNX/blob/master/amw_icon.png)
-=======
-The God Rays Game Engine Team
--Putting the holy spirit into computing! 
-![God Rays Game Engine](https://github.com/eavpsp/GodRaysNX/blob/master/amw_icon.png)
+
 >>>>>>> 49e47932db6c1705338865b2676e4626200bf542
