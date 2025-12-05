@@ -26,9 +26,9 @@ The Almighty Metal Engine Team
 
 The following libraries are required to run this project:
 
-- [Bullet Physics](https://github.com/bulletphysics/bullet3/tree/master/src): Bullet Physics is a popular physics engine used in many games and simulations. You can download it from the GitHub repository.
-- [nanojpeg](https://github.com/SuperV1234/nanojpeg): nanojpeg is a lightweight JPEG decoder library. You can download it from the GitHub repository.
-- [std_image](https://github.com/PistonDevelopers/std_image): std_image is a cross-platform image library for Rust. You can download it from the GitHub repository.
+- [Bullet Physics](https://github.com/bulletphysics/bullet3/tree/master/src): Bullet Physics is a popular physics engine used in many games and simulations. You can download it from the GitHub repository. Put the contents of bullet src into ext/bullet
+- [nanojpeg](https://svn.emphy.de/nanojpeg/trunk/nanojpeg/nanojpeg.c): nanojpeg is a lightweight JPEG decoder library. You can download it from the link and create the nanojpeg.c and nanojpeg.h scripts and place them in ext/.
+- [std_image](https://github.com/nothings/stb/blob/master/stb_image.h): std_image is a cross-platform image library. You can download it from the GitHub repository.
 
 Make sure you have the required libraries installed in the ext/ directory before running the project.
 ![Almighty Metal Engine](https://github.com/eavpsp/GodRaysNX/blob/master/amw_icon.png)
