@@ -68,8 +68,7 @@ LIBS	:= -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lass -ltheor
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=  $(CURDIR)/../raylib-nx-master/src $(PORTLIBS) $(LIBNX) 
-
+LIBDIRS	:=  $(CURDIR)/../raylib-nx-master/src $(PORTLIBS) $(LIBNX)
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

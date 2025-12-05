@@ -7,6 +7,11 @@ struct CollisionInfo
 {
     const btCollisionObject* bodyA;
     const btCollisionObject* bodyB;
+    ~CollisionInfo()
+    {
+        delete bodyA;
+        delete bodyB;
+    }
 };
 class PhysicsWorld
 {   

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <switch.h>
+
 
 #include <glad/glad.h>  // glad library (OpenGL loader)
 

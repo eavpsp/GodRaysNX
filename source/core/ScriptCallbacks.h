@@ -63,7 +63,7 @@ class EngineCallBacks
        void RunUpdateCallbacks() 
         {
 
-            for(int i = 0; i < GameObjects->size(); i++)
+            for(long unsigned int i = 0; i < GameObjects->size(); i++)
             {
                 GameObject* obj = dynamic_cast<GameObject*>(GameObjects->at(i));
                 if (obj != nullptr) 

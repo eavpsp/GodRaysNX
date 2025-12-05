@@ -83,7 +83,7 @@ struct GameObject : public EngineObject
         };
         void UpdateComponents()
         {
-            for (int i = 0; i < components.size(); i++)
+            for (long unsigned int i = 0; i < components.size(); i++)
             {
                 components.at(i)->OnUpdate();
             }
@@ -91,7 +91,7 @@ struct GameObject : public EngineObject
         
         void RemoveComponent(GameComponent *component)
         {
-            for (int i = 0; i < components.size(); i++)
+            for (long unsigned int i = 0; i < components.size(); i++)
             {
                 if (components[i] == component)
                 {
@@ -103,7 +103,7 @@ struct GameObject : public EngineObject
         template<typename T>
         T *GetComponent()
         {
-            for (int i = 0; i < components.size(); i++)
+            for (long unsigned int i = 0; i < components.size(); i++)
             {
                 if (dynamic_cast<T*>(components[i]))
                 {

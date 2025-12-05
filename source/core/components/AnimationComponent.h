@@ -42,7 +42,7 @@ struct SpriteAnimation
 
 struct SpriteAnimationComponent : public GameComponent//Requires Texture2DComponent
 {
-    int animsCount = 0;
+    long unsigned int animsCount = 0;
     unsigned int animIndex = 0;
     unsigned int animCurrentFrame = 0;
     SpriteAnimation *spriteAnimations;
